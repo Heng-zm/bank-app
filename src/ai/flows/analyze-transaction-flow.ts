@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 const AnalyzeTransactionInputSchema = z.object({
@@ -36,6 +37,7 @@ export async function analyzeTransaction(input: AnalyzeTransactionInput): Promis
 
 const prompt = ai.definePrompt({
   name: 'analyzeTransactionPrompt',
+  model: googleAI.model('gemini-1.5-flash-latest'),
   input: { schema: AnalyzeTransactionInputSchema },
   output: { schema: AnalyzeTransactionOutputSchema },
   prompt: `You are a fraud detection specialist for a bank. Your task is to analyze a proposed transaction and assess its risk level based on the user's recent activity.
