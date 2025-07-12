@@ -8,6 +8,7 @@ export interface NotificationPreferences {
 export interface Account {
   id: string;
   holderName: string;
+  accountNumber: string;
   balance: number;
   notificationPreferences?: NotificationPreferences;
 }

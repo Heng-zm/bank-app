@@ -131,6 +131,7 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
             </Card>
+            <TransactionForm onSubmit={handleAddTransaction} isProcessing={isProcessing} />
             <div className="p-4 border rounded-xl bg-card text-card-foreground shadow-sm space-y-2">
               <h3 className="font-semibold text-sm">Admin Action</h3>
               <p className="text-xs text-muted-foreground">Simulate a new feature announcement for the current user.</p>

@@ -34,9 +34,9 @@ const formSchema = z.object({
   }),
   receiptFile: z
     .any()
-    .refine((file) => !file || file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine((file) => !file || (file[0] && file[0].size <= MAX_FILE_SIZE), `Max file size is 5MB.`)
     .refine(
-      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      (file) => !file || (file[0] && ACCEPTED_IMAGE_TYPES.includes(file[0].type)),
       ".jpg, .jpeg, .png and .webp files are accepted."
     ).optional(),
 });
@@ -54,7 +54,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     defaultValues: {
       recipient: "",
       description: "",
-      amount: 0,
+      amount: undefined,
       receiptFile: undefined,
     },
   });
@@ -63,6 +63,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     setUploadProgress(null);
     const formData: TransactionFormData = {
         ...values,
+        amount: values.amount || 0,
         receiptFile: values.receiptFile?.[0]
     };
     
@@ -95,11 +96,11 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
               name="recipient"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Recipient (Optional)</FormLabel>
+                  <FormLabel>Recipient (Account # or Email)</FormLabel>
                   <FormControl>
                     <div className="relative">
                        <Send className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input placeholder="Recipient User ID or Email" {...field} className="pl-10" />
+                       <Input placeholder="e.g., 001-002-003 or user@example.com" {...field} className="pl-10" />
                     </div>
                   </FormControl>
                   <FormMessage />

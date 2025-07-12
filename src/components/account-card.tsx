@@ -15,14 +15,27 @@ export function AccountCard({ account }: AccountCardProps) {
     currency: "USD",
   }).format(account.balance);
 
+  const formatAccountNumber = (number: string) => {
+    if (!number) return "";
+    return number.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3');
+  }
+
   return (
     <Card className="shadow-lg">
       <CardHeader className="pb-2">
-        <CardDescription className="flex items-center gap-2">
-          <User className="h-4 w-4" />
-          <span>{account.holderName}</span>
-        </CardDescription>
-        <CardTitle className="text-4xl">{formattedBalance}</CardTitle>
+        <div className="flex justify-between items-start">
+            <div className="grid gap-1">
+                <CardDescription className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>{account.holderName}</span>
+                </CardDescription>
+                <CardTitle className="text-4xl">{formattedBalance}</CardTitle>
+            </div>
+            <div className="text-right">
+                <div className="text-xs text-muted-foreground">Account Number</div>
+                <div className="font-mono text-sm font-semibold">{formatAccountNumber(account.accountNumber)}</div>
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="text-xs text-muted-foreground">Available Balance</div>

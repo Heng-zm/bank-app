@@ -32,11 +32,26 @@ import { auth } from "@/lib/firebase";
 
 const LOW_BALANCE_THRESHOLD = 100;
 
+async function generateUniqueAccountNumber(db: any): Promise<string> {
+    let accountNumber;
+    let isUnique = false;
+    while (!isUnique) {
+        accountNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+        const q = query(collection(db, "accounts"), where("accountNumber", "==", accountNumber));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            isUnique = true;
+        }
+    }
+    return accountNumber!;
+}
+
 export function useAccount(userId?: string) {
   const { toast } = useToast();
   const [account, setAccount] = useState<Account>({ 
     id: "", 
     holderName: "Guest", 
+    accountNumber: "000000000",
     balance: 0,
     notificationPreferences: { deposits: true, alerts: true, info: true }
   });
@@ -64,12 +79,19 @@ export function useAccount(userId?: string) {
         if (!data.notificationPreferences) {
           data.notificationPreferences = { deposits: true, alerts: true, info: true };
         }
+        if (!data.accountNumber) {
+            const newAccountNumber = await generateUniqueAccountNumber(db);
+            await updateDoc(accountRef, { accountNumber: newAccountNumber });
+            data.accountNumber = newAccountNumber;
+        }
         setAccount(data);
       } else {
         const user = auth?.currentUser;
+        const newAccountNumber = await generateUniqueAccountNumber(db);
         const newAccount: Account = {
             id: userId,
             holderName: user?.email || "New User",
+            accountNumber: newAccountNumber,
             balance: 5432.1,
             notificationPreferences: { deposits: true, alerts: true, info: true }
         };
@@ -185,15 +207,19 @@ export function useAccount(userId?: string) {
 
             // Handle recipient if it's a transfer
             if (data.recipient) {
-                if (data.recipient === senderData.holderName) {
+                if (data.recipient === senderData.accountNumber || data.recipient === senderData.holderName) {
                     throw new Error("You cannot send money to yourself.");
                 }
+                
+                const isAccountNumber = /^\d{9}$/.test(data.recipient);
+                const recipientQuery = isAccountNumber
+                    ? query(collection(db, "accounts"), where("accountNumber", "==", data.recipient), limit(1))
+                    : query(collection(db, "accounts"), where("holderName", "==", data.recipient), limit(1));
 
-                const recipientQuery = query(collection(db, "accounts"), where("holderName", "==", data.recipient), limit(1));
                 const recipientSnapshot = await getDocs(recipientQuery);
 
                 if (recipientSnapshot.empty) {
-                    throw new Error(`Recipient with email ${data.recipient} not found.`);
+                    throw new Error(`Recipient "${data.recipient}" not found.`);
                 }
                 
                 const recipientDoc = recipientSnapshot.docs[0];
