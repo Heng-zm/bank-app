@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
-import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -16,9 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { analyzeTransaction, AnalyzeTransactionOutput } from '@/ai/flows/analyze-transaction-flow';
 
 interface QrCodeData {
   recipient: string;
@@ -33,7 +30,7 @@ export default function QrPayPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { handleAddTransaction, isProcessing, transactions } = useAccount(user?.uid);
+  const { handleAddTransaction, isProcessing } = useAccount(user?.uid);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,8 +40,6 @@ export default function QrPayPage() {
   const [error, setError] = useState<string | null>(null);
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
   const [finalAmount, setFinalAmount] = useState<number | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalyzeTransactionOutput | null>(null);
 
   const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
     resolver: zodResolver(paymentFormSchema),
@@ -101,7 +96,7 @@ export default function QrPayPage() {
                         setScannedData(data);
                         setError(null);
                         if (data.amount && typeof data.amount === 'number' && data.amount > 0) {
-                           handleAmountSet(data.amount);
+                           setFinalAmount(data.amount);
                         }
                     } else {
                         setError("Invalid QR code format. Expected a recipient.");
@@ -122,38 +117,6 @@ export default function QrPayPage() {
       return () => cancelAnimationFrame(animationFrameId);
     }
   }, [hasCameraPermission, tick]);
-
-  const handleAmountSet = async (amount: number) => {
-    if (!scannedData) return;
-    setFinalAmount(amount);
-    setIsAnalyzing(true);
-    setAnalysisResult(null);
-
-    try {
-      const recentTransactions = transactions.slice(0, 10).map(t => ({
-        amount: t.amount,
-        description: t.description,
-        type: t.type,
-        timestamp: t.timestamp
-      }));
-      
-      const result = await analyzeTransaction({
-        amount,
-        recipient: scannedData.recipient,
-        recentTransactions: JSON.stringify(recentTransactions, null, 2),
-      });
-
-      setAnalysisResult(result);
-    } catch (e) {
-      console.error("Fraud analysis failed", e);
-      toast({ variant: 'destructive', title: 'Analysis Failed', description: 'Could not analyze transaction risk.' });
-      // Default to low risk on failure to not block user
-      setAnalysisResult({ risk: 'low', reason: 'Analysis service failed.' });
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }
-
 
   const handleConfirmPayment = async () => {
     if (!scannedData || !finalAmount || finalAmount <= 0) return;
@@ -180,82 +143,28 @@ export default function QrPayPage() {
       setError(null);
       setIsPaymentSuccessful(false);
       setFinalAmount(null);
-      setAnalysisResult(null);
-      setIsAnalyzing(false);
       paymentForm.reset();
   }
   
   const onPaymentFormSubmit = (values: z.infer<typeof paymentFormSchema>) => {
-    handleAmountSet(values.amount);
+    setFinalAmount(values.amount);
   }
   
   const renderConfirmation = () => {
-    if (isAnalyzing) {
-        return (
-            <div className="flex flex-col items-center justify-center space-y-2 py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-muted-foreground">Analyzing transaction...</p>
-            </div>
-        )
-    }
-
-    if (analysisResult) {
-       const isHighRisk = analysisResult.risk !== 'low';
-       return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold text-2xl text-primary">${finalAmount?.toFixed(2)}</span>
-            </div>
-
-            {isHighRisk ? (
-                 <Alert variant="destructive">
-                    <ShieldAlert className="h-4 w-4" />
-                    <AlertTitle>Potential Risk Detected ({analysisResult.risk})</AlertTitle>
-                    <AlertDescription>{analysisResult.reason}</AlertDescription>
-                </Alert>
-            ) : (
-                <Alert>
-                    <ShieldCheck className="h-4 w-4" />
-                    <AlertTitle>Low Risk</AlertTitle>
-                    <AlertDescription>{analysisResult.reason}</AlertDescription>
-                </Alert>
-            )}
-           
-            {isHighRisk ? (
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                         <Button className="w-full" disabled={isProcessing}>
-                            {isProcessing ? <Loader2 className="animate-spin" /> : `Proceed Anyway`}
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Our system has flagged this transaction as potentially risky. Please confirm that you know and trust the recipient before proceeding.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleConfirmPayment}>Confirm Payment</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            ) : (
-                <Button onClick={handleConfirmPayment} className="w-full" disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="animate-spin" /> : `Confirm Payment`}
-                </Button>
-            )}
-
-             <Button variant="outline" onClick={handleScanAgain} className="w-full">
-                Cancel
-              </Button>
-        </div>
-       )
-    }
-
-    return null;
+    return (
+     <div className="space-y-4">
+         <div className="flex justify-between items-center">
+             <span className="text-muted-foreground">Amount</span>
+             <span className="font-bold text-2xl text-primary">${finalAmount?.toFixed(2)}</span>
+         </div>
+         <Button onClick={handleConfirmPayment} className="w-full" disabled={isProcessing}>
+             {isProcessing ? <Loader2 className="animate-spin" /> : `Confirm Payment`}
+         </Button>
+          <Button variant="outline" onClick={handleScanAgain} className="w-full">
+             Cancel
+           </Button>
+     </div>
+    )
   }
 
   return (
@@ -268,7 +177,7 @@ export default function QrPayPage() {
           </CardTitle>
           <CardDescription>
             {scannedData ? 'Confirm your payment details.' : 'Scan a payment QR code.'}
-          </CardDescription>
+          </Description>
         </CardHeader>
         <CardContent>
           {error && (
@@ -333,8 +242,8 @@ export default function QrPayPage() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full" disabled={isProcessing}>
-                           {isAnalyzing ? <Loader2 className="animate-spin" /> : `Analyze Transaction`}
+                        <Button type="submit" className="w-full">
+                           Set Amount
                         </Button>
                          <Button variant="outline" onClick={handleScanAgain} className="w-full">
                             Cancel
