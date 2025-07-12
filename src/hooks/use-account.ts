@@ -207,13 +207,16 @@ export function useAccount(userId?: string) {
 
             // Handle recipient if it's a transfer
             if (data.recipient) {
-                if (data.recipient === senderData.accountNumber || data.recipient === senderData.holderName) {
+                // Sanitize recipient input to handle formatted account numbers
+                const sanitizedRecipient = data.recipient.replace(/[-\s]/g, '');
+                
+                if (sanitizedRecipient === senderData.accountNumber || data.recipient === senderData.holderName) {
                     throw new Error("You cannot send money to yourself.");
                 }
                 
-                const isAccountNumber = /^\d{9}$/.test(data.recipient);
+                const isAccountNumber = /^\d{9}$/.test(sanitizedRecipient);
                 const recipientQuery = isAccountNumber
-                    ? query(collection(db, "accounts"), where("accountNumber", "==", data.recipient), limit(1))
+                    ? query(collection(db, "accounts"), where("accountNumber", "==", sanitizedRecipient), limit(1))
                     : query(collection(db, "accounts"), where("holderName", "==", data.recipient), limit(1));
 
                 const recipientSnapshot = await getDocs(recipientQuery);
