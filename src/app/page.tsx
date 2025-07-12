@@ -2,7 +2,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Landmark, LogOut } from "lucide-react";
+import Link from "next/link";
+import { Landmark, LogOut, QrCode } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
@@ -65,10 +66,18 @@ export default function Home() {
               <p className="text-muted-foreground">Your Personal Banking Simulator</p>
             </div>
         </div>
-        <Button variant="ghost" onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-        </Button>
+        <div>
+          <Button variant="ghost" asChild className="mr-2">
+            <Link href="/qr-pay">
+              <QrCode className="mr-2 h-4 w-4" />
+              QRPay
+            </Link>
+          </Button>
+          <Button variant="ghost" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+          </Button>
+        </div>
       </header>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

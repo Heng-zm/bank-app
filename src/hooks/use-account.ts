@@ -71,41 +71,46 @@ export function useAccount(userId?: string) {
   }, [userId, setAccount, setTransactions]);
 
 
-  const handleAddTransaction = async (data: TransactionFormData) => {
-    setIsProcessing(true);
+  const handleAddTransaction = async (data: TransactionFormData): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        setIsProcessing(true);
 
-    const newTransaction: Transaction = {
-      id: `txn_${Date.now()}`,
-      accountId: account.id,
-      timestamp: new Date().toISOString(),
-      amount: data.amount,
-      description: data.description,
-      type: "withdrawal",
-    };
-    
-    const updatedBalance = account.balance - newTransaction.amount;
-    
-    if (updatedBalance < 0) {
-      toast({
-        variant: "destructive",
-        title: "Transaction Failed",
-        description: "Insufficient funds.",
-      });
-      setIsProcessing(false);
-      return;
-    }
-    
-    setAccount({ ...account, balance: updatedBalance });
-    
-    const updatedTransactions = [newTransaction, ...transactions];
-    setTransactions(updatedTransactions);
+        const newTransaction: Transaction = {
+          id: `txn_${Date.now()}`,
+          accountId: account.id,
+          timestamp: new Date().toISOString(),
+          amount: data.amount,
+          description: data.description,
+          type: "withdrawal",
+        };
+        
+        const updatedBalance = account.balance - newTransaction.amount;
+        
+        if (updatedBalance < 0) {
+          const errorMsg = "Insufficient funds.";
+          toast({
+            variant: "destructive",
+            title: "Transaction Failed",
+            description: errorMsg,
+          });
+          setIsProcessing(false);
+          reject(new Error(errorMsg));
+          return;
+        }
+        
+        setAccount({ ...account, balance: updatedBalance });
+        
+        const updatedTransactions = [newTransaction, ...transactions];
+        setTransactions(updatedTransactions);
 
-    toast({
-        title: "Transaction Successful",
-        description: "Your transaction has been processed.",
+        toast({
+            title: "Transaction Successful",
+            description: "Your transaction has been processed.",
+        });
+
+        setIsProcessing(false);
+        resolve();
     });
-
-    setIsProcessing(false);
   };
 
   return {
