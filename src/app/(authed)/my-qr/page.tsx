@@ -13,11 +13,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
+  amount: z.coerce.number().min(0, { message: "Amount cannot be negative." }).optional(),
 });
 
 export default function MyQrPage() {
@@ -29,7 +29,7 @@ export default function MyQrPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: 0,
+      amount: undefined,
     },
   });
 
@@ -38,19 +38,26 @@ export default function MyQrPage() {
         toast({ variant: 'destructive', title: "Authentication Error", description: "You must be logged in to generate a QR code." });
         return;
     }
-    const data = {
+    const data: {recipient: string; amount?: number} = {
       recipient: user.email || user.uid, // Use email as recipient, fallback to UID
-      amount: values.amount,
     };
+    if (values.amount && values.amount > 0) {
+        data.amount = values.amount;
+    }
     setQrCodeData(JSON.stringify(data));
   };
   
   const handleShare = async () => {
     if (navigator.share) {
+      const amount = form.getValues('amount');
+      const shareText = amount && amount > 0 
+        ? `Here is my payment QR code to receive $${Number(amount).toFixed(2)}.`
+        : 'Here is my payment QR code.';
+
       try {
         await navigator.share({
           title: 'FinSim Payment Request',
-          text: `Here is my payment QR code to receive ${Number(form.getValues('amount')).toFixed(2)}.`,
+          text: shareText,
           url: window.location.href,
         });
       } catch (error) {
@@ -66,12 +73,19 @@ export default function MyQrPage() {
     }
   }
 
+  const generatedAmount = form.getValues('amount');
+
   return (
     <div className="flex items-center justify-center h-full">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle>My QR Code</CardTitle>
-          <CardDescription>Generate a QR code to receive money.</CardDescription>
+          <CardDescription>
+            {qrCodeData 
+                ? "Share this code to receive money."
+                : "Enter an amount or leave it blank for a generic request."
+            }
+          </CardDescription>
         </CardHeader>
         <CardContent>
             {!qrCodeData ? (
@@ -82,7 +96,7 @@ export default function MyQrPage() {
                         name="amount"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Amount</FormLabel>
+                            <FormLabel>Amount (Optional)</FormLabel>
                             <FormControl>
                                 <Input type="number" placeholder="0.00" {...field} step="0.01"/>
                             </FormControl>
@@ -100,10 +114,14 @@ export default function MyQrPage() {
                     <div className="p-4 bg-white rounded-lg">
                         <QRCode value={qrCodeData} size={256} />
                     </div>
-                    <p className="text-center">Scan this code to pay <span className='font-bold'>${Number(form.getValues('amount')).toFixed(2)}</span> to <span className="font-mono text-sm">{user?.email}</span></p>
+                    {generatedAmount && generatedAmount > 0 ? (
+                        <p className="text-center">Scan this code to pay <span className='font-bold'>${Number(generatedAmount).toFixed(2)}</span> to <span className="font-mono text-sm">{user?.email}</span></p>
+                    ) : (
+                        <p className="text-center">Scan this code to pay <span className="font-mono text-sm">{user?.email}</span></p>
+                    )}
                     <div className="flex w-full gap-2">
-                        <Button variant="outline" onClick={() => setQrCodeData(null)} className="flex-1">
-                            New Amount
+                        <Button variant="outline" onClick={() => { setQrCodeData(null); form.reset(); }} className="flex-1">
+                            New Code
                         </Button>
                         <Button onClick={handleShare} className="flex-1">
                             <Share2 className="mr-2 h-4 w-4"/>
@@ -117,4 +135,3 @@ export default function MyQrPage() {
     </div>
   );
 }
-

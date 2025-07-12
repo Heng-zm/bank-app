@@ -5,6 +5,9 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
 import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
 import { useAccount } from '@/hooks/use-account';
 import { useAuth } from '@/hooks/use-auth';
@@ -12,12 +15,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import type { TransactionFormData } from '@/lib/types';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 interface QrCodeData {
   recipient: string;
-  amount: number;
+  amount?: number;
 }
+
+const paymentFormSchema = z.object({
+    amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
+});
 
 export default function QrPayPage() {
   const router = useRouter();
@@ -32,6 +40,11 @@ export default function QrPayPage() {
   const [scannedData, setScannedData] = useState<QrCodeData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
+  const [finalAmount, setFinalAmount] = useState<number | null>(null);
+
+  const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
+    resolver: zodResolver(paymentFormSchema),
+  });
 
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -77,11 +90,14 @@ export default function QrPayPage() {
             if (code) {
                 try {
                     const data = JSON.parse(code.data) as QrCodeData;
-                    if (data.recipient && typeof data.recipient === 'string' && data.amount && typeof data.amount === 'number') {
+                    if (data.recipient && typeof data.recipient === 'string') {
                         setScannedData(data);
+                        if (data.amount && typeof data.amount === 'number' && data.amount > 0) {
+                            setFinalAmount(data.amount);
+                        }
                         setError(null);
                     } else {
-                        setError("Invalid QR code format. Expected recipient and amount.");
+                        setError("Invalid QR code format. Expected a recipient.");
                     }
                 } catch (e) {
                     setError("Failed to parse QR code data. Please use a valid payment QR code.");
@@ -101,20 +117,21 @@ export default function QrPayPage() {
   }, [hasCameraPermission, tick]);
 
 
-  const handleConfirmPayment = async () => {
-    if (!scannedData) return;
+  const handleConfirmPayment = async (amount: number) => {
+    if (!scannedData || amount <= 0) return;
 
     try {
         await handleAddTransaction({
             description: `Payment to ${scannedData.recipient}`,
-            amount: scannedData.amount,
+            amount: amount,
             recipient: scannedData.recipient
         });
+        setFinalAmount(amount);
         setIsPaymentSuccessful(true);
         setError(null);
         toast({
             title: "Payment Successful",
-            description: `You paid ${scannedData.amount.toFixed(2)} to ${scannedData.recipient}.`
+            description: `You paid ${amount.toFixed(2)} to ${scannedData.recipient}.`
         });
     } catch (e: any) {
         setError(e.message || "An unexpected error occurred during payment.");
@@ -125,6 +142,12 @@ export default function QrPayPage() {
       setScannedData(null);
       setError(null);
       setIsPaymentSuccessful(false);
+      setFinalAmount(null);
+      paymentForm.reset();
+  }
+  
+  const onPaymentFormSubmit = (values: z.infer<typeof paymentFormSchema>) => {
+    handleConfirmPayment(values.amount);
   }
 
   return (
@@ -173,7 +196,7 @@ export default function QrPayPage() {
             <div className="text-center space-y-4">
                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
                 <h3 className="text-xl font-bold">Payment Complete!</h3>
-                <p>You successfully paid ${scannedData?.amount.toFixed(2)} to {scannedData?.recipient}.</p>
+                <p>You successfully paid ${finalAmount?.toFixed(2)} to {scannedData?.recipient}.</p>
                 <Button onClick={handleScanAgain} className="w-full">
                     Scan Another Code
                 </Button>
@@ -185,14 +208,41 @@ export default function QrPayPage() {
                 <span className="text-muted-foreground">Recipient</span>
                 <span className="font-bold">{scannedData.recipient}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold text-2xl text-primary">${scannedData.amount.toFixed(2)}</span>
-              </div>
-              <Button onClick={handleConfirmPayment} className="w-full" disabled={isProcessing}>
-                {isProcessing ? <Loader2 className="animate-spin" /> : `Confirm Payment`}
-              </Button>
-               <Button variant="outline" onClick={() => setScannedData(null)} className="w-full">
+
+              {finalAmount ? (
+                <>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Amount</span>
+                        <span className="font-bold text-2xl text-primary">${finalAmount.toFixed(2)}</span>
+                    </div>
+                    <Button onClick={() => handleConfirmPayment(finalAmount)} className="w-full" disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="animate-spin" /> : `Confirm Payment`}
+                    </Button>
+                </>
+              ) : (
+                <Form {...paymentForm}>
+                    <form onSubmit={paymentForm.handleSubmit(onPaymentFormSubmit)} className="space-y-4">
+                         <FormField
+                            control={paymentForm.control}
+                            name="amount"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Amount</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="0.00" {...field} step="0.01"/>
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" className="w-full" disabled={isProcessing}>
+                           {isProcessing ? <Loader2 className="animate-spin" /> : `Confirm Payment`}
+                        </Button>
+                    </form>
+                </Form>
+              )}
+
+               <Button variant="outline" onClick={handleScanAgain} className="w-full">
                 Cancel
               </Button>
             </div>
