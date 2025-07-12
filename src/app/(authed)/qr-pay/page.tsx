@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+
 
 interface QrCodeData {
   recipient: string;
@@ -150,8 +152,7 @@ export default function QrPayPage() {
     setFinalAmount(values.amount);
   }
   
-  const renderConfirmation = () => {
-    return (
+  const renderConfirmation = () => (
      <div className="space-y-4">
          <div className="flex justify-between items-center">
              <span className="text-muted-foreground">Amount</span>
@@ -164,8 +165,7 @@ export default function QrPayPage() {
              Cancel
            </Button>
      </div>
-    )
-  }
+  );
 
   return (
     <div className="flex items-center justify-center h-full">
