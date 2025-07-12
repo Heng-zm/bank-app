@@ -40,7 +40,7 @@ export function NotificationBell({ notifications, onOpen }: NotificationBellProp
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0">
+      <PopoverContent className="w-screen max-w-[320px] sm:max-w-sm p-0">
         <div className="p-4 font-semibold border-b">
           Notifications
         </div>
