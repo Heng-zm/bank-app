@@ -19,6 +19,12 @@ import {
   addDoc,
   limit
 } from "firebase/firestore";
+import { 
+    getStorage,
+    ref,
+    uploadBytesResumable,
+    getDownloadURL,
+} from 'firebase/storage';
 import type { Account, Transaction, TransactionFormData, Notification } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
@@ -34,6 +40,7 @@ export function useAccount(userId?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   const db = getFirestore();
+  const storage = getStorage();
 
   useEffect(() => {
     if (!userId || !db) {
@@ -116,15 +123,42 @@ export function useAccount(userId?: string) {
   }, [userId, db, toast]);
 
 
-  const handleAddTransaction = async (data: TransactionFormData): Promise<void> => {
-    if (!userId || !db) {
+  const handleAddTransaction = async (data: TransactionFormData, onProgress?: (progress: number) => void): Promise<void> => {
+    if (!userId || !db || !storage) {
       toast({ variant: 'destructive', title: "Error", description: "Not connected to the database." });
       return;
     }
 
     setIsProcessing(true);
     
+    let receiptUrl: string | null = null;
+
     try {
+        // Step 1: Upload receipt if it exists
+        if (data.receiptFile) {
+            const filePath = `receipts/${userId}/${Date.now()}_${data.receiptFile.name}`;
+            const storageRef = ref(storage, filePath);
+            const uploadTask = uploadBytesResumable(storageRef, data.receiptFile);
+
+            await new Promise<void>((resolve, reject) => {
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        onProgress?.(progress);
+                    },
+                    (error) => {
+                        console.error("Upload failed:", error);
+                        reject(new Error("Receipt upload failed. Please try again."));
+                    },
+                    async () => {
+                        receiptUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve();
+                    }
+                );
+            });
+        }
+        
+        // Step 2: Run the Firestore transaction
         await runTransaction(db, async (transaction) => {
             const senderAccountRef = doc(db, "accounts", userId);
             const senderAccountDoc = await transaction.get(senderAccountRef);
@@ -148,11 +182,11 @@ export function useAccount(userId?: string) {
                 type: 'withdrawal',
                 timestamp: serverTimestamp(),
                 recipient: data.recipient || null,
+                receiptUrl: receiptUrl,
             });
 
             // Handle recipient if it's a transfer
             if (data.recipient) {
-                 // The recipient is provided as an email address, which is the holderName
                 const recipientQuery = query(collection(db, "accounts"), where("holderName", "==", data.recipient), limit(1));
                 const recipientSnapshot = await getDocs(recipientQuery);
 
@@ -165,10 +199,8 @@ export function useAccount(userId?: string) {
                 const recipientBalance = recipientDoc.data().balance;
                 const newRecipientBalance = recipientBalance + data.amount;
 
-                // Update recipient's balance
                 transaction.update(recipientAccountRef, { balance: newRecipientBalance });
 
-                // Create deposit transaction for recipient
                 const recipientTransactionRef = doc(collection(db, "transactions"));
                 transaction.set(recipientTransactionRef, {
                     accountId: recipientDoc.id,
@@ -179,7 +211,6 @@ export function useAccount(userId?: string) {
                     sender: senderAccountDoc.data().holderName
                 });
 
-                // Create notification for recipient
                 const recipientNotificationRef = doc(collection(db, "notifications"));
                 transaction.set(recipientNotificationRef, {
                     userId: recipientDoc.id,
@@ -190,7 +221,6 @@ export function useAccount(userId?: string) {
                 });
             }
 
-            // Create low balance notification for sender if needed
             if (newSenderBalance < LOW_BALANCE_THRESHOLD) {
                 const senderNotificationRef = doc(collection(db, "notifications"));
                 transaction.set(senderNotificationRef, {

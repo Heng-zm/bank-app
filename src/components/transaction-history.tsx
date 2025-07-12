@@ -14,7 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from 'date-fns';
-import { History, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { History, ArrowUpRight, ArrowDownLeft, Receipt } from "lucide-react";
+import Link from "next/link";
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -48,7 +49,15 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               {transactions.map((tx) => (
                 <TableRow key={tx.id}>
                   <TableCell>
-                    {tx.description}
+                    <div className="flex flex-col">
+                        <span>{tx.description}</span>
+                        {tx.receiptUrl && (
+                             <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-primary hover:underline mt-1">
+                                <Receipt className="h-3 w-3" />
+                                View Receipt
+                            </Link>
+                        )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}

@@ -3,28 +3,28 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Users can read and write to their own account document.
     match /accounts/{userId} {
-      allow read, update, write: if request.auth != null && request.auth.uid == userId;
-      // Allow creating an account for a new user.
+      allow read, update: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null;
     }
 
-    // Rules for the transactions collection
     match /transactions/{transactionId} {
-      // Allow user to create a transaction for themselves.
-      allow create: if request.auth != null && request.resource.data.accountId == request.auth.uid;
-      // Allow user to read their own transaction documents.
-      allow read: if request.auth != null && resource.data.accountId == request.auth.uid;
+      allow read: if request.auth != null && request.auth.uid == resource.data.accountId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.accountId;
     }
 
-    // Rules for the notifications collection
     match /notifications/{notificationId} {
-      // Allow server-side logic or trusted clients to create notifications.
+      allow read, update: if request.auth != null && request.auth.uid == resource.data.userId;
       allow create: if request.auth != null;
-      // Allow user to read or update their own notification documents.
-      allow read, update: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+  }
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /receipts/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
