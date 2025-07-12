@@ -23,6 +23,7 @@ export default function Home() {
     account, 
     transactions, 
     isProcessing, 
+    isLoading: isAccountLoading,
     handleAddTransaction 
   } = useAccount(user?.uid);
   const [isClient, setIsClient] = useState(false);
@@ -36,7 +37,7 @@ export default function Home() {
     router.push('/login');
   };
 
-  if (!isClient || isAuthLoading) {
+  if (!isClient || isAuthLoading || isAccountLoading) {
     return (
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <header className="mb-8">

@@ -1,6 +1,8 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyBU_Q2F0zIMTrIyh5nXERtU3fEtlSX4SH0",
@@ -19,16 +21,19 @@ const areConfigValuesPresent = firebaseConfigValues.every(value => value);
 
 let app;
 let auth;
+let db;
 
 if (areConfigValuesPresent) {
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
+  db = getFirestore(app);
 } else {
   console.warn("Firebase config is missing. Please check your .env file.");
   // Provide dummy instances if config is not set
   app = undefined;
   auth = undefined;
+  db = undefined;
 }
 
 
-export { app, auth };
+export { app, auth, db };

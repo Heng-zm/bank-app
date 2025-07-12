@@ -1,10 +1,24 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useState, useEffect, useCallback } from "react";
+import { 
+  getFirestore, 
+  doc, 
+  onSnapshot, 
+  collection, 
+  query, 
+  orderBy, 
+  runTransaction,
+  serverTimestamp,
+  getDoc,
+  setDoc,
+  Timestamp,
+  where
+} from "firebase/firestore";
 import type { Account, Transaction, TransactionFormData } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from "@/lib/firebase";
 
 const initialAccount: Account = {
   id: "acc_12345",
@@ -12,116 +26,142 @@ const initialAccount: Account = {
   balance: 5432.1,
 };
 
-const initialTransactions: Transaction[] = [
-  {
-    id: 'txn_1',
-    accountId: 'acc_12345',
-    timestamp: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
-    amount: 1200.00,
-    description: 'Paycheck Deposit',
-    type: 'deposit',
-  },
-  {
-    id: 'txn_2',
-    accountId: 'acc_12345',
-    timestamp: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
-    amount: 75.50,
-    description: 'Grocery Store',
-    type: 'withdrawal',
-  },
-  {
-    id: 'txn_3',
-    accountId: 'acc_12345',
-    timestamp: new Date().toISOString(),
-    amount: 25.00,
-    description: 'Coffee Shop',
-    type: 'withdrawal',
-  },
-];
-
 export function useAccount(userId?: string) {
   const { toast } = useToast();
-  const storageKeyAccount = userId ? `finsim-account-${userId}` : 'finsim-account-guest';
-  const storageKeyTransactions = userId ? `finsim-transactions-${userId}` : 'finsim-transactions-guest';
-
-  const [account, setAccount] = useLocalStorage<Account>(storageKeyAccount, {
-      ...initialAccount,
-      id: userId || 'acc_guest'
-  });
-  const [transactions, setTransactions] = useLocalStorage<Transaction[]>(storageKeyTransactions, initialTransactions.map(tx => ({...tx, accountId: userId || 'acc_guest' })));
+  const [account, setAccount] = useState<Account>(initialAccount);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(true);
+
+  const db = getFirestore();
+
   useEffect(() => {
-    if (userId) {
-        // This effect ensures that when a user logs in, their data is loaded.
-        // It's a simple way to handle user-specific data with local storage.
-        const userAccount = localStorage.getItem(`finsim-account-${userId}`);
-        if (!userAccount) {
-            setAccount({
-                ...initialAccount,
-                id: userId,
-                holderName: "New User"
-            });
-        }
-        const userTransactions = localStorage.getItem(`finsim-transactions-${userId}`);
-        if (!userTransactions) {
-            setTransactions(initialTransactions.map(tx => ({...tx, accountId: userId })));
-        }
+    if (!userId || !db) {
+        setIsLoading(false);
+        return;
     }
-  }, [userId, setAccount, setTransactions]);
+    
+    setIsLoading(true);
+
+    const accountRef = doc(db, "accounts", userId);
+
+    const unsubscribeAccount = onSnapshot(accountRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        setAccount(docSnap.data() as Account);
+      } else {
+        // If account doesn't exist, create it
+        const user = auth?.currentUser;
+        const newAccount: Account = {
+            id: userId,
+            holderName: user?.email || "New User",
+            balance: 5432.1,
+        };
+        await setDoc(accountRef, newAccount);
+        setAccount(newAccount);
+      }
+    }, (error) => {
+        console.error("Error listening to account:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not load account data."});
+    });
+
+    const transactionsQuery = query(
+        collection(db, "transactions"), 
+        where("accountId", "==", userId),
+        orderBy("timestamp", "desc")
+    );
+    
+    const unsubscribeTransactions = onSnapshot(transactionsQuery, (querySnapshot) => {
+        const txs: Transaction[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            txs.push({
+                ...data,
+                id: doc.id,
+                timestamp: (data.timestamp as Timestamp).toDate().toISOString(),
+            } as Transaction);
+        });
+        setTransactions(txs);
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Error listening to transactions:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not load transaction history."});
+        setIsLoading(false);
+    });
+
+    return () => {
+        unsubscribeAccount();
+        unsubscribeTransactions();
+    }
+  }, [userId, db, toast]);
 
 
   const handleAddTransaction = async (data: TransactionFormData): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        setIsProcessing(true);
+    if (!userId || !db) {
+      toast({ variant: 'destructive', title: "Error", description: "Not connected to the database." });
+      return;
+    }
 
-        const isTransfer = !!data.recipient;
-        const description = isTransfer 
-          ? `Transfer to ${data.recipient}: ${data.description}` 
-          : data.description;
+    setIsProcessing(true);
+    
+    try {
+        await runTransaction(db, async (transaction) => {
+            const accountRef = doc(db, "accounts", userId);
+            const accountDoc = await transaction.get(accountRef);
 
-        const newTransaction: Transaction = {
-          id: `txn_${Date.now()}`,
-          accountId: account.id,
-          timestamp: new Date().toISOString(),
-          amount: data.amount,
-          description: description,
-          type: "withdrawal",
-        };
-        
-        const updatedBalance = account.balance - newTransaction.amount;
-        
-        if (updatedBalance < 0) {
-          const errorMsg = "Insufficient funds.";
-          toast({
-            variant: "destructive",
-            title: "Transaction Failed",
-            description: errorMsg,
-          });
-          setIsProcessing(false);
-          reject(new Error(errorMsg));
-          return;
-        }
-        
-        setAccount({ ...account, balance: updatedBalance });
-        
-        const updatedTransactions = [newTransaction, ...transactions];
-        setTransactions(updatedTransactions);
+            if (!accountDoc.exists()) {
+                throw new Error("Account does not exist!");
+            }
 
-        toast({
-            title: isTransfer ? "Transfer Successful" : "Transaction Successful",
-            description: isTransfer ? `Sent ${data.amount.toFixed(2)} to ${data.recipient}` : "Your transaction has been processed.",
+            const currentBalance = accountDoc.data().balance;
+            const newBalance = currentBalance - data.amount;
+
+            if (newBalance < 0) {
+                throw new Error("Insufficient funds.");
+            }
+            
+            // Update account balance
+            transaction.update(accountRef, { balance: newBalance });
+
+            // Create new transaction record
+            const newTransactionRef = doc(collection(db, "transactions"));
+            const isTransfer = !!data.recipient;
+            const description = isTransfer 
+              ? `Transfer to ${data.recipient}: ${data.description}` 
+              : data.description;
+              
+            transaction.set(newTransactionRef, {
+                accountId: userId,
+                amount: data.amount,
+                description: description,
+                type: 'withdrawal',
+                timestamp: serverTimestamp()
+            });
         });
 
+        toast({
+            title: "Transaction Successful",
+            description: "Your transaction has been processed.",
+        });
+
+    } catch (e: any) {
+        console.error("Transaction failed: ", e);
+        toast({
+            variant: "destructive",
+            title: "Transaction Failed",
+            description: e.message || "An unexpected error occurred.",
+        });
+        // Rethrow to satisfy Promise rejection for callers
+        throw e;
+    } finally {
         setIsProcessing(false);
-        resolve();
-    });
+    }
   };
 
   return {
     account,
     transactions,
     isProcessing,
+    isLoading, // Expose loading state
     handleAddTransaction,
   };
 }

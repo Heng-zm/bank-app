@@ -108,6 +108,7 @@ export default function QrPayPage() {
         await handleAddTransaction({
             description: `Payment to ${scannedData.recipient}`,
             amount: scannedData.amount,
+            recipient: scannedData.recipient
         });
         setIsPaymentSuccessful(true);
         setError(null);

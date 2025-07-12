@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -14,6 +15,7 @@ function parseJSON<T>(value: string | null): T | undefined {
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
   const readValue = useCallback((): T => {
+    // Prevent build errors "window is not defined" but keep keep working
     if (typeof window === 'undefined') {
       return initialValue;
     }
@@ -27,9 +29,16 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
     }
   }, [initialValue, key]);
 
-  const [storedValue, setStoredValue] = useState<T>(readValue);
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
 
   const setValue = (value: T | ((val: T) => T)) => {
+    // Prevent build errors "window is not defined" but keep keep working
+    if (typeof window === 'undefined') {
+      console.warn(
+        `Tried setting localStorage key “${key}” even though environment is not a client`,
+      );
+    }
+
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
