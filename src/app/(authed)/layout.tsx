@@ -22,7 +22,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { NotificationBell } from '@/components/notification-bell';
 import { useAccount } from '@/hooks/use-account';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,7 +42,7 @@ function NavLink({
   onClose,
 }: {
   href: string;
-  label: string;
+  label:string;
   icon: React.ElementType;
   isMobile?: boolean;
   onClose?: () => void;
@@ -75,7 +75,12 @@ export default function AuthedLayout({
   const { user, isLoading: isAuthLoading } = useAuth();
   const { notifications, markNotificationsAsRead, isLoading: isAccountLoading } = useAccount(user?.uid);
   const router = useRouter();
+  const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const currentPage = useMemo(() => {
+    return navItems.find(item => item.href === pathname) || { label: 'Dashboard' };
+  }, [pathname]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -154,7 +159,7 @@ export default function AuthedLayout({
               </SheetContent>
             </Sheet>
           <div className="w-full flex-1">
-             <h1 className="font-semibold text-lg">Dashboard</h1>
+             <h1 className="font-semibold text-lg">{currentPage.label}</h1>
           </div>
           <NotificationBell notifications={notifications} onOpen={markNotificationsAsRead} />
         </header>

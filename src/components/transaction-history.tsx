@@ -68,17 +68,17 @@ export function TransactionHistory({
 
   return (
     <Card className="shadow-lg h-full">
-      <CardHeader className="flex flex-row items-center">
-        <div className="grid gap-2">
+      <CardHeader className="flex flex-col md:flex-row md:items-center">
+        <div className="grid gap-2 flex-1">
             <CardTitle>{title}</CardTitle>
             <CardDescription>
                 {showFilters ? 'A record of all your account activity.' : `Your ${transactions.length} most recent transactions.`}
             </CardDescription>
         </div>
          {showFilters && (
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 mt-4 md:mt-0">
                 <Select value={typeFilter} onValueChange={(value: "all" | "deposit" | "withdrawal") => setTypeFilter(value)}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger>
                         <SelectValue placeholder="Filter by type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -93,7 +93,7 @@ export function TransactionHistory({
                     <Button
                         variant={"outline"}
                         className={cn(
-                        "w-[280px] justify-start text-left font-normal",
+                        "w-full md:w-[280px] justify-start text-left font-normal",
                         !dateRange && "text-muted-foreground"
                         )}
                     >
