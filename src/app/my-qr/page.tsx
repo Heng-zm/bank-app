@@ -49,7 +49,7 @@ export default function MyQrPage() {
     if (navigator.share) {
       navigator.share({
         title: 'FinSim Payment Request',
-        text: `Here is my payment QR code to receive ${form.getValues('amount').toFixed(2)}.`,
+        text: `Here is my payment QR code to receive ${Number(form.getValues('amount')).toFixed(2)}.`,
         url: window.location.href,
       })
       .catch((error) => console.error('Error sharing:', error));
@@ -96,7 +96,7 @@ export default function MyQrPage() {
                     <div className="p-4 bg-white rounded-lg">
                         <QRCode value={qrCodeData} size={256} />
                     </div>
-                    <p className="text-center">Scan this code to pay <span className='font-bold'>${form.getValues('amount').toFixed(2)}</span> to <span className="font-mono text-sm">{user?.email}</span></p>
+                    <p className="text-center">Scan this code to pay <span className='font-bold'>${Number(form.getValues('amount')).toFixed(2)}</span> to <span className="font-mono text-sm">{user?.email}</span></p>
                     <div className="flex w-full gap-2">
                         <Button variant="outline" onClick={() => setQrCodeData(null)} className="flex-1">
                             New Amount
