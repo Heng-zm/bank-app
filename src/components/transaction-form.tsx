@@ -1,11 +1,13 @@
 
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect, useCallback } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowRightLeft, Loader2, Send, Paperclip } from "lucide-react";
+import { ArrowRightLeft, Loader2, Send, Paperclip, UserCheck, Search } from "lucide-react";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import type { TransactionFormData } from "@/lib/types";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -48,6 +51,8 @@ interface TransactionFormProps {
 
 export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps) {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [recipientName, setRecipientName] = useState<string | null>(null);
+  const [isRecipientLoading, setIsRecipientLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,6 +63,50 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
       receiptFile: undefined,
     },
   });
+
+  const recipientValue = useWatch({
+    control: form.control,
+    name: "recipient",
+  });
+
+  const debouncedRecipient = useDebounce(recipientValue, 500);
+
+  useEffect(() => {
+    const findRecipient = async () => {
+      if (!debouncedRecipient) {
+        setRecipientName(null);
+        return;
+      }
+      
+      const sanitizedRecipient = debouncedRecipient.replace(/[-\s]/g, '');
+      const isAccountNumber = /^\d{9}$/.test(sanitizedRecipient);
+      
+      if (isAccountNumber) {
+        setIsRecipientLoading(true);
+        setRecipientName(null);
+        try {
+          const q = query(collection(db, "accounts"), where("accountNumber", "==", sanitizedRecipient), limit(1));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const recipientData = querySnapshot.docs[0].data();
+            setRecipientName(recipientData.holderName);
+          } else {
+            setRecipientName("Account not found");
+          }
+        } catch (error) {
+          console.error("Error fetching recipient:", error);
+          setRecipientName("Error finding account");
+        } finally {
+          setIsRecipientLoading(false);
+        }
+      } else {
+         setRecipientName(null);
+      }
+    };
+
+    findRecipient();
+  }, [debouncedRecipient]);
+
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setUploadProgress(null);
@@ -104,6 +153,18 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
                     </div>
                   </FormControl>
                   <FormMessage />
+                  {isRecipientLoading && (
+                    <div className="flex items-center text-sm text-muted-foreground pt-1">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Searching...
+                    </div>
+                  )}
+                  {recipientName && !isRecipientLoading && (
+                     <div className="flex items-center text-sm text-muted-foreground pt-1">
+                      <UserCheck className="mr-2 h-4 w-4 text-green-500" />
+                      <span>{recipientName}</span>
+                    </div>
+                  )}
                 </FormItem>
               )}
             />
@@ -173,3 +234,4 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     </Card>
   );
 }
+
