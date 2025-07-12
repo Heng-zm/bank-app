@@ -172,7 +172,7 @@ export default function QrPayPage() {
   );
 
   return (
-    <div className="flex items-center justify-center h-full">
+    <div className="flex items-center justify-center h-full animate-fade-in-up">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -180,7 +180,12 @@ export default function QrPayPage() {
             Scan to Pay
           </CardTitle>
           <CardDescription>
-            {scannedData ? 'Confirm your payment details.' : 'Scan a payment QR code.'}
+            {isPaymentSuccessful 
+              ? 'Payment was completed successfully.'
+              : scannedData 
+              ? 'Confirm your payment details.' 
+              : 'Position a QR code inside the frame.'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -192,29 +197,31 @@ export default function QrPayPage() {
              </Alert>
           )}
 
-          <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden mb-4">
-            <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
-            { hasCameraPermission === null && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <Loader2 className="h-8 w-8 animate-spin text-white"/>
-                </div>
-            )}
-            { hasCameraPermission === false && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white p-4 text-center">
-                    <p>Camera access denied. Please enable it in your browser settings.</p>
-                </div>
-            )}
-             { !scannedData && !isPaymentSuccessful && hasCameraPermission && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white p-4">
-                    <p className="font-semibold text-lg">Scanning for QR Code...</p>
-                    <div className="absolute w-2/3 h-2/3 border-4 border-dashed border-white/50 rounded-lg"/>
-                </div>
-            )}
-          </div>
+          {!isPaymentSuccessful && !scannedData && (
+             <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden mb-4">
+                <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
+                <canvas ref={canvasRef} style={{ display: 'none' }} />
+                
+                { hasCameraPermission === null && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <Loader2 className="h-8 w-8 animate-spin text-white"/>
+                    </div>
+                )}
+                { hasCameraPermission === false && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white p-4 text-center">
+                        <p>Camera access denied. Please enable it in your browser settings.</p>
+                    </div>
+                )}
+                { hasCameraPermission && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white p-4">
+                        <div className="absolute w-2/3 h-2/3 border-4 border-dashed border-white/50 rounded-lg"/>
+                    </div>
+                )}
+            </div>
+          )}
         
           {isPaymentSuccessful ? (
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-4 py-8">
                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
                 <h3 className="text-xl font-bold">Payment Complete!</h3>
                 <p>You successfully paid ${finalAmount?.toFixed(2)} to {scannedData?.recipient}.</p>
@@ -225,9 +232,9 @@ export default function QrPayPage() {
           ) : scannedData ? (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Payment Details</h3>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center p-3 bg-muted rounded-md">
                 <span className="text-muted-foreground">Recipient</span>
-                <span className="font-bold">{scannedData.recipient}</span>
+                <span className="font-mono font-bold">{scannedData.recipient}</span>
               </div>
 
               {finalAmount ? renderConfirmation() : (
@@ -240,7 +247,7 @@ export default function QrPayPage() {
                                 <FormItem>
                                 <FormLabel>Amount</FormLabel>
                                 <FormControl>
-                                    <Input type="number" placeholder="0.00" {...field} step="0.01"/>
+                                    <Input type="number" placeholder="0.00" {...field} step="0.01" autoFocus/>
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
