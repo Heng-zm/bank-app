@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAccount } from "@/hooks/use-account";
 import { useAuth } from "@/hooks/use-auth";
 import { AccountCard } from "@/components/account-card";
@@ -22,7 +22,23 @@ import {
   ChartLegendContent,
 } from "@/components/ui/chart"
 import { Pie, Cell, PieChart as RechartsPieChart } from "recharts"
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { DndItem } from "@/components/dnd-item";
 
+const DEFAULT_WIDGET_ORDER = ["account", "spending", "transactionForm", "history", "admin"];
 
 export default function DashboardPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -34,6 +50,28 @@ export default function DashboardPage() {
     isLoading: isAccountLoading,
     handleAddTransaction,
   } = useAccount(user?.uid);
+  
+  const [widgetOrder, setWidgetOrder] = useLocalStorage<string[]>("dashboard-widget-order", DEFAULT_WIDGET_ORDER);
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+        activationConstraint: {
+          distance: 8,
+        },
+    })
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const {active, over} = event;
+    
+    if (over && active.id !== over.id) {
+      setWidgetOrder((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  }
 
   const chartData = useMemo(() => {
     const spending = transactions
@@ -98,52 +136,95 @@ export default function DashboardPage() {
     );
   }
 
-  return (
-    <>
-       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <div className="grid auto-rows-max items-start gap-4 lg:col-span-4 lg:gap-8">
-            <AccountCard account={account} />
-             <Card className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <PieChart className="h-5 w-5"/>
-                        Spending Summary
-                    </CardTitle>
-                    <CardDescription>A breakdown of your spending by category.</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  {chartData.length > 0 ? (
-                    <ChartContainer config={chartConfig}>
-                      <RechartsPieChart>
-                        <ChartTooltip content={<ChartTooltipContent nameKey="value" />} />
-                        <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={60}>
-                           {chartData.map((entry) => (
-                              <Cell key={`cell-${entry.name}`} fill={entry.fill} />
-                            ))}
-                        </Pie>
-                        <ChartLegend content={<ChartLegendContent />} />
-                      </RechartsPieChart>
-                    </ChartContainer>
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground">
-                      No spending data to display.
-                    </div>
-                  )}
-                </CardContent>
-            </Card>
-            <TransactionForm onSubmit={handleAddTransaction} isProcessing={isProcessing} />
-            <div className="p-4 border rounded-xl bg-card text-card-foreground shadow-sm space-y-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <h3 className="font-semibold text-sm">Admin Action</h3>
-              <p className="text-xs text-muted-foreground">Simulate a new feature announcement for the current user.</p>
-              <Button onClick={handleAnnounceFeature} size="sm" className="w-full" variant="secondary">
-                <Megaphone className="mr-2 h-4 w-4"/> Announce New Feature
-              </Button>
+  const widgets: { [key: string]: React.ReactNode } = {
+    account: <AccountCard account={account} />,
+    spending: (
+      <Card className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <PieChart className="h-5 w-5"/>
+                Spending Summary
+            </CardTitle>
+            <CardDescription>A breakdown of your spending by category.</CardDescription>
+        </CardHeader>
+        <CardContent className="h-[300px]">
+          {chartData.length > 0 ? (
+            <ChartContainer config={chartConfig}>
+              <RechartsPieChart>
+                <ChartTooltip content={<ChartTooltipContent nameKey="value" />} />
+                <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={60}>
+                    {chartData.map((entry) => (
+                      <Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                    ))}
+                </Pie>
+                <ChartLegend content={<ChartLegendContent />} />
+              </RechartsPieChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              No spending data to display.
             </div>
-          </div>
-          <div className="grid auto-rows-max items-start gap-4 lg:col-span-3 lg:gap-8">
-             <TransactionHistory title="Recent Transactions" transactions={transactions.slice(0, 10)} />
-          </div>
+          )}
+        </CardContent>
+      </Card>
+    ),
+    transactionForm: <TransactionForm onSubmit={handleAddTransaction} isProcessing={isProcessing} />,
+    history: <TransactionHistory title="Recent Transactions" transactions={transactions.slice(0, 10)} />,
+    admin: (
+      <div className="p-4 border rounded-xl bg-card text-card-foreground shadow-sm space-y-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+        <h3 className="font-semibold text-sm">Admin Action</h3>
+        <p className="text-xs text-muted-foreground">Simulate a new feature announcement for the current user.</p>
+        <Button onClick={handleAnnounceFeature} size="sm" className="w-full" variant="secondary">
+          <Megaphone className="mr-2 h-4 w-4"/> Announce New Feature
+        </Button>
       </div>
-    </>
+    ),
+  };
+
+  const mainWidgets = {
+    account: widgets.account,
+    spending: widgets.spending,
+    transactionForm: widgets.transactionForm,
+    admin: widgets.admin,
+  };
+
+  const sidebarWidgets = {
+    history: widgets.history,
+  };
+  
+  const orderedMainWidgets = widgetOrder.filter(id => mainWidgets[id]).map(id => (
+    <DndItem key={id} id={id}>{mainWidgets[id]}</DndItem>
+  ));
+
+  const orderedSidebarWidgets = widgetOrder.filter(id => sidebarWidgets[id]).map(id => (
+     <DndItem key={id} id={id}>{sidebarWidgets[id]}</DndItem>
+  ));
+
+  return (
+    <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <SortableContext 
+            items={widgetOrder.filter(id => mainWidgets[id])}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="grid auto-rows-max items-start gap-4 lg:col-span-4 lg:gap-8">
+              {orderedMainWidgets}
+            </div>
+          </SortableContext>
+
+          <SortableContext 
+            items={widgetOrder.filter(id => sidebarWidgets[id])}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="grid auto-rows-max items-start gap-4 lg:col-span-3 lg:gap-8">
+              {orderedSidebarWidgets}
+            </div>
+          </SortableContext>
+      </div>
+    </DndContext>
   );
 }
