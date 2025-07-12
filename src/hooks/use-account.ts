@@ -170,23 +170,12 @@ export function useAccount(userId?: string) {
 
             if (newSenderBalance < 0) throw new Error("Insufficient funds.");
 
-            // Update sender's account
-            transaction.update(senderAccountRef, { balance: newSenderBalance });
-
-            // Create withdrawal transaction for sender
-            const newTransactionRef = doc(collection(db, "transactions"));
-            transaction.set(newTransactionRef, {
-                accountId: userId,
-                amount: data.amount,
-                description: data.description,
-                type: 'withdrawal',
-                timestamp: serverTimestamp(),
-                recipient: data.recipient || null,
-                receiptUrl: receiptUrl,
-            });
-
             // Handle recipient if it's a transfer
             if (data.recipient) {
+                if (data.recipient === senderAccountDoc.data().holderName) {
+                    throw new Error("You cannot send money to yourself.");
+                }
+
                 const recipientQuery = query(collection(db, "accounts"), where("holderName", "==", data.recipient), limit(1));
                 const recipientSnapshot = await getDocs(recipientQuery);
 
@@ -220,6 +209,22 @@ export function useAccount(userId?: string) {
                     timestamp: serverTimestamp(),
                 });
             }
+
+            // Update sender's account
+            transaction.update(senderAccountRef, { balance: newSenderBalance });
+
+            // Create withdrawal transaction for sender
+            const newTransactionRef = doc(collection(db, "transactions"));
+            transaction.set(newTransactionRef, {
+                accountId: userId,
+                amount: data.amount,
+                description: data.description,
+                type: 'withdrawal',
+                timestamp: serverTimestamp(),
+                recipient: data.recipient || null,
+                receiptUrl: receiptUrl,
+            });
+
 
             if (newSenderBalance < LOW_BALANCE_THRESHOLD) {
                 const senderNotificationRef = doc(collection(db, "notifications"));
