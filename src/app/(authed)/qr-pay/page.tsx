@@ -162,10 +162,11 @@ export default function QrPayPage() {
     if (!scannedData || !finalAmount || finalAmount <= 0) return;
 
     try {
+      const recentTransactions = transactions?.length > 0 ? transactions.slice(0, 10) : [];
       const analysis = await analyzeTransaction({
         amount: finalAmount,
         recipient: scannedData.recipient,
-        recentTransactions: JSON.stringify(transactions.slice(0, 10)),
+        recentTransactions: JSON.stringify(recentTransactions),
       });
 
       setRiskAnalysis(analysis);
