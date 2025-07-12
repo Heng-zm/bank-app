@@ -14,6 +14,7 @@ export interface Transaction {
 }
 
 export interface TransactionFormData {
+    recipient?: string;
     description: string;
     amount: number;
 }

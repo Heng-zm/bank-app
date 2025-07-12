@@ -4,7 +4,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowRightLeft, Loader2 } from "lucide-react";
+import { ArrowRightLeft, Loader2, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import type { TransactionFormData } from "@/lib/types";
 
 const formSchema = z.object({
+  recipient: z.string().optional(),
   description: z.string().min(2, {
     message: "Description must be at least 2 characters.",
   }),
@@ -37,6 +38,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      recipient: "",
       description: "",
       amount: 0,
     },
@@ -54,11 +56,27 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
             <ArrowRightLeft className="h-5 w-5 text-primary"/>
             New Transaction
         </CardTitle>
-        <CardDescription>Send a payment or make a withdrawal.</CardDescription>
+        <CardDescription>Send a payment or make a transfer.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+             <FormField
+              control={form.control}
+              name="recipient"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Recipient (Optional)</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                       <Send className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                       <Input placeholder="Recipient User ID or Email" {...field} className="pl-10" />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="description"

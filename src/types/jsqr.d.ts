@@ -29,3 +29,5 @@ declare module 'jsqr' {
 
   export default jsQR;
 }
+
+declare module 'qrcode.react';

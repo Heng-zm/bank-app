@@ -70,7 +70,13 @@ export default function Home() {
           <Button variant="ghost" asChild className="mr-2">
             <Link href="/qr-pay">
               <QrCode className="mr-2 h-4 w-4" />
-              QRPay
+              Scan to Pay
+            </Link>
+          </Button>
+           <Button variant="ghost" asChild className="mr-2">
+            <Link href="/my-qr">
+              <QrCode className="mr-2 h-4 w-4" />
+              My QR Code
             </Link>
           </Button>
           <Button variant="ghost" onClick={handleLogout}>

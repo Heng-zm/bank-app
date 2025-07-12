@@ -75,12 +75,17 @@ export function useAccount(userId?: string) {
     return new Promise((resolve, reject) => {
         setIsProcessing(true);
 
+        const isTransfer = !!data.recipient;
+        const description = isTransfer 
+          ? `Transfer to ${data.recipient}: ${data.description}` 
+          : data.description;
+
         const newTransaction: Transaction = {
           id: `txn_${Date.now()}`,
           accountId: account.id,
           timestamp: new Date().toISOString(),
           amount: data.amount,
-          description: data.description,
+          description: description,
           type: "withdrawal",
         };
         
@@ -104,8 +109,8 @@ export function useAccount(userId?: string) {
         setTransactions(updatedTransactions);
 
         toast({
-            title: "Transaction Successful",
-            description: "Your transaction has been processed.",
+            title: isTransfer ? "Transfer Successful" : "Transaction Successful",
+            description: isTransfer ? `Sent ${data.amount.toFixed(2)} to ${data.recipient}` : "Your transaction has been processed.",
         });
 
         setIsProcessing(false);
