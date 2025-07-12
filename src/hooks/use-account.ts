@@ -20,13 +20,7 @@ import {
   limit,
   updateDoc
 } from "firebase/firestore";
-import { 
-    getStorage,
-    ref,
-    uploadBytesResumable,
-    getDownloadURL,
-} from 'firebase/storage';
-import type { Account, Transaction, TransactionFormData, Notification, NotificationPreferences } from "@/lib/types";
+import type { Account, Transaction, TransactionFormData, Notification } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 
@@ -64,7 +58,6 @@ export function useAccount(userId?: string) {
 
 
   const db = getFirestore();
-  const storage = getStorage();
 
   useEffect(() => {
     notificationsRef.current = notifications;
@@ -186,42 +179,15 @@ export function useAccount(userId?: string) {
   }, [userId, db, toast]);
 
 
-  const handleAddTransaction = async (data: TransactionFormData, onProgress?: (progress: number) => void): Promise<void> => {
-    if (!userId || !db || !storage) {
+  const handleAddTransaction = async (data: TransactionFormData): Promise<void> => {
+    if (!userId || !db) {
       toast({ variant: 'destructive', title: "Error", description: "Not connected to the database." });
       return;
     }
 
     setIsProcessing(true);
     
-    let receiptUrl: string | null = null;
-
     try {
-        // Step 1: Upload receipt if it exists
-        if (data.receiptFile) {
-            const filePath = `receipts/${userId}/${Date.now()}_${data.receiptFile.name}`;
-            const storageRef = ref(storage, filePath);
-            const uploadTask = uploadBytesResumable(storageRef, data.receiptFile);
-
-            await new Promise<void>((resolve, reject) => {
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        onProgress?.(progress);
-                    },
-                    (error) => {
-                        console.error("Upload failed:", error);
-                        reject(new Error("Receipt upload failed. Please try again."));
-                    },
-                    async () => {
-                        receiptUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                        resolve();
-                    }
-                );
-            });
-        }
-        
-        // Step 2: Run the Firestore transaction
         await runTransaction(db, async (transaction) => {
             const senderAccountRef = doc(db, "accounts", userId);
             const senderAccountDoc = await transaction.get(senderAccountRef);
@@ -298,7 +264,6 @@ export function useAccount(userId?: string) {
                 type: 'withdrawal',
                 timestamp: serverTimestamp(),
                 recipient: data.recipient || null,
-                receiptUrl: receiptUrl,
             });
 
 
@@ -369,7 +334,3 @@ export function useAccount(userId?: string) {
     updateAccountDetails
   };
 }
-
-    
-
-    

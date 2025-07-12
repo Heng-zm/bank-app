@@ -15,8 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from 'date-fns';
-import { ArrowUpRight, ArrowDownLeft, Receipt, CalendarIcon, FilterX } from "lucide-react";
-import Link from "next/link";
+import { ArrowUpRight, ArrowDownLeft, CalendarIcon, FilterX } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -148,12 +147,6 @@ export function TransactionHistory({
                                 <div className="space-y-1">
                                     <p className="font-medium">{tx.description}</p>
                                     <p className="text-sm text-muted-foreground">{tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}</p>
-                                    {tx.receiptUrl && (
-                                        <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary hover:underline">
-                                            <Receipt className="h-3 w-3" />
-                                            View Receipt
-                                        </Link>                          
-                                    )}
                                 </div>
                            </div>
                            <div className={cn(
@@ -190,15 +183,7 @@ export function TransactionHistory({
                     filteredTransactions.map((tx) => (
                     <TableRow key={tx.id}>
                         <TableCell>
-                        <div className="flex flex-col">
                             <span className="font-medium">{tx.description}</span>
-                            {tx.receiptUrl && (
-                                <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-primary hover:underline mt-1">
-                                    <Receipt className="h-3 w-3" />
-                                    View Receipt
-                                </Link>                          
-                            )}
-                        </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                         {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}

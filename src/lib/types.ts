@@ -22,15 +22,12 @@ export interface Transaction {
   type: 'deposit' | 'withdrawal';
   recipient?: string | null;
   sender?: string | null;
-  receiptUrl?: string | null;
 }
 
 export interface TransactionFormData {
     recipient?: string;
     description: string;
     amount: number;
-    receiptFile?: File | null;
-    receiptUrl?: string | null;
 }
 
 export interface Notification {

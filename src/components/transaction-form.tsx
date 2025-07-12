@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowRightLeft, Loader2, Send, Paperclip, UserCheck, Search } from "lucide-react";
+import { ArrowRightLeft, Loader2, Send, UserCheck } from "lucide-react";
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -20,12 +20,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import type { TransactionFormData } from "@/lib/types";
 import { useDebounce } from "@/hooks/use-debounce";
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const formSchema = z.object({
   recipient: z.string().min(1, { message: "Recipient is required." }),
@@ -35,22 +31,14 @@ const formSchema = z.object({
   amount: z.coerce.number().positive({
     message: "Amount must be a positive number.",
   }),
-  receiptFile: z
-    .any()
-    .refine((file) => !file || (file[0] && file[0].size <= MAX_FILE_SIZE), `Max file size is 10MB.`)
-    .refine(
-      (file) => !file || (file[0] && ACCEPTED_IMAGE_TYPES.includes(file[0].type)),
-      ".jpg, .jpeg, .png and .webp files are accepted."
-    ).optional(),
 });
 
 interface TransactionFormProps {
-  onSubmit: (data: TransactionFormData, onProgress?: (progress: number) => void) => Promise<void>;
+  onSubmit: (data: TransactionFormData) => Promise<void>;
   isProcessing: boolean;
 }
 
 export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps) {
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [recipientName, setRecipientName] = useState<string | null>(null);
   const [isRecipientLoading, setIsRecipientLoading] = useState(false);
 
@@ -60,7 +48,6 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
       recipient: "",
       description: "",
       amount: '' as any,
-      receiptFile: undefined,
     },
   });
 
@@ -109,23 +96,15 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
 
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    setUploadProgress(null);
     const formData: TransactionFormData = {
         ...values,
         amount: values.amount || 0,
-        receiptFile: values.receiptFile?.[0]
     };
     
-    await onSubmit(formData, (progress) => {
-        setUploadProgress(progress);
-    });
+    await onSubmit(formData);
 
     form.reset();
-    setUploadProgress(null);
   };
-
-  const isUploading = uploadProgress !== null && uploadProgress < 100;
-  const isSubmitDisabled = isProcessing || isUploading;
 
 
   return (
@@ -194,39 +173,10 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
                 </FormItem>
               )}
             />
-             <FormField
-              control={form.control}
-              name="receiptFile"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Receipt (Optional)</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                       <Paperclip className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input 
-                         type="file" 
-                         accept="image/*"
-                         className="pl-10 pt-[5px] file:text-foreground"
-                         onChange={(e) => field.onChange(e.target.files)}
-                       />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {uploadProgress !== null && (
-                <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Uploading receipt...</p>
-                    <Progress value={uploadProgress} />
-                </div>
-            )}
             
-            <Button type="submit" className="w-full" disabled={isSubmitDisabled}>
+            <Button type="submit" className="w-full" disabled={isProcessing}>
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isUploading && "Uploading..."}
-              {!isProcessing && !isUploading && "Submit Transaction"}
+              Submit Transaction
             </Button>
           </form>
         </Form>
