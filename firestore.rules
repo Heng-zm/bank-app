@@ -3,26 +3,21 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only read/write their own account document.
+    // Users can read/write their own account.
     match /accounts/{userId} {
-      allow read, write: if request.auth.uid == userId;
+      allow read, update, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Users can create new transactions for themselves.
-    // Users can only read transactions where their userId matches the accountId.
+    // Users can create transactions for themselves.
+    // Users can list transactions if they are querying by their own accountId.
     match /transactions/{transactionId} {
-      allow create: if request.auth != null && request.resource.data.accountId == request.auth.uid;
-      allow read: if request.auth != null && resource.data.accountId == request.auth.uid;
+      allow create: if request.auth.uid == request.resource.data.accountId;
+      allow list: if request.auth.uid == request.query.where.accountId.value;
     }
     
-    // Allow users to query the transactions collection if they are filtering by their own accountId.
-    match /transactions/{document=**} {
-        allow list: if request.auth != null && request.query.getRules().get("accountId") == request.auth.uid;
-    }
-
-    // Users can only read/update notifications intended for them.
+    // Users can read and write their own notifications.
     match /notifications/{notificationId} {
-      allow read, update, create: if request.auth.uid == resource.data.userId || request.auth.uid == request.resource.data.userId;
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
   }
 }
