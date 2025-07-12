@@ -152,9 +152,13 @@ export function useAccount(userId?: string) {
 
             // Handle recipient if it's a transfer
             if (data.recipient) {
+                 // The recipient is provided as an email address, which is the holderName
                 const recipientQuery = query(collection(db, "accounts"), where("holderName", "==", data.recipient), limit(1));
                 const recipientSnapshot = await getDocs(recipientQuery);
-                if (recipientSnapshot.empty) throw new Error(`Recipient ${data.recipient} not found.`);
+
+                if (recipientSnapshot.empty) {
+                    throw new Error(`Recipient with email ${data.recipient} not found.`);
+                }
                 
                 const recipientDoc = recipientSnapshot.docs[0];
                 const recipientAccountRef = recipientDoc.ref;
