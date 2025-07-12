@@ -28,7 +28,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const formSchema = z.object({
-  recipient: z.string().optional(),
+  recipient: z.string().min(1, { message: "Recipient is required." }),
   description: z.string().min(2, {
     message: "Description must be at least 2 characters.",
   }),
@@ -145,11 +145,11 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
               name="recipient"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Recipient (Account # or Email)</FormLabel>
+                  <FormLabel>Recipient Account #</FormLabel>
                   <FormControl>
                     <div className="relative">
                        <Send className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input placeholder="e.g., 001-002-003 or user@example.com" {...field} className="pl-10" />
+                       <Input placeholder="e.g., 001-002-003" {...field} className="pl-10" />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -234,4 +234,3 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     </Card>
   );
 }
-

@@ -213,19 +213,21 @@ export function useAccount(userId?: string) {
                 // Sanitize recipient input to handle formatted account numbers
                 const sanitizedRecipient = data.recipient.replace(/[-\s]/g, '');
                 
-                if (sanitizedRecipient === senderData.accountNumber || data.recipient === senderData.holderName) {
+                if (sanitizedRecipient === senderData.accountNumber) {
                     throw new Error("You cannot send money to yourself.");
                 }
                 
                 const isAccountNumber = /^\d{9}$/.test(sanitizedRecipient);
-                const recipientQuery = isAccountNumber
-                    ? query(collection(db, "accounts"), where("accountNumber", "==", sanitizedRecipient), limit(1))
-                    : query(collection(db, "accounts"), where("holderName", "==", data.recipient), limit(1));
 
+                if (!isAccountNumber) {
+                    throw new Error(`Invalid account number format: "${data.recipient}". Please enter a 9-digit number.`);
+                }
+
+                const recipientQuery = query(collection(db, "accounts"), where("accountNumber", "==", sanitizedRecipient), limit(1));
                 const recipientSnapshot = await getDocs(recipientQuery);
 
                 if (recipientSnapshot.empty) {
-                    throw new Error(`Recipient "${data.recipient}" not found.`);
+                    throw new Error(`Recipient account "${data.recipient}" not found.`);
                 }
                 
                 const recipientDoc = recipientSnapshot.docs[0];
