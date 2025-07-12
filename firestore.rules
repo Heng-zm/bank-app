@@ -1,48 +1,114 @@
+
 rules_version = '2';
 
+/**
+ * This is a complete and secure set of Firestore rules for an application
+ * with user accounts, transactions, and notifications.
+ *
+ * It is built on a strict ownership model: users can only access data
+ * directly associated with their unique user ID (UID).
+ */
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    /**************************************************************
+     *                                                            *
+     *                      HELPER FUNCTIONS                      *
+     *                                                            *
+     **************************************************************/
+
+    /**
+     * Checks if a user is authenticated.
+     * `request.auth` is null if the user is not signed in.
+     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // accounts collection: A user can read/write their own account.
-    // Any signed-in user can query the collection to find other users for transfers.
+    /**
+     * Checks if the currently authenticated user is the owner of a document
+     * based on their UID.
+     * @param userId The UID of the user to check against.
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+
+    /**************************************************************
+     *                                                            *
+     *                   COLLECTION: `accounts`                   *
+     *                                                            *
+     **************************************************************/
+
+    /**
+     * Rules for user account documents, where the document ID `{userId}`
+     * is the user's Firebase UID.
+     */
     match /accounts/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      // A user can read or write THEIR OWN account document.
+      allow read, write: if isSignedIn() && isOwner(userId);
+
+      // Any signed-in user can query the `accounts` collection.
+      // This is required to search for a recipient user by their email/name
+      // before making a transfer.
       allow list: if isSignedIn();
     }
 
-    // transactions collection: A user can only access their own transactions.
-    match /transactions/{transactionId} {
-      // Allow reading a single transaction if the user is the owner.
-      allow get: if isSignedIn() && request.auth.uid == resource.data.accountId;
 
-      // Allow listing transactions ONLY when the query filters by the user's own ID.
-      // This is the critical rule for allowing the transaction history to load.
+    /**************************************************************
+     *                                                            *
+     *                 COLLECTION: `transactions`                 *
+     *                                                            *
+     **************************************************************/
+
+    /**
+     * Rules for transaction documents. Each document MUST contain an `accountId`
+     * field that stores the UID of the user who owns the transaction.
+     */
+    match /transactions/{transactionId} {
+      // READ: A user can get a single transaction document only if they are the owner.
+      allow get: if isSignedIn() && isOwner(resource.data.accountId);
+
+      // QUERY: A user can list transactions ONLY IF the query explicitly filters
+      // for their own `accountId`. This is a critical security pattern.
+      // Your client code MUST use a query like: `where("accountId", "==", user.uid)`
       allow list: if isSignedIn() && request.query.where.accountId == request.auth.uid;
 
-      // Allow creating a transaction if the user is setting themselves as the owner.
-      allow create: if isSignedIn() && request.resource.data.accountId == request.auth.uid;
-      
-      // Deny updates and deletes to maintain an immutable ledger.
+      // CREATE: A user can create a new transaction only if they are the owner.
+      allow create: if isSignedIn() && isOwner(request.resource.data.accountId);
+
+      // DENY all updates and deletes to maintain a secure audit trail.
       allow update, delete: if false;
     }
 
-    // notifications collection: A user can only access their own notifications.
-    match /notifications/{notificationId} {
-      // Allow reading a single notification if the user is the owner.
-      allow get: if isSignedIn() && request.auth.uid == resource.data.userId;
 
-      // Allow listing notifications ONLY when the query filters by the user's own ID.
+    /**************************************************************
+     *                                                            *
+     *                COLLECTION: `notifications`                 *
+     *                                                            *
+     **************************************************************/
+
+    /**
+     * Rules for notification documents. Each document MUST contain a `userId`
+     * field for the user who should receive the notification.
+     */
+    match /notifications/{notificationId} {
+      // READ: A user can get a single notification only if they are the recipient.
+      allow get: if isSignedIn() && isOwner(resource.data.userId);
+
+      // QUERY: A user can list notifications ONLY IF the query filters for their `userId`.
       allow list: if isSignedIn() && request.query.where.userId == request.auth.uid;
-      
-      // Allow creating notifications for other users (e.g., for transfers).
+
+      // CREATE: Any authenticated user can create a notification. This is necessary
+      // so the system can create notifications for transfers or low balance alerts.
       allow create: if isSignedIn();
-      
-      // Allow updating/deleting one's own notifications (e.g., mark as read).
-      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.userId;
+
+      // UPDATE & DELETE: A user can update or delete their own notifications
+      // (e.g., to mark as read or remove).
+      allow update, delete: if isSignedIn() && isOwner(resource.data.userId);
     }
   }
 }
+
+    
