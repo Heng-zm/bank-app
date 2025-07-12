@@ -1,8 +1,15 @@
 
+export interface NotificationPreferences {
+  deposits: boolean;
+  alerts: boolean;
+  info: boolean;
+}
+
 export interface Account {
   id: string;
   holderName: string;
   balance: number;
+  notificationPreferences?: NotificationPreferences;
 }
 
 export interface Transaction {

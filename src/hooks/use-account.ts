@@ -17,7 +17,8 @@ import {
   Timestamp,
   where,
   addDoc,
-  limit
+  limit,
+  updateDoc
 } from "firebase/firestore";
 import { 
     getStorage,
@@ -25,7 +26,7 @@ import {
     uploadBytesResumable,
     getDownloadURL,
 } from 'firebase/storage';
-import type { Account, Transaction, TransactionFormData, Notification } from "@/lib/types";
+import type { Account, Transaction, TransactionFormData, Notification, NotificationPreferences } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 
@@ -33,7 +34,12 @@ const LOW_BALANCE_THRESHOLD = 100;
 
 export function useAccount(userId?: string) {
   const { toast } = useToast();
-  const [account, setAccount] = useState<Account>({ id: "", holderName: "Guest", balance: 0 });
+  const [account, setAccount] = useState<Account>({ 
+    id: "", 
+    holderName: "Guest", 
+    balance: 0,
+    notificationPreferences: { deposits: true, alerts: true, info: true }
+  });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -53,13 +59,19 @@ export function useAccount(userId?: string) {
     const accountRef = doc(db, "accounts", userId);
     const unsubscribeAccount = onSnapshot(accountRef, async (docSnap) => {
       if (docSnap.exists()) {
-        setAccount(docSnap.data() as Account);
+        const data = docSnap.data() as Account;
+        // Ensure notificationPreferences has defaults
+        if (!data.notificationPreferences) {
+          data.notificationPreferences = { deposits: true, alerts: true, info: true };
+        }
+        setAccount(data);
       } else {
         const user = auth?.currentUser;
         const newAccount: Account = {
             id: userId,
             holderName: user?.email || "New User",
             balance: 5432.1,
+            notificationPreferences: { deposits: true, alerts: true, info: true }
         };
         await setDoc(accountRef, newAccount);
         setAccount(newAccount);
@@ -165,14 +177,15 @@ export function useAccount(userId?: string) {
 
             if (!senderAccountDoc.exists()) throw new Error("Your account does not exist!");
             
-            const senderBalance = senderAccountDoc.data().balance;
+            const senderData = senderAccountDoc.data() as Account;
+            const senderBalance = senderData.balance;
             const newSenderBalance = senderBalance - data.amount;
 
             if (newSenderBalance < 0) throw new Error("Insufficient funds.");
 
             // Handle recipient if it's a transfer
             if (data.recipient) {
-                if (data.recipient === senderAccountDoc.data().holderName) {
+                if (data.recipient === senderData.holderName) {
                     throw new Error("You cannot send money to yourself.");
                 }
 
@@ -184,8 +197,9 @@ export function useAccount(userId?: string) {
                 }
                 
                 const recipientDoc = recipientSnapshot.docs[0];
+                const recipientData = recipientDoc.data() as Account;
                 const recipientAccountRef = recipientDoc.ref;
-                const recipientBalance = recipientDoc.data().balance;
+                const recipientBalance = recipientData.balance;
                 const newRecipientBalance = recipientBalance + data.amount;
 
                 transaction.update(recipientAccountRef, { balance: newRecipientBalance });
@@ -194,20 +208,22 @@ export function useAccount(userId?: string) {
                 transaction.set(recipientTransactionRef, {
                     accountId: recipientDoc.id,
                     amount: data.amount,
-                    description: `Received from ${senderAccountDoc.data().holderName}`,
+                    description: `Received from ${senderData.holderName}`,
                     type: 'deposit',
                     timestamp: serverTimestamp(),
-                    sender: senderAccountDoc.data().holderName
+                    sender: senderData.holderName
                 });
-
-                const recipientNotificationRef = doc(collection(db, "notifications"));
-                transaction.set(recipientNotificationRef, {
-                    userId: recipientDoc.id,
-                    message: `You received $${data.amount.toFixed(2)} from ${senderAccountDoc.data().holderName}.`,
-                    type: 'deposit',
-                    isRead: false,
-                    timestamp: serverTimestamp(),
-                });
+                
+                if (recipientData.notificationPreferences?.deposits) {
+                    const recipientNotificationRef = doc(collection(db, "notifications"));
+                    transaction.set(recipientNotificationRef, {
+                        userId: recipientDoc.id,
+                        message: `You received $${data.amount.toFixed(2)} from ${senderData.holderName}.`,
+                        type: 'deposit',
+                        isRead: false,
+                        timestamp: serverTimestamp(),
+                    });
+                }
             }
 
             // Update sender's account
@@ -226,7 +242,7 @@ export function useAccount(userId?: string) {
             });
 
 
-            if (newSenderBalance < LOW_BALANCE_THRESHOLD) {
+            if (newSenderBalance < LOW_BALANCE_THRESHOLD && senderData.notificationPreferences?.alerts) {
                 const senderNotificationRef = doc(collection(db, "notifications"));
                 transaction.set(senderNotificationRef, {
                     userId: userId,
@@ -256,6 +272,14 @@ export function useAccount(userId?: string) {
     }
   };
 
+  const updateAccountDetails = async (details: Partial<Account>) => {
+    if (!userId || !db) {
+        throw new Error("User is not authenticated or database is not available.");
+    }
+    const accountRef = doc(db, "accounts", userId);
+    await updateDoc(accountRef, details);
+  };
+
   const markNotificationsAsRead = useCallback(async () => {
     if (!userId || !db) return;
     const unreadNotifications = notifications.filter(n => !n.isRead);
@@ -281,6 +305,7 @@ export function useAccount(userId?: string) {
     isProcessing,
     isLoading,
     handleAddTransaction,
-    markNotificationsAsRead
+    markNotificationsAsRead,
+    updateAccountDetails
   };
 }

@@ -22,7 +22,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!auth) {
         setIsLoading(false);
-        return;
+        // On the server, we can't determine auth state, so we'll just render children.
+        // The client-side effect will handle redirection if necessary.
+        if (typeof window === 'undefined') {
+            return;
+        }
     }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -33,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (isLoading || !auth) return;
+    if (isLoading || typeof window === 'undefined') return;
 
     const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
 
@@ -48,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, isLoading }}>
-        {children}
+        {isLoading && typeof window !== 'undefined' ? null : children}
     </AuthContext.Provider>
   );
 };

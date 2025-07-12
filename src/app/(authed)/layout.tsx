@@ -16,6 +16,7 @@ import {
   Menu,
   User,
   History,
+  Settings,
 } from 'lucide-react';
 import {
   Sheet,
@@ -32,6 +33,7 @@ const navItems = [
   { href: '/transactions', label: 'Transactions', icon: History },
   { href: '/qr-pay', label: 'Scan to Pay', icon: QrCode },
   { href: '/my-qr', label: 'My QR Code', icon: User },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 function NavLink({
