@@ -5,7 +5,7 @@ import { googleAI } from '@genkit-ai/googleai';
 /**
  * A Genkit plugin that pretty-prints any task to the console.
  */
-const prettyPrinter: Plugin = {
+const prettyPrinter = (): Plugin => ({
   name: 'prettyPrinter',
   configure: async () => {},
   onTask: async (task: Task) => {
@@ -18,7 +18,7 @@ const prettyPrinter: Plugin = {
     }
     console.log(taskStr);
   },
-};
+});
 
 /**
  * Initializes and configures the Genkit AI instance for the application.
@@ -28,6 +28,6 @@ export const ai = genkit({
     googleAI({
       apiVersion: ['v1beta'],
     }),
-    prettyPrinter,
+    prettyPrinter(),
   ],
 });
