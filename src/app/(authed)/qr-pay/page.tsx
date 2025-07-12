@@ -81,36 +81,40 @@ export default function QrPayPage() {
         const video = videoRef.current;
         const context = canvas.getContext('2d');
 
-        canvas.height = video.videoHeight;
-        canvas.width = video.videoWidth;
-        context?.drawImage(video, 0, 0, canvas.width, canvas.height);
+        if (context) {
+          canvas.height = video.videoHeight;
+          canvas.width = video.videoWidth;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const imageData = context?.getImageData(0, 0, canvas.width, canvas.height);
-        if (imageData) {
-            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert",
-            });
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          if (imageData) {
+              const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                  inversionAttempts: "dontInvert",
+              });
 
-            if (code) {
-                try {
-                    const data = JSON.parse(code.data) as QrCodeData;
-                    if (data.recipient && typeof data.recipient === 'string') {
-                        setScannedData(data);
-                        setError(null);
-                        if (data.amount && typeof data.amount === 'number' && data.amount > 0) {
-                           setFinalAmount(data.amount);
-                        }
-                    } else {
-                        setError("Invalid QR code format. Expected a recipient.");
-                    }
-                } catch (e) {
-                    setError("Failed to parse QR code data. Please use a valid payment QR code.");
-                }
-            }
+              if (code) {
+                  try {
+                      const data = JSON.parse(code.data) as QrCodeData;
+                      if (data.recipient && typeof data.recipient === 'string') {
+                          setScannedData(data);
+                          setError(null);
+                          if (data.amount && typeof data.amount === 'number' && data.amount > 0) {
+                             setFinalAmount(data.amount);
+                          }
+                      } else {
+                          setError("Invalid QR code format. Expected a recipient.");
+                      }
+                  } catch (e) {
+                      setError("Failed to parse QR code data. Please use a valid payment QR code.");
+                  }
+              }
+          }
         }
       }
     }
-    requestAnimationFrame(tick);
+    if (!isPaymentSuccessful) {
+        requestAnimationFrame(tick);
+    }
   }, [scannedData, isPaymentSuccessful]);
 
   useEffect(() => {
