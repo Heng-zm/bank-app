@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, isLoading }}>
-        {isLoading && typeof window !== 'undefined' ? null : children}
+        {children}
     </AuthContext.Provider>
   );
 };
