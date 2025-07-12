@@ -44,6 +44,9 @@ export default function QrPayPage() {
 
   const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
     resolver: zodResolver(paymentFormSchema),
+    defaultValues: {
+      amount: '' as any, // Initialize with empty string to make it controlled
+    },
   });
 
   useEffect(() => {
