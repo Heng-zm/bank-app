@@ -1,3 +1,4 @@
+
 export interface Account {
   id: string;
   holderName: string;
@@ -11,10 +12,21 @@ export interface Transaction {
   amount: number;
   description: string;
   type: 'deposit' | 'withdrawal';
+  recipient?: string | null;
+  sender?: string | null;
 }
 
 export interface TransactionFormData {
     recipient?: string;
     description: string;
     amount: number;
+}
+
+export interface Notification {
+    id: string;
+    userId: string;
+    message: string;
+    type: 'deposit' | 'alert' | 'info';
+    isRead: boolean;
+    timestamp: string;
 }

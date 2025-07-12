@@ -3,10 +3,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Landmark, LogOut, QrCode } from "lucide-react";
+import { Landmark, LogOut, QrCode, Megaphone } from "lucide-react";
 import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 import { useAccount } from "@/hooks/use-account";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,16 +16,22 @@ import { TransactionForm } from "@/components/transaction-form";
 import { TransactionHistory } from "@/components/transaction-history";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notification-bell";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function Home() {
   const { user, isLoading: isAuthLoading } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
   const { 
     account, 
     transactions, 
+    notifications,
     isProcessing, 
     isLoading: isAccountLoading,
-    handleAddTransaction 
+    handleAddTransaction,
+    markNotificationsAsRead
   } = useAccount(user?.uid);
   const [isClient, setIsClient] = useState(false);
 
@@ -36,6 +43,23 @@ export default function Home() {
     await signOut(auth);
     router.push('/login');
   };
+
+  const handleAnnounceFeature = async () => {
+    if (!user || !db) return;
+    try {
+      await addDoc(collection(db, "notifications"), {
+        userId: user.uid,
+        message: "New feature available! You can now categorize your spending.",
+        type: 'info',
+        isRead: false,
+        timestamp: serverTimestamp(),
+      });
+      toast({ title: "Announcement Sent!", description: "A new feature notification has been created." });
+    } catch (error) {
+      console.error("Error announcing feature:", error);
+      toast({ variant: "destructive", title: "Error", description: "Could not send announcement."});
+    }
+  }
 
   if (!isClient || isAuthLoading || isAccountLoading) {
     return (
@@ -67,21 +91,22 @@ export default function Home() {
               <p className="text-muted-foreground">Your Personal Banking Simulator</p>
             </div>
         </div>
-        <div>
-          <Button variant="ghost" asChild className="mr-2">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" asChild>
             <Link href="/qr-pay">
-              <QrCode className="mr-2 h-4 w-4" />
+              <QrCode />
               Scan to Pay
             </Link>
           </Button>
-           <Button variant="ghost" asChild className="mr-2">
+           <Button variant="ghost" asChild>
             <Link href="/my-qr">
-              <QrCode className="mr-2 h-4 w-4" />
+              <QrCode />
               My QR Code
             </Link>
           </Button>
+          <NotificationBell notifications={notifications} onOpen={markNotificationsAsRead} />
           <Button variant="ghost" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut />
               Logout
           </Button>
         </div>
@@ -91,6 +116,13 @@ export default function Home() {
         <div className="lg:col-span-1 flex flex-col gap-6">
           <AccountCard account={account} />
           <TransactionForm onSubmit={handleAddTransaction} isProcessing={isProcessing}/>
+           <div className="p-4 border rounded-lg bg-card text-card-foreground shadow-sm space-y-2">
+              <h3 className="font-semibold text-sm">Admin Action</h3>
+              <p className="text-xs text-muted-foreground">Simulate a new feature announcement for the current user.</p>
+              <Button onClick={handleAnnounceFeature} size="sm" className="w-full">
+                <Megaphone className="mr-2 h-4 w-4"/> Announce New Feature
+              </Button>
+            </div>
         </div>
         <div className="lg:col-span-2">
           <TransactionHistory transactions={transactions} />

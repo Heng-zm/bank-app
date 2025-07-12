@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Transaction } from "@/lib/types";
@@ -10,9 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from 'date-fns';
-import { History } from "lucide-react";
+import { History, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -38,6 +40,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               <TableRow>
                 <TableHead>Description</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
               </TableRow>
             </TableHeader>
@@ -45,12 +48,18 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               {transactions.map((tx) => (
                 <TableRow key={tx.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      {tx.description}
-                    </div>
+                    {tx.description}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {format(new Date(tx.timestamp), "MMM d, yyyy")}
+                    {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={tx.type === 'deposit' ? 'secondary' : 'outline'} className={cn(
+                       tx.type === 'deposit' && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                    )}>
+                       {tx.type === 'deposit' ? <ArrowDownLeft className="mr-1 h-3 w-3" /> : <ArrowUpRight className="mr-1 h-3 w-3" />}
+                       {tx.type}
+                    </Badge>
                   </TableCell>
                   <TableCell className={cn(
                     "text-right font-medium",
@@ -60,6 +69,13 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                   </TableCell>
                 </TableRow>
               ))}
+              {transactions.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    No transactions yet.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
