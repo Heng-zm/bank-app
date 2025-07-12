@@ -47,6 +47,8 @@ export default function QrPayPage() {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const animationFrameId = useRef<number | null>(null);
   
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [scannedData, setScannedData] = useState<QrCodeData | null>(null);
@@ -65,32 +67,37 @@ export default function QrPayPage() {
     },
   });
 
-  useEffect(() => {
-    const getCameraPermission = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setHasCameraPermission(true);
-      } catch (err) {
-        console.error("Error accessing camera:", err);
-        setHasCameraPermission(false);
-        setError("Camera access is required to scan QR codes. Please enable camera permissions in your browser settings.");
-      }
-    };
-    getCameraPermission();
-
-    return () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const stream = videoRef.current.srcObject as MediaStream;
-            stream.getTracks().forEach(track => track.stop());
-        }
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+    }
+    if (videoRef.current) {
+        videoRef.current.srcObject = null;
     }
   }, []);
 
+
+  const startCamera = useCallback(async () => {
+    // Stop any existing stream before starting a new one
+    stopCamera();
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            streamRef.current = stream;
+        }
+        setHasCameraPermission(true);
+    } catch (err) {
+        console.error("Error accessing camera:", err);
+        setHasCameraPermission(false);
+        setError("Camera access is required to scan QR codes. Please enable camera permissions in your browser settings.");
+    }
+  }, [stopCamera]);
+
+
   const tick = useCallback(() => {
-    if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA && !scannedData && !isPaymentSuccessful) {
+    if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA && !scannedData) {
       if (canvasRef.current) {
         const canvas = canvasRef.current;
         const video = videoRef.current;
@@ -111,6 +118,7 @@ export default function QrPayPage() {
                   try {
                       const data = JSON.parse(code.data) as QrCodeData;
                       if (data.recipient && typeof data.recipient === 'string') {
+                          stopCamera();
                           setScannedData(data);
                           setError(null);
                           if (data.amount && typeof data.amount === 'number' && data.amount > 0) {
@@ -127,17 +135,43 @@ export default function QrPayPage() {
         }
       }
     }
-    if (!isPaymentSuccessful) {
-        requestAnimationFrame(tick);
+    // Continue scanning as long as we don't have scanned data
+    if (!scannedData) {
+        animationFrameId.current = requestAnimationFrame(tick);
     }
-  }, [scannedData, isPaymentSuccessful]);
+  }, [scannedData, stopCamera]);
+
 
   useEffect(() => {
-    if (hasCameraPermission) {
-      const animationFrameId = requestAnimationFrame(tick);
-      return () => cancelAnimationFrame(animationFrameId);
+    startCamera(); // Start camera on component mount
+
+    return () => { // Cleanup on unmount
+        stopCamera();
+        if (animationFrameId.current) {
+            cancelAnimationFrame(animationFrameId.current);
+        }
     }
-  }, [hasCameraPermission, tick]);
+  }, [startCamera, stopCamera]);
+
+
+  useEffect(() => {
+    // Only start scanning loop if we have camera permission and no data has been scanned yet
+    if (hasCameraPermission && !scannedData) {
+        // Cancel any previous frame to avoid multiple loops
+        if (animationFrameId.current) {
+            cancelAnimationFrame(animationFrameId.current);
+        }
+        animationFrameId.current = requestAnimationFrame(tick);
+    }
+
+    // Cleanup function to cancel animation frame when dependencies change
+    return () => {
+        if (animationFrameId.current) {
+            cancelAnimationFrame(animationFrameId.current);
+        }
+    }
+  }, [hasCameraPermission, scannedData, tick]);
+
 
   const proceedWithPayment = async () => {
     if (!scannedData || !finalAmount || finalAmount <= 0) return;
@@ -195,6 +229,7 @@ export default function QrPayPage() {
       setIsPaymentSuccessful(false);
       setFinalAmount(null);
       paymentForm.reset();
+      startCamera();
   }
   
   const onPaymentFormSubmit = (values: z.infer<typeof paymentFormSchema>) => {
