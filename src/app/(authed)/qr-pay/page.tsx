@@ -181,7 +181,7 @@ export default function QrPayPage() {
           </CardTitle>
           <CardDescription>
             {scannedData ? 'Confirm your payment details.' : 'Scan a payment QR code.'}
-          </Description>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
