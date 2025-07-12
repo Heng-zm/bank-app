@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Share2, Loader2 } from 'lucide-react';
+import { Share2, User, RefreshCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -23,11 +23,12 @@ const formSchema = z.object({
 });
 
 export default function MyQrPage() {
-  const router = useRouter();
   const { user, isLoading: isAuthLoading } = useAuth();
   const { account, isLoading: isAccountLoading } = useAccount(user?.uid);
   const { toast } = useToast();
-  const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  
+  const [qrCodeValue, setQrCodeValue] = useState('');
+  const [requestedAmount, setRequestedAmount] = useState<number | undefined>(undefined);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,27 +36,41 @@ export default function MyQrPage() {
       amount: undefined,
     },
   });
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (!user || !account?.accountNumber) {
-        toast({ variant: 'destructive', title: "Authentication Error", description: "Could not generate QR code. Account details are missing." });
-        return;
-    }
-    const data: {recipient: string; amount?: number} = {
+  
+  const generateQrData = (amount?: number) => {
+    if (!account?.accountNumber) return '';
+    const data: { recipient: string; amount?: number } = {
       recipient: account.accountNumber,
     };
-    if (values.amount && values.amount > 0) {
-        data.amount = values.amount;
+    if (amount && amount > 0) {
+      data.amount = amount;
     }
-    setQrCodeData(JSON.stringify(data));
+    return JSON.stringify(data);
+  }
+
+  useEffect(() => {
+    if (account?.accountNumber) {
+      setQrCodeValue(generateQrData());
+    }
+  }, [account.accountNumber]);
+
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    setRequestedAmount(values.amount);
+    setQrCodeValue(generateQrData(values.amount));
   };
   
+  const resetAmount = () => {
+    form.reset({ amount: undefined });
+    setRequestedAmount(undefined);
+    setQrCodeValue(generateQrData());
+  }
+
   const handleShare = async () => {
     if (navigator.share) {
-      const amount = form.getValues('amount');
-      const shareText = amount && amount > 0 
-        ? `Here is my payment QR code to receive $${Number(amount).toFixed(2)}.`
-        : 'Here is my payment QR code.';
+      const shareText = requestedAmount && requestedAmount > 0 
+        ? `Here is my payment QR code to receive $${Number(requestedAmount).toFixed(2)} from ${account.holderName}.`
+        : `Here is my payment QR code to receive money from ${account.holderName}.`;
 
       try {
         await navigator.share({
@@ -68,7 +83,7 @@ export default function MyQrPage() {
         toast({
             variant: "destructive",
             title: "Share Failed",
-            description: "Could not share the QR code. Permission may have been denied."
+            description: "Could not share the QR code."
         });
       }
     } else {
@@ -76,9 +91,8 @@ export default function MyQrPage() {
     }
   }
 
-  const generatedAmount = form.getValues('amount');
 
-  if (isAuthLoading || isAccountLoading) {
+  if (isAuthLoading || isAccountLoading || !account.accountNumber) {
     return (
         <div className="flex items-center justify-center h-full">
             <Card className="w-full max-w-md mx-auto">
@@ -86,8 +100,11 @@ export default function MyQrPage() {
                     <Skeleton className="h-8 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
                 </CardHeader>
-                <CardContent>
-                    <Skeleton className="h-10 w-full mb-4" />
+                <CardContent className="space-y-4">
+                    <div className="flex justify-center">
+                        <Skeleton className="h-64 w-64" />
+                    </div>
+                    <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                 </CardContent>
             </Card>
@@ -97,60 +114,69 @@ export default function MyQrPage() {
 
 
   return (
-    <div className="flex items-center justify-center h-full">
+    <div className="flex items-center justify-center h-full animate-fade-in-up">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
-          <CardTitle>My QR Code</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <User />
+            Receive Payment
+          </CardTitle>
           <CardDescription>
-            {qrCodeData 
-                ? "Share this code to receive money."
-                : "Enter an amount or leave it blank for a generic request."
-            }
+            Share this QR code to get paid. You can add an amount below.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-            {!qrCodeData ? (
-                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                        control={form.control}
-                        name="amount"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Amount (Optional)</FormLabel>
-                            <FormControl>
-                                <Input type="number" placeholder="0.00" {...field} step="0.01"/>
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <Button type="submit" className="w-full">
-                            Generate QR Code
-                        </Button>
-                    </form>
-                 </Form>
-            ) : (
+        <CardContent className="space-y-6">
+            {qrCodeValue ? (
                 <div className="flex flex-col items-center space-y-4">
-                    <div className="p-4 bg-white rounded-lg">
-                        <QRCode value={qrCodeData} size={256} />
+                    <div className="p-4 bg-white rounded-lg shadow-md">
+                        <QRCode value={qrCodeValue} size={256} />
                     </div>
-                    {generatedAmount && generatedAmount > 0 ? (
-                        <p className="text-center">Scan this code to pay <span className='font-bold'>${Number(generatedAmount).toFixed(2)}</span> to <span className="font-mono text-sm">{account?.holderName}</span></p>
-                    ) : (
-                        <p className="text-center">Scan this code to pay <span className="font-mono text-sm">{account?.holderName}</span></p>
-                    )}
-                    <div className="flex w-full gap-2">
-                        <Button variant="outline" onClick={() => { setQrCodeData(null); form.reset(); }} className="flex-1">
-                            New Code
-                        </Button>
-                        <Button onClick={handleShare} className="flex-1">
-                            <Share2 className="mr-2 h-4 w-4"/>
-                            Share
-                        </Button>
+                    <div className="text-center">
+                        {requestedAmount && requestedAmount > 0 ? (
+                            <p className="text-lg">Requesting <span className='font-bold text-primary'>${Number(requestedAmount).toFixed(2)}</span></p>
+                        ) : (
+                            <p className="text-lg">Requesting payment</p>
+                        )}
+                         <p className="text-sm text-muted-foreground">To: {account?.holderName}</p>
+                         <p className="text-xs text-muted-foreground font-mono">Acct: {account.accountNumber}</p>
                     </div>
                 </div>
+            ) : (
+                 <div className="flex justify-center">
+                    <Skeleton className="h-64 w-64" />
+                </div>
             )}
+            
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Specific Amount (Optional)</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="0.00" {...field} step="0.01"/>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button type="submit" className="flex-1">
+                            Set Amount
+                        </Button>
+                        <Button type="button" variant="secondary" onClick={resetAmount} className="flex-1">
+                            <RefreshCcw className="mr-2 h-4 w-4" /> Reset
+                        </Button>
+                    </div>
+                </form>
+            </Form>
+            
+            <Button onClick={handleShare} className="w-full" variant="outline">
+                <Share2 className="mr-2 h-4 w-4"/>
+                Share Payment Request
+            </Button>
         </CardContent>
       </Card>
     </div>
