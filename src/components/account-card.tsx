@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Account } from "@/lib/types";
@@ -15,20 +16,16 @@ export function AccountCard({ account }: AccountCardProps) {
   }).format(account.balance);
 
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5 text-primary" />
+    <Card className="shadow-lg">
+      <CardHeader className="pb-2">
+        <CardDescription className="flex items-center gap-2">
+          <User className="h-4 w-4" />
           <span>{account.holderName}</span>
-        </CardTitle>
-        <CardDescription>Account Overview</CardDescription>
+        </CardDescription>
+        <CardTitle className="text-4xl">{formattedBalance}</CardTitle>
       </CardHeader>
-      <CardContent className="flex items-center gap-4">
-        <Wallet className="h-8 w-8 text-accent" />
-        <div>
-          <p className="text-sm text-muted-foreground">Available Balance</p>
-          <p className="text-2xl font-bold">{formattedBalance}</p>
-        </div>
+      <CardContent>
+        <div className="text-xs text-muted-foreground">Available Balance</div>
       </CardContent>
     </Card>
   );

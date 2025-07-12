@@ -128,22 +128,18 @@ export default function QrPayPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+    <div className="flex items-center justify-center h-full">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <QrCode />
-            QRPay
+            Scan to Pay
           </CardTitle>
           <CardDescription>
             {scannedData ? 'Confirm your payment details.' : 'Scan a payment QR code.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="ghost" onClick={() => router.push('/')} className="absolute top-4 right-4">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
-          </Button>
-
           {error && (
              <Alert variant="destructive" className="mb-4">
                <AlertTriangle className="h-4 w-4" />

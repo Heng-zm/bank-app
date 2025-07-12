@@ -15,19 +15,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from 'date-fns';
-import { History, ArrowUpRight, ArrowDownLeft, Receipt, CalendarIcon, FilterX } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, Receipt, CalendarIcon, FilterX } from "lucide-react";
 import Link from "next/link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import type { DateRange } from "react-day-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
+  title?: string;
+  showFilters?: boolean;
 }
 
-export function TransactionHistory({ transactions }: TransactionHistoryProps) {
+export function TransactionHistory({ 
+    transactions, 
+    title = "Transaction History", 
+    showFilters = false 
+}: TransactionHistoryProps) {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [typeFilter, setTypeFilter] = useState<"all" | "deposit" | "withdrawal">("all");
 
@@ -35,6 +42,8 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
 
   const filteredTransactions = useMemo(() => {
+    if (!showFilters) return transactions;
+
     return transactions.filter(tx => {
       const txDate = new Date(tx.timestamp);
       
@@ -48,25 +57,26 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
       
       return isDateInRange && isTypeMatch;
     });
-  }, [transactions, dateRange, typeFilter]);
+  }, [transactions, dateRange, typeFilter, showFilters]);
   
   const resetFilters = () => {
       setDateRange(undefined);
       setTypeFilter("all");
   }
 
+  const scrollAreaHeight = showFilters ? "h-[65vh]" : "h-auto";
+
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-            <div>
-                <CardTitle className="flex items-center gap-2">
-                    <History className="h-5 w-5 text-primary"/>
-                    Transaction History
-                </CardTitle>
-                <CardDescription>A record of your recent account activity.</CardDescription>
-            </div>
-             <div className="flex items-center gap-2">
+    <Card className="shadow-lg h-full">
+      <CardHeader className="flex flex-row items-center">
+        <div className="grid gap-2">
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>
+                {showFilters ? 'A record of all your account activity.' : `Your ${transactions.length} most recent transactions.`}
+            </CardDescription>
+        </div>
+         {showFilters && (
+            <div className="flex items-center gap-2 ml-auto">
                 <Select value={typeFilter} onValueChange={(value: "all" | "deposit" | "withdrawal") => setTypeFilter(value)}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Filter by type" />
@@ -116,12 +126,12 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                     <FilterX className="h-4 w-4" />
                  </Button>
             </div>
-        </div>
+         )}
       </CardHeader>
       <CardContent>
-        <div className="overflow-auto max-h-[60vh] relative">
+        <ScrollArea className={scrollAreaHeight}>
           <Table>
-            <TableHeader className="sticky top-0 bg-card z-10">
+            <TableHeader>
               <TableRow>
                 <TableHead>Description</TableHead>
                 <TableHead>Date</TableHead>
@@ -130,48 +140,49 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransactions.map((tx) => (
-                <TableRow key={tx.id}>
-                  <TableCell>
-                    <div className="flex flex-col">
-                        <span>{tx.description}</span>
-                        {tx.receiptUrl && (
-                             <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-primary hover:underline mt-1">
-                                <Receipt className="h-3 w-3" />
-                                View Receipt
-                            </Link>
-                        )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={tx.type === 'deposit' ? 'secondary' : 'outline'} className={cn(
-                       tx.type === 'deposit' && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((tx) => (
+                  <TableRow key={tx.id}>
+                    <TableCell>
+                      <div className="flex flex-col">
+                          <span className="font-medium">{tx.description}</span>
+                          {tx.receiptUrl && (
+                              <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-primary hover:underline mt-1">
+                                  <Receipt className="h-3 w-3" />
+                                  View Receipt
+                              </Link>
+                          )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={tx.type === 'deposit' ? 'secondary' : 'outline'} className={cn(
+                        tx.type === 'deposit' && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200"
+                      )}>
+                        {tx.type === 'deposit' ? <ArrowDownLeft className="mr-1 h-3 w-3" /> : <ArrowUpRight className="mr-1 h-3 w-3" />}
+                        {tx.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className={cn(
+                      "text-right font-medium",
+                      tx.type === 'deposit' ? 'text-green-600' : 'text-gray-800 dark:text-gray-200'
                     )}>
-                       {tx.type === 'deposit' ? <ArrowDownLeft className="mr-1 h-3 w-3" /> : <ArrowUpRight className="mr-1 h-3 w-3" />}
-                       {tx.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className={cn(
-                    "text-right font-medium",
-                    tx.type === 'deposit' ? 'text-green-600' : 'text-gray-800 dark:text-gray-200'
-                  )}>
-                    {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredTransactions.length === 0 && (
+                      {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
-                    No transactions match the selected filters.
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    No transactions found.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-        </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );
