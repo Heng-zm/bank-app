@@ -3,21 +3,32 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read/write their own account.
+
+    // Allow users to read and update their own account
     match /accounts/{userId} {
-      allow read, update, write: if request.auth != null && request.auth.uid == userId;
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
     }
 
-    // Users can create transactions for themselves.
-    // Users can list transactions if they are querying by their own accountId.
+    // Allow users to list their own transactions and create new transactions for themselves.
     match /transactions/{transactionId} {
-      allow create: if request.auth.uid == request.resource.data.accountId;
-      allow list: if request.auth.uid == request.query.where.accountId.value;
+      allow read, create: if request.auth != null && request.auth.uid == request.resource.data.accountId;
     }
     
-    // Users can read and write their own notifications.
+    // Allow users to list their own transactions using a query.
+    match /transactions/{transaction} {
+      allow list: if request.auth != null && request.query.filters[0].value == request.auth.uid;
+    }
+
+    // Allow users to manage their own notifications
     match /notifications/{notificationId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+       allow read, update: if request.auth != null && request.auth.uid == resource.data.userId;
+       allow create: if request.auth != null;
+    }
+
+    // Allow listing notifications for the logged in user
+    match /notifications/{notification} {
+      allow list: if request.auth != null && request.query.filters[0].value == request.auth.uid;
     }
   }
 }
