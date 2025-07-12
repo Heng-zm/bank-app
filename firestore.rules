@@ -1,4 +1,3 @@
-
 rules_version = '2';
 
 service cloud.firestore {
@@ -8,35 +7,42 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // accounts collection: A user can read/write their own account.
+    // Any signed-in user can query the collection to find other users for transfers.
     match /accounts/{userId} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
       allow list: if isSignedIn();
     }
 
+    // transactions collection: A user can only access their own transactions.
     match /transactions/{transactionId} {
-      // A user can only create a transaction for themselves.
-      allow create: if isSignedIn() && request.resource.data.accountId == request.auth.uid;
+      // Allow reading a single transaction if the user is the owner.
+      allow get: if isSignedIn() && request.auth.uid == resource.data.accountId;
 
-      // A user can read a transaction if they are the owner.
-      allow get: if isSignedIn() && resource.data.accountId == request.auth.uid;
-
-      // A user can query transactions only if the query is scoped to their own accountId.
+      // Allow listing transactions ONLY when the query filters by the user's own ID.
+      // This is the critical rule for allowing the transaction history to load.
       allow list: if isSignedIn() && request.query.where.accountId == request.auth.uid;
+
+      // Allow creating a transaction if the user is setting themselves as the owner.
+      allow create: if isSignedIn() && request.resource.data.accountId == request.auth.uid;
       
-      // Transactions are immutable.
+      // Deny updates and deletes to maintain an immutable ledger.
       allow update, delete: if false;
     }
 
+    // notifications collection: A user can only access their own notifications.
     match /notifications/{notificationId} {
-      // Any authenticated user can create a notification (e.g., for transfers).
-      // Your app logic must ensure the correct userId is set.
+      // Allow reading a single notification if the user is the owner.
+      allow get: if isSignedIn() && request.auth.uid == resource.data.userId;
+
+      // Allow listing notifications ONLY when the query filters by the user's own ID.
+      allow list: if isSignedIn() && request.query.where.userId == request.auth.uid;
+      
+      // Allow creating notifications for other users (e.g., for transfers).
       allow create: if isSignedIn();
       
-      // A user can read, update, or delete a notification if they are the recipient.
-      allow get, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
-      
-      // A user can query notifications only if the query is scoped to their own userId.
-      allow list: if isSignedIn() && request.query.where.userId == request.auth.uid;
+      // Allow updating/deleting one's own notifications (e.g., mark as read).
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.userId;
     }
   }
 }
