@@ -4,58 +4,66 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
   
-    // Anyone can read from this collection.
-    // In a real app, you would want to restrict this.
-    function canReadPublicData() {
-      return true;
-    }
-
-    // A user must be signed-in to do this.
-    function isSignedIn() {
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
       return request.auth != null;
     }
 
-    // A user can only affect their own documents.
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
-    // Rules for the 'accounts' collection.
+    // Rules for the 'accounts' collection
     match /accounts/{userId} {
-      // A user can create their own account document.
-      allow create: if isSignedIn() && isOwner(userId);
-      
-      // A user can read their own account document.
-      // Any signed-in user can query the accounts collection to find a recipient.
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn();
+      // Users can create their own account document
+      allow create: if isAuthenticated() && request.auth.uid == userId;
 
-      // A user can update their own account balance.
-      // This is also used by the transaction logic to update the recipient's balance.
-      allow update: if isSignedIn();
+      // Users can only read their own account document
+      allow get: if isAuthenticated() && request.auth.uid == userId;
+
+      // Users can only update their own account balance
+      // Other fields like holderName should not be changed by the client
+      allow update: if isAuthenticated() && request.auth.uid == userId
+                    && request.resource.data.keys().hasOnly(['balance']);
+                    
+      // Disallow client-side deletion of accounts
+      allow delete: if false;
+
+      // Allow users to list accounts if they are querying by holderName (email)
+      // This is necessary for the "send money" feature to find a recipient
+      allow list: if isAuthenticated();
     }
 
-    // Rules for the 'transactions' collection.
+    // Rules for the 'transactions' collection
     match /transactions/{transactionId} {
-      // Allow read access to transactions if the user is the owner of the account associated with the transaction.
-      // This is checked by querying on 'accountId'.
-      allow read: if isSignedIn() && isOwner(request.query.accountId);
+      // Allow users to create transactions for themselves (withdrawals)
+      // OR for another user (deposits as part of a transfer)
+      allow create: if isAuthenticated();
 
-      // A user can create a transaction document if they are signed in.
-      // The logic in use-account.ts handles the security of who can create what.
-      allow create: if isSignedIn();
+      // Users can only read their own transaction documents
+      // This rule uses a 'get' on the path to check the accountId of the document being read.
+      allow get: if isAuthenticated() && request.auth.uid == get(/databases/$(database)/documents/transactions/$(transactionId)).data.accountId;
+
+      // Users can only list transactions belonging to their own account
+      allow list: if isAuthenticated() && request.auth.uid == request.query.where.accountId;
+
+      // Disallow client-side updates and deletions of transactions
+      allow update, delete: if false;
     }
 
-    // Rules for the 'notifications' collection.
+    // Rules for the 'notifications' collection
     match /notifications/{notificationId} {
-        // Allow read access if the query is filtering by the user's own ID.
-        allow read: if isSignedIn() && isOwner(request.query.userId);
+       // Allow creation of notifications. This will be triggered by server-side logic (transactions) or admin actions.
+      allow create: if isAuthenticated();
 
-        // A user can create a notification if they are signed in.
-        allow create: if isSignedIn();
-        
-        // A user can update their own notifications (e.g., to mark as read).
-        allow update: if isSignedIn() && isOwner(resource.data.userId);
+      // Users can only read their own notification documents
+      allow get: if isAuthenticated() && request.auth.uid == get(/databases/$(database)/documents/notifications/$(notificationId)).data.userId;
+
+      // Users can only list notifications belonging to them
+      allow list: if isAuthenticated() && request.auth.uid == request.query.where.userId;
+
+      // Users can update their own notifications (e.g., to mark them as read)
+      allow update: if isAuthenticated() && request.auth.uid == get(/databases/$(database)/documents/notifications/$(notificationId)).data.userId
+                    && request.resource.data.keys().hasOnly(['isRead']);
+
+      // Disallow client-side deletion of notifications
+      allow delete: if false;
     }
   }
 }
