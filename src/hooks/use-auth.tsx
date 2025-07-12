@@ -20,6 +20,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!auth) {
+        setIsLoading(false);
+        return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setIsLoading(false);
@@ -29,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !auth) return;
 
     const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
 

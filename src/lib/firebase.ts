@@ -11,7 +11,22 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+// Check if all required environment variables are present
+const firebaseConfigValues = Object.values(firebaseConfig);
+const areConfigValuesPresent = firebaseConfigValues.every(value => value);
+
+let app;
+let auth;
+
+if (areConfigValuesPresent) {
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  auth = getAuth(app);
+} else {
+  console.warn("Firebase config is missing. Please check your .env file.");
+  // Provide dummy instances if config is not set
+  app = undefined;
+  auth = undefined;
+}
+
 
 export { app, auth };

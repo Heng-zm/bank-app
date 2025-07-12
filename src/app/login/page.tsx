@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogIn } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -33,6 +35,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,16 +48,25 @@ export default function LoginPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    setError(null);
+
+    if (!auth) {
+        setError("Firebase is not configured. Please check your environment variables.");
+        setIsLoading(false);
+        return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       router.push("/");
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: error.message,
-      });
-      setIsLoading(false);
+       let errorMessage = error.message;
+        if (error.code === 'auth/invalid-credential') {
+            errorMessage = 'Invalid email or password. Please try again.';
+        }
+        setError(errorMessage);
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -68,6 +81,13 @@ export default function LoginPage() {
           <CardDescription>Log in to access your FinSim account.</CardDescription>
         </CardHeader>
         <CardContent>
+           {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Login Failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField

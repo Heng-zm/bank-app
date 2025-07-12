@@ -22,7 +22,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, AlertCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -33,6 +35,7 @@ export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,6 +47,14 @@ export default function SignupPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    setError(null);
+
+    if (!auth) {
+        setError("Firebase is not configured. Please check your environment variables.");
+        setIsLoading(false);
+        return;
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       toast({
@@ -52,12 +63,9 @@ export default function SignupPage() {
       });
       router.push("/login");
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Signup Failed",
-        description: error.message,
-      });
-      setIsLoading(false);
+      setError(error.message);
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -72,6 +80,13 @@ export default function SignupPage() {
           <CardDescription>Join FinSim today to start managing your finances.</CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Signup Failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField

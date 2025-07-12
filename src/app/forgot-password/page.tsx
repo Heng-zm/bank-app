@@ -20,17 +20,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, KeyRound } from "lucide-react";
+import { Loader2, KeyRound, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
 });
 
 export default function ForgotPasswordPage() {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,19 +43,21 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    if (!auth) {
+        setError("Firebase is not configured. Please check your environment variables.");
+        setIsLoading(false);
+        return;
+    }
+
     try {
       await sendPasswordResetEmail(auth, values.email);
       setIsSent(true);
-      toast({
-        title: "Password Reset Email Sent",
-        description: "Please check your inbox for instructions to reset your password.",
-      });
+      setSuccessMessage("If an account exists for this email, a password reset link has been sent.");
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
+      setError(error.message);
     } finally {
         setIsLoading(false);
     }
@@ -69,12 +73,27 @@ export default function ForgotPasswordPage() {
           </CardTitle>
           <CardDescription>
             {isSent 
-              ? "A link to reset your password has been sent to your email."
+              ? "Follow the instructions sent to your email to reset your password."
               : "Enter your email to receive a password reset link."
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
+           {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+           {successMessage && !error &&(
+            <Alert className="mb-4 border-green-500 text-green-700">
+               <AlertCircle className="h-4 w-4 text-green-700" />
+              <AlertTitle>Email Sent</AlertTitle>
+              <AlertDescription>{successMessage}</AlertDescription>
+            </Alert>
+          )}
+
           {!isSent ? (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -92,16 +111,11 @@ export default function ForgotPasswordPage() {
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="animate-spin" />}
-                  Send Reset Link
+                  {isLoading ? <Loader2 className="animate-spin" /> : "Send Reset Link" }
                 </Button>
               </form>
             </Form>
-          ) : (
-             <Button onClick={() => (window.location.href = '/login')} className="w-full">
-                Back to Login
-            </Button>
-          )}
+          ) : null}
            <div className="mt-4 text-center text-sm">
             <Link href="/login" className="underline">
                 Back to Login
