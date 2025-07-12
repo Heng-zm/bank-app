@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -37,7 +38,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
-      amount: undefined,
+      amount: "" as any,
     },
   });
 
