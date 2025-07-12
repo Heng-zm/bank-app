@@ -47,12 +47,20 @@ export default function MyQrPage() {
   
   const handleShare = async () => {
     if (navigator.share) {
-      navigator.share({
-        title: 'FinSim Payment Request',
-        text: `Here is my payment QR code to receive ${Number(form.getValues('amount')).toFixed(2)}.`,
-        url: window.location.href,
-      })
-      .catch((error) => console.error('Error sharing:', error));
+      try {
+        await navigator.share({
+          title: 'FinSim Payment Request',
+          text: `Here is my payment QR code to receive ${Number(form.getValues('amount')).toFixed(2)}.`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+        toast({
+            variant: "destructive",
+            title: "Share Failed",
+            description: "Could not share the QR code. Permission may have been denied."
+        });
+      }
     } else {
         toast({ title: "Share Not Supported", description: "Your browser does not support the Web Share API."})
     }
