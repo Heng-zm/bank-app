@@ -28,6 +28,6 @@ export const ai = genkit({
     googleAI({
       apiVersion: ['v1beta'],
     }),
-    prettyPrinter(),
+    prettyPrinter,
   ],
 });
