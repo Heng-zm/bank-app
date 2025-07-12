@@ -21,6 +21,9 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useState, useMemo } from 'react';
@@ -142,6 +145,10 @@ export default function AuthedLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col">
+                 <SheetHeader className="sr-only">
+                    <SheetTitle>Navigation Menu</SheetTitle>
+                    <SheetDescription>Main navigation links for the application.</SheetDescription>
+                 </SheetHeader>
                  <div className="flex h-14 items-center border-b mb-4">
                     <Link href="/" className="flex items-center gap-2 font-semibold text-lg">
                     <Landmark className="h-8 w-8 text-primary" />
