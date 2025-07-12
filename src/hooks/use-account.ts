@@ -32,7 +32,7 @@ import { auth } from "@/lib/firebase";
 
 const LOW_BALANCE_THRESHOLD = 100;
 
-async function generateUniqueAccountNumber(db: any): Promise<string> {
+export async function generateUniqueAccountNumber(db: any): Promise<string> {
     let accountNumber;
     let isUnique = false;
     while (!isUnique) {
@@ -86,13 +86,16 @@ export function useAccount(userId?: string) {
         }
         setAccount(data);
       } else {
+        // Fallback: If account doesn't exist (e.g., failed during signup), create one.
+        // This is now a secondary measure, as account creation should happen at signup.
         const user = auth?.currentUser;
+        console.log("Account not found for user, creating a fallback account.");
         const newAccountNumber = await generateUniqueAccountNumber(db);
         const newAccount: Account = {
             id: userId,
             holderName: user?.email || "New User",
             accountNumber: newAccountNumber,
-            balance: 5432.1,
+            balance: 5432.1, // Default fallback balance
             notificationPreferences: { deposits: true, alerts: true, info: true }
         };
         await setDoc(accountRef, newAccount);

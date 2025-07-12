@@ -8,7 +8,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+import { generateUniqueAccountNumber } from "@/hooks/use-account";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +31,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  initialBalance: z.coerce.number().min(0, { message: "Initial balance cannot be negative." }),
 });
 
 export default function SignupPage() {
@@ -42,6 +45,7 @@ export default function SignupPage() {
     defaultValues: {
       email: "",
       password: "",
+      initialBalance: 1000,
     },
   });
 
@@ -49,21 +53,38 @@ export default function SignupPage() {
     setIsLoading(true);
     setError(null);
 
-    if (!auth) {
+    if (!auth || !db) {
         setError("Firebase is not configured. Please check your environment variables.");
         setIsLoading(false);
         return;
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+      
+      // Create the account document in Firestore
+      const newAccountNumber = await generateUniqueAccountNumber(db);
+      const accountData = {
+        id: user.uid,
+        holderName: user.email || "New User",
+        accountNumber: newAccountNumber,
+        balance: values.initialBalance,
+        notificationPreferences: { deposits: true, alerts: true, info: true }
+      };
+      await setDoc(doc(db, "accounts", user.uid), accountData);
+
       toast({
         title: "Account Created!",
         description: "You have been successfully signed up. Please log in.",
       });
       router.push("/login");
     } catch (error: any) {
-      setError(error.message);
+      let errorMessage = error.message;
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email address is already in use. Please try another one.';
+      }
+      setError(errorMessage);
     } finally {
         setIsLoading(false);
     }
@@ -110,6 +131,19 @@ export default function SignupPage() {
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="initialBalance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Initial Balance</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="1000.00" {...field} step="0.01" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
