@@ -103,7 +103,7 @@ export default function DashboardPage() {
        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <div className="grid auto-rows-max items-start gap-4 lg:col-span-4 lg:gap-8">
             <AccountCard account={account} />
-             <Card>
+             <Card className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <PieChart className="h-5 w-5"/>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
                 </CardContent>
             </Card>
             <TransactionForm onSubmit={handleAddTransaction} isProcessing={isProcessing} />
-            <div className="p-4 border rounded-xl bg-card text-card-foreground shadow-sm space-y-2">
+            <div className="p-4 border rounded-xl bg-card text-card-foreground shadow-sm space-y-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <h3 className="font-semibold text-sm">Admin Action</h3>
               <p className="text-xs text-muted-foreground">Simulate a new feature announcement for the current user.</p>
               <Button onClick={handleAnnounceFeature} size="sm" className="w-full" variant="secondary">

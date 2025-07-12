@@ -67,7 +67,7 @@ export function TransactionHistory({
   const scrollAreaHeight = showFilters ? "h-[65vh]" : "h-auto";
 
   return (
-    <Card className="shadow-lg h-full">
+    <Card className="shadow-lg h-full animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
       <CardHeader className="flex flex-col md:flex-row md:items-center">
         <div className="grid gap-2 flex-1">
             <CardTitle>{title}</CardTitle>
@@ -150,7 +150,7 @@ export function TransactionHistory({
                               <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-primary hover:underline mt-1">
                                   <Receipt className="h-3 w-3" />
                                   View Receipt
-                              </Link>
+                              </Link>                          
                           )}
                       </div>
                     </TableCell>
@@ -159,7 +159,7 @@ export function TransactionHistory({
                     </TableCell>
                     <TableCell>
                       <Badge variant={tx.type === 'deposit' ? 'secondary' : 'outline'} className={cn(
-                        tx.type === 'deposit' && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200"
+                        tx.type === 'deposit' && "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border-emerald-200"
                       )}>
                         {tx.type === 'deposit' ? <ArrowDownLeft className="mr-1 h-3 w-3" /> : <ArrowUpRight className="mr-1 h-3 w-3" />}
                         {tx.type}
@@ -167,7 +167,7 @@ export function TransactionHistory({
                     </TableCell>
                     <TableCell className={cn(
                       "text-right font-medium",
-                      tx.type === 'deposit' ? 'text-green-600' : 'text-gray-800 dark:text-gray-200'
+                      tx.type === 'deposit' ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-800 dark:text-gray-200'
                     )}>
                       {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
                     </TableCell>

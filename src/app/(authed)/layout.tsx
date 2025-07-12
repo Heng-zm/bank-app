@@ -62,7 +62,7 @@ function NavLink({
         isMobile && 'text-lg'
       )}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-5 w-5" />
       {label}
     </Link>
   );
@@ -90,12 +90,14 @@ export default function AuthedLayout({
   
   if (isAuthLoading || isAccountLoading) {
     return (
-      <div className="flex min-h-screen w-full">
-        <div className="hidden md:flex md:w-[240px] flex-col gap-4 border-r bg-muted/40 p-4">
+      <div className="flex min-h-screen w-full bg-muted/40">
+        <div className="hidden md:flex md:w-[240px] flex-col gap-4 border-r bg-background p-4">
             <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+            <div className="flex-1 space-y-2 mt-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
         </div>
         <div className="flex-1 p-6">
             <Skeleton className="h-full w-full" />
@@ -105,9 +107,9 @@ export default function AuthedLayout({
   }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr] bg-muted/40">
       {/* Desktop Sidebar */}
-      <aside className="hidden border-r bg-card md:block">
+      <aside className="hidden border-r bg-background md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
@@ -115,7 +117,7 @@ export default function AuthedLayout({
               <span className="text-xl">FinSim</span>
             </Link>
           </div>
-          <nav className="flex-1 grid items-start px-2 text-sm font-medium lg:px-4">
+          <nav className="flex-1 grid items-start px-2 text-sm font-medium lg:px-4 py-4">
             {navItems.map((item) => (
               <NavLink key={item.href} {...item} />
             ))}
@@ -131,7 +133,7 @@ export default function AuthedLayout({
       
       <div className="flex flex-col">
         {/* Mobile Header */}
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6 md:hidden">
+        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 md:hidden sticky top-0 z-30">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="shrink-0">
@@ -166,12 +168,12 @@ export default function AuthedLayout({
         </header>
         
         {/* Desktop Header */}
-        <header className="hidden md:flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6 justify-end">
+        <header className="hidden md:flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 justify-end sticky top-0 z-30">
             <div className="font-semibold">{user?.email}</div>
             <NotificationBell notifications={notifications} onOpen={markNotificationsAsRead} />
         </header>
 
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-fade-in-up">
            {children}
         </main>
       </div>

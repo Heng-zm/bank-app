@@ -59,7 +59,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     defaultValues: {
       recipient: "",
       description: "",
-      amount: "" as any,
+      amount: '' as any,
       receiptFile: undefined,
     },
   });
@@ -129,13 +129,13 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
 
 
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
+    <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <ArrowRightLeft className="h-5 w-5 text-primary"/>
             New Transaction
         </CardTitle>
-        <CardDescription>Send a payment or make a transfer.</CardDescription>
+        <CardDescription>Send money using a 9-digit account number.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -206,7 +206,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
                        <Input 
                          type="file" 
                          accept="image/*"
-                         className="pl-10 pt-2 file:text-foreground"
+                         className="pl-10 pt-[5px] file:text-foreground"
                          onChange={(e) => field.onChange(e.target.files)}
                        />
                     </div>

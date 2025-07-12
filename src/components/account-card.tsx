@@ -21,7 +21,7 @@ export function AccountCard({ account }: AccountCardProps) {
   }
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg animate-fade-in-up">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
             <div className="grid gap-1">
@@ -29,7 +29,7 @@ export function AccountCard({ account }: AccountCardProps) {
                 <User className="h-4 w-4" />
                 <span>{account.holderName}</span>
                 </CardDescription>
-                <CardTitle className="text-4xl">{formattedBalance}</CardTitle>
+                <CardTitle className="text-4xl font-bold">{formattedBalance}</CardTitle>
             </div>
             <div className="text-right">
                 <div className="text-xs text-muted-foreground">Account Number</div>
