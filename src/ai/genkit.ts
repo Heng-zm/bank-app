@@ -1,6 +1,6 @@
 
 import {genkit, Plugin, Task} from 'genkit';
-import {googleAI, GoogleAIModel} from 'genkit/googleai';
+import { googleAI } from '@genkit-ai/googleai';
 
 /**
  * A Genkit plugin that pretty-prints any task to the console.
