@@ -17,6 +17,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { analyzeTransaction, AnalyzeTransactionOutput } from '@/ai/flows/analyze-transaction-flow';
 
 
 interface QrCodeData {
@@ -32,7 +43,7 @@ export default function QrPayPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { handleAddTransaction, isProcessing } = useAccount(user?.uid);
+  const { handleAddTransaction, isProcessing, transactions } = useAccount(user?.uid);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,6 +53,10 @@ export default function QrPayPage() {
   const [error, setError] = useState<string | null>(null);
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
   const [finalAmount, setFinalAmount] = useState<number | null>(null);
+
+  const [riskAnalysis, setRiskAnalysis] = useState<AnalyzeTransactionOutput | null>(null);
+  const [showRiskDialog, setShowRiskDialog] = useState(false);
+
 
   const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
     resolver: zodResolver(paymentFormSchema),
@@ -124,9 +139,8 @@ export default function QrPayPage() {
     }
   }, [hasCameraPermission, tick]);
 
-  const handleConfirmPayment = async () => {
+  const proceedWithPayment = async () => {
     if (!scannedData || !finalAmount || finalAmount <= 0) return;
-
     try {
         await handleAddTransaction({
             description: `Payment to ${scannedData.recipient}`,
@@ -141,6 +155,36 @@ export default function QrPayPage() {
         });
     } catch (e: any) {
         setError(e.message || "An unexpected error occurred during payment.");
+    }
+  }
+
+  const handleConfirmPayment = async () => {
+    if (!scannedData || !finalAmount || finalAmount <= 0) return;
+
+    try {
+      const analysis = await analyzeTransaction({
+        amount: finalAmount,
+        recipient: scannedData.recipient,
+        recentTransactions: JSON.stringify(transactions.slice(0, 10)),
+      });
+
+      setRiskAnalysis(analysis);
+
+      if (analysis.risk === 'medium' || analysis.risk === 'high') {
+        setShowRiskDialog(true);
+      } else {
+        await proceedWithPayment();
+      }
+
+    } catch (e: any) {
+      console.error("Fraud analysis failed:", e);
+      // Fallback to proceeding with payment if AI fails, but show a toast
+      toast({
+        variant: "destructive",
+        title: "Could not analyze transaction",
+        description: "Proceeding with payment, but please be cautious.",
+      });
+      await proceedWithPayment();
     }
   };
   
@@ -173,6 +217,26 @@ export default function QrPayPage() {
 
   return (
     <div className="flex items-center justify-center h-full animate-fade-in-up">
+       <AlertDialog open={showRiskDialog} onOpenChange={setShowRiskDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="text-destructive"/>
+                Security Check
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {riskAnalysis?.reason || "This transaction appears unusual. Please review before proceeding."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={proceedWithPayment}>
+                Confirm Payment
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
