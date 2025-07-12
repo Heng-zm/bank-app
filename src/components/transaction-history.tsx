@@ -49,7 +49,6 @@ export function TransactionHistory({
       
       const isDateInRange = !dateRange || (
         (!dateRange.from || txDate >= dateRange.from) &&
-        // Add 24h to the 'to' date to include the whole day
         (!dateRange.to || txDate < new Date(dateRange.to.getTime() + 24 * 60 * 60 * 1000))
       );
       
@@ -129,60 +128,108 @@ export function TransactionHistory({
          )}
       </CardHeader>
       <CardContent>
-        <ScrollArea className={scrollAreaHeight}>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Description</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map((tx) => (
-                  <TableRow key={tx.id}>
-                    <TableCell>
-                      <div className="flex flex-col">
-                          <span className="font-medium">{tx.description}</span>
-                          {tx.receiptUrl && (
-                              <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-primary hover:underline mt-1">
-                                  <Receipt className="h-3 w-3" />
-                                  View Receipt
-                              </Link>                          
-                          )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={tx.type === 'deposit' ? 'secondary' : 'outline'} className={cn(
-                        tx.type === 'deposit' && "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border-emerald-200"
-                      )}>
-                        {tx.type === 'deposit' ? <ArrowDownLeft className="mr-1 h-3 w-3" /> : <ArrowUpRight className="mr-1 h-3 w-3" />}
-                        {tx.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className={cn(
-                      "text-right font-medium",
-                      tx.type === 'deposit' ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-800 dark:text-gray-200'
-                    )}>
-                      {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+        {/* Mobile View - Card List */}
+        <div className="md:hidden">
+            {filteredTransactions.length > 0 ? (
+                 <ScrollArea className={scrollAreaHeight}>
+                    <div className="space-y-4">
+                    {filteredTransactions.map((tx) => (
+                        <div key={tx.id} className="p-4 border rounded-lg flex justify-between items-start">
+                           <div className="flex items-center gap-4">
+                                <div className={cn(
+                                    "flex items-center justify-center rounded-full h-10 w-10",
+                                     tx.type === 'deposit' ? 'bg-emerald-100' : 'bg-gray-100'
+                                )}>
+                                    {tx.type === 'deposit' ? 
+                                        <ArrowDownLeft className="h-5 w-5 text-emerald-600" /> : 
+                                        <ArrowUpRight className="h-5 w-5 text-gray-600" />
+                                    }
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="font-medium">{tx.description}</p>
+                                    <p className="text-sm text-muted-foreground">{tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}</p>
+                                    {tx.receiptUrl && (
+                                        <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary hover:underline">
+                                            <Receipt className="h-3 w-3" />
+                                            View Receipt
+                                        </Link>                          
+                                    )}
+                                </div>
+                           </div>
+                           <div className={cn(
+                                "font-semibold",
+                                tx.type === 'deposit' ? 'text-emerald-600' : 'text-gray-800'
+                           )}>
+                             {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
+                           </div>
+                        </div>
+                    ))}
+                    </div>
+                </ScrollArea>
+            ) : (
+                 <div className="text-center h-24 flex items-center justify-center">
                     No transactions found.
-                  </TableCell>
+                </div>
+            )}
+        </div>
+        
+        {/* Desktop View - Table */}
+        <div className="hidden md:block">
+            <ScrollArea className={scrollAreaHeight}>
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
+                </TableHeader>
+                <TableBody>
+                {filteredTransactions.length > 0 ? (
+                    filteredTransactions.map((tx) => (
+                    <TableRow key={tx.id}>
+                        <TableCell>
+                        <div className="flex flex-col">
+                            <span className="font-medium">{tx.description}</span>
+                            {tx.receiptUrl && (
+                                <Link href={tx.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-primary hover:underline mt-1">
+                                    <Receipt className="h-3 w-3" />
+                                    View Receipt
+                                </Link>                          
+                            )}
+                        </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                        {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}
+                        </TableCell>
+                        <TableCell>
+                        <Badge variant={tx.type === 'deposit' ? 'secondary' : 'outline'} className={cn(
+                            tx.type === 'deposit' && "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border-emerald-200"
+                        )}>
+                            {tx.type === 'deposit' ? <ArrowDownLeft className="mr-1 h-3 w-3" /> : <ArrowUpRight className="mr-1 h-3 w-3" />}
+                            {tx.type}
+                        </Badge>
+                        </TableCell>
+                        <TableCell className={cn(
+                        "text-right font-medium",
+                        tx.type === 'deposit' ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-800 dark:text-gray-200'
+                        )}>
+                        {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </TableCell>
+                    </TableRow>
+                    ))
+                ) : (
+                    <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                        No transactions found.
+                    </TableCell>
+                    </TableRow>
+                )}
+                </TableBody>
+            </Table>
+            </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
