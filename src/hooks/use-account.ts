@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   getFirestore, 
   doc, 
@@ -59,9 +59,16 @@ export function useAccount(userId?: string) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const notificationsRef = useRef<Notification[]>([]);
+  const isInitialLoad = useRef(true);
+
 
   const db = getFirestore();
   const storage = getStorage();
+
+  useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
 
   useEffect(() => {
     if (!userId || !db) {
@@ -95,7 +102,7 @@ export function useAccount(userId?: string) {
             id: userId,
             holderName: user?.email || "New User",
             accountNumber: newAccountNumber,
-            balance: 5432.1, // Default fallback balance
+            balance: 1000,
             notificationPreferences: { deposits: true, alerts: true, info: true }
         };
         await setDoc(accountRef, newAccount);
@@ -146,6 +153,25 @@ export function useAccount(userId?: string) {
         } as Notification);
       });
       setNotifications(notifs);
+
+      if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        return;
+      }
+      
+      const previousNotifications = notificationsRef.current;
+      const newNotifications = notifs.filter(n => !previousNotifications.some(pn => pn.id === n.id));
+
+      if (newNotifications.length > 0) {
+        const latestNotification = newNotifications[0]; // Assuming newest is first
+        if (latestNotification.type !== 'info') { // Don't toast admin announcements
+             toast({
+                title: latestNotification.type.charAt(0).toUpperCase() + latestNotification.type.slice(1),
+                description: latestNotification.message
+            });
+        }
+      }
+
     }, (error) => {
       console.error("Error listening to notifications:", error);
       toast({ variant: "destructive", title: "Error", description: "Could not load notifications."});
@@ -343,3 +369,5 @@ export function useAccount(userId?: string) {
     updateAccountDetails
   };
 }
+
+    
