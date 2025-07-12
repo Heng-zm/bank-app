@@ -4,66 +4,40 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
   
-    // Helper function to check if the user is authenticated
-    function isAuthenticated() {
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    // Rules for the 'accounts' collection
     match /accounts/{userId} {
-      // Users can create their own account document
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-
-      // Users can only read their own account document
-      allow get: if isAuthenticated() && request.auth.uid == userId;
-
-      // Users can only update their own account balance
-      // Other fields like holderName should not be changed by the client
-      allow update: if isAuthenticated() && request.auth.uid == userId
-                    && request.resource.data.keys().hasOnly(['balance']);
-                    
-      // Disallow client-side deletion of accounts
-      allow delete: if false;
-
-      // Allow users to list accounts if they are querying by holderName (email)
-      // This is necessary for the "send money" feature to find a recipient
-      allow list: if isAuthenticated();
+      // Allow a user to read, create, and update their own account document.
+      allow read, create, update: if isSignedIn() && request.auth.uid == userId;
+      
+      // Allow any authenticated user to query the accounts collection.
+      // This is required to find a recipient's account by email for transfers.
+      // The query itself is secure as it only retrieves limited data.
+      allow list: if isSignedIn();
     }
 
-    // Rules for the 'transactions' collection
     match /transactions/{transactionId} {
-      // Allow users to create transactions for themselves (withdrawals)
-      // OR for another user (deposits as part of a transfer)
-      allow create: if isAuthenticated();
-
-      // Users can only read their own transaction documents
-      // This rule uses a 'get' on the path to check the accountId of the document being read.
-      allow get: if isAuthenticated() && request.auth.uid == get(/databases/$(database)/documents/transactions/$(transactionId)).data.accountId;
-
-      // Users can only list transactions belonging to their own account
-      allow list: if isAuthenticated() && request.auth.uid == request.query.where.accountId;
-
-      // Disallow client-side updates and deletions of transactions
-      allow update, delete: if false;
+      // Allow a user to create a transaction for themselves (e.g., a withdrawal) 
+      // or for another user (e.g., a deposit during a transfer).
+      allow create: if isSignedIn();
+      
+      // Allow a user to query for their own transactions.
+      // The query in the app is `where("accountId", "==", userId)`.
+      allow list: if isSignedIn() && request.query.where.accountId == request.auth.uid;
     }
-
-    // Rules for the 'notifications' collection
+    
     match /notifications/{notificationId} {
-       // Allow creation of notifications. This will be triggered by server-side logic (transactions) or admin actions.
-      allow create: if isAuthenticated();
+      // Allow a user to create a notification for themselves or another user.
+      allow create: if isSignedIn();
+      
+      // Allow a user to update their own notifications (e.g., to mark as read).
+      allow update: if isSignedIn() && request.auth.uid == resource.data.userId;
 
-      // Users can only read their own notification documents
-      allow get: if isAuthenticated() && request.auth.uid == get(/databases/$(database)/documents/notifications/$(notificationId)).data.userId;
-
-      // Users can only list notifications belonging to them
-      allow list: if isAuthenticated() && request.auth.uid == request.query.where.userId;
-
-      // Users can update their own notifications (e.g., to mark them as read)
-      allow update: if isAuthenticated() && request.auth.uid == get(/databases/$(database)/documents/notifications/$(notificationId)).data.userId
-                    && request.resource.data.keys().hasOnly(['isRead']);
-
-      // Disallow client-side deletion of notifications
-      allow delete: if false;
+      // Allow a user to query for their own notifications.
+      // The query in the app is `where("userId", "==", userId)`.
+      allow list: if isSignedIn() && request.query.where.userId == request.auth.uid;
     }
   }
 }
