@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///home/user/studio/src/app/page.tsx"],"sourcesContent":["\n\"use client\";\n\nimport { useRouter } from \"next/navigation\";\nimport { useEffect } from 'react';\n\n// This is a temporary redirect component.\n// The main page is now at /dashboard, but we'll keep this\n// to redirect any users who land on the root URL.\nexport default function HomeRedirect() {\n  const router = useRouter();\n\n  useEffect(() => {\n    router.replace('/dashboard');\n  }, [router]);\n\n  // Render a loading state or nothing while redirecting\n  return null; \n}\n"],"names":[],"mappings":";;;AAGA;AACA;;AAHA;;;AAQe,SAAS;;IACtB,MAAM,SAAS,CAAA,GAAA,qIAAA,CAAA,YAAS,AAAD;IAEvB,CAAA,GAAA,6JAAA,CAAA,YAAS,AAAD;kCAAE;YACR,OAAO,OAAO,CAAC;QACjB;iCAAG;QAAC;KAAO;IAEX,sDAAsD;IACtD,OAAO;AACT;GATwB;;QACP,qIAAA,CAAA,YAAS;;;KADF","debugId":null}}]
+}

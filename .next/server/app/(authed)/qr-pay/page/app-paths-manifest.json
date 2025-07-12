@@ -1,0 +1,3 @@
+{
+  "/(authed)/qr-pay/page": "app/(authed)/qr-pay/page.js"
+}
