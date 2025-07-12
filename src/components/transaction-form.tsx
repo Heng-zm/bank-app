@@ -54,7 +54,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     defaultValues: {
       recipient: "",
       description: "",
-      amount: undefined,
+      amount: "" as any,
       receiptFile: undefined,
     },
   });
