@@ -24,7 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import type { TransactionFormData } from "@/lib/types";
 import { useDebounce } from "@/hooks/use-debounce";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const formSchema = z.object({
@@ -37,7 +37,7 @@ const formSchema = z.object({
   }),
   receiptFile: z
     .any()
-    .refine((file) => !file || (file[0] && file[0].size <= MAX_FILE_SIZE), `Max file size is 5MB.`)
+    .refine((file) => !file || (file[0] && file[0].size <= MAX_FILE_SIZE), `Max file size is 10MB.`)
     .refine(
       (file) => !file || (file[0] && ACCEPTED_IMAGE_TYPES.includes(file[0].type)),
       ".jpg, .jpeg, .png and .webp files are accepted."
