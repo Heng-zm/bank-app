@@ -39,12 +39,38 @@ const initialTransactions: Transaction[] = [
   },
 ];
 
-export function useAccount() {
+export function useAccount(userId?: string) {
   const { toast } = useToast();
-  const [account, setAccount] = useLocalStorage<Account>("finsim-account", initialAccount);
-  const [transactions, setTransactions] = useLocalStorage<Transaction[]>("finsim-transactions", initialTransactions);
+  const storageKeyAccount = userId ? `finsim-account-${userId}` : 'finsim-account-guest';
+  const storageKeyTransactions = userId ? `finsim-transactions-${userId}` : 'finsim-transactions-guest';
+
+  const [account, setAccount] = useLocalStorage<Account>(storageKeyAccount, {
+      ...initialAccount,
+      id: userId || 'acc_guest'
+  });
+  const [transactions, setTransactions] = useLocalStorage<Transaction[]>(storageKeyTransactions, initialTransactions.map(tx => ({...tx, accountId: userId || 'acc_guest' })));
   const [isProcessing, setIsProcessing] = useState(false);
   
+  useEffect(() => {
+    if (userId) {
+        // This effect ensures that when a user logs in, their data is loaded.
+        // It's a simple way to handle user-specific data with local storage.
+        const userAccount = localStorage.getItem(`finsim-account-${userId}`);
+        if (!userAccount) {
+            setAccount({
+                ...initialAccount,
+                id: userId,
+                holderName: "New User"
+            });
+        }
+        const userTransactions = localStorage.getItem(`finsim-transactions-${userId}`);
+        if (!userTransactions) {
+            setTransactions(initialTransactions.map(tx => ({...tx, accountId: userId })));
+        }
+    }
+  }, [userId, setAccount, setTransactions]);
+
+
   const handleAddTransaction = async (data: TransactionFormData) => {
     setIsProcessing(true);
 

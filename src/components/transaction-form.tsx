@@ -38,7 +38,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
-      amount: "" as any,
+      amount: 0,
     },
   });
 
