@@ -59,7 +59,7 @@ export function NotificationBell({ notifications, onOpen }: NotificationBellProp
                        <div className="flex-1 space-y-1">
                             <p className="text-sm">{n.message}</p>
                             <p className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(n.timestamp), { addSuffix: true })}
+                                {n.timestamp ? formatDistanceToNow(new Date(n.timestamp), { addSuffix: true }) : 'just now'}
                             </p>
                        </div>
                     </div>
