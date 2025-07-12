@@ -8,13 +8,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import QRCode from 'qrcode.react';
 import { useAuth } from '@/hooks/use-auth';
+import { useAccount } from '@/hooks/use-account';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Share2 } from 'lucide-react';
+import { Share2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
   amount: z.coerce.number().min(0, { message: "Amount cannot be negative." }).optional(),
@@ -22,7 +24,8 @@ const formSchema = z.object({
 
 export default function MyQrPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const { account, isLoading: isAccountLoading } = useAccount(user?.uid);
   const { toast } = useToast();
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
 
@@ -34,12 +37,12 @@ export default function MyQrPage() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (!user) {
-        toast({ variant: 'destructive', title: "Authentication Error", description: "You must be logged in to generate a QR code." });
+    if (!user || !account?.accountNumber) {
+        toast({ variant: 'destructive', title: "Authentication Error", description: "Could not generate QR code. Account details are missing." });
         return;
     }
     const data: {recipient: string; amount?: number} = {
-      recipient: user.email || user.uid, // Use email as recipient, fallback to UID
+      recipient: account.accountNumber,
     };
     if (values.amount && values.amount > 0) {
         data.amount = values.amount;
@@ -74,6 +77,24 @@ export default function MyQrPage() {
   }
 
   const generatedAmount = form.getValues('amount');
+
+  if (isAuthLoading || isAccountLoading) {
+    return (
+        <div className="flex items-center justify-center h-full">
+            <Card className="w-full max-w-md mx-auto">
+                <CardHeader>
+                    <Skeleton className="h-8 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-10 w-full mb-4" />
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+        </div>
+    )
+  }
+
 
   return (
     <div className="flex items-center justify-center h-full">
@@ -115,9 +136,9 @@ export default function MyQrPage() {
                         <QRCode value={qrCodeData} size={256} />
                     </div>
                     {generatedAmount && generatedAmount > 0 ? (
-                        <p className="text-center">Scan this code to pay <span className='font-bold'>${Number(generatedAmount).toFixed(2)}</span> to <span className="font-mono text-sm">{user?.email}</span></p>
+                        <p className="text-center">Scan this code to pay <span className='font-bold'>${Number(generatedAmount).toFixed(2)}</span> to <span className="font-mono text-sm">{account?.holderName}</span></p>
                     ) : (
-                        <p className="text-center">Scan this code to pay <span className="font-mono text-sm">{user?.email}</span></p>
+                        <p className="text-center">Scan this code to pay <span className="font-mono text-sm">{account?.holderName}</span></p>
                     )}
                     <div className="flex w-full gap-2">
                         <Button variant="outline" onClick={() => { setQrCodeData(null); form.reset(); }} className="flex-1">
