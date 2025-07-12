@@ -11,7 +11,6 @@ export interface Transaction {
   amount: number;
   description: string;
   type: 'deposit' | 'withdrawal';
-  isFraudulent?: boolean;
 }
 
 export interface TransactionFormData {

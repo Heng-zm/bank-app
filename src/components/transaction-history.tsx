@@ -10,10 +10,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from 'date-fns';
-import { History, AlertCircle } from "lucide-react";
+import { History } from "lucide-react";
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -44,16 +43,10 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
             </TableHeader>
             <TableBody>
               {transactions.map((tx) => (
-                <TableRow key={tx.id} className={cn(tx.isFraudulent && "bg-destructive/10 hover:bg-destructive/20")}>
+                <TableRow key={tx.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {tx.description}
-                      {tx.isFraudulent && (
-                        <Badge variant="destructive" className="flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" />
-                            Flagged
-                        </Badge>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">

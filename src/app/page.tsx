@@ -8,14 +8,12 @@ import { useAccount } from "@/hooks/use-account";
 import { AccountCard } from "@/components/account-card";
 import { TransactionForm } from "@/components/transaction-form";
 import { TransactionHistory } from "@/components/transaction-history";
-import { FraudAlert } from "@/components/fraud-alert";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   const { 
     account, 
     transactions, 
-    fraudExplanation, 
     isProcessing, 
     handleAddTransaction 
   } = useAccount();
@@ -61,7 +59,6 @@ export default function Home() {
           <TransactionForm onSubmit={handleAddTransaction} isProcessing={isProcessing}/>
         </div>
         <div className="lg:col-span-2">
-          {fraudExplanation && <FraudAlert explanation={fraudExplanation} />}
           <TransactionHistory transactions={transactions} />
         </div>
       </div>
