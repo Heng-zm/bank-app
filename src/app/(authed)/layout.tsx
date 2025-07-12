@@ -51,18 +51,17 @@ function NavLink({
   const isActive = pathname === href;
 
   return (
-    <Link href={href} legacyBehavior passHref>
-      <a
-        onClick={onClose}
-        className={cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-          isActive && 'bg-primary/10 text-primary font-semibold',
-          isMobile && 'text-lg'
-        )}
-      >
-        <Icon className="h-4 w-4" />
-        {label}
-      </a>
+    <Link
+      href={href}
+      onClick={onClose}
+      className={cn(
+        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+        isActive && 'bg-primary/10 text-primary font-semibold',
+        isMobile && 'text-lg'
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      {label}
     </Link>
   );
 }
