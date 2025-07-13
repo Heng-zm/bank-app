@@ -98,22 +98,10 @@ body.font-khmer {
 }
 
 @layer components {
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(1, 1fr);
-        gap: 1.5rem;
-    }
-
-    @media (min-width: 768px) {
-        .dashboard-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+    .action-card {
+        @apply block p-5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
     }
     
-    .dashboard-card-link {
-        @apply hover:scale-[1.02] transition-transform duration-200;
-    }
-
     .keypad-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);

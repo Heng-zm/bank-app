@@ -48,11 +48,11 @@ export default function DashboardPage() {
        <div className="space-y-6">
           <Skeleton className="h-8 w-1/2" />
           <Skeleton className="h-[125px] w-full" />
-          <div className="dashboard-grid">
-              <Skeleton className="h-[150px] w-full" />
-              <Skeleton className="h-[150px] w-full" />
-              <Skeleton className="h-[150px] w-full" />
-              <Skeleton className="h-[150px] w-full" />
+          <div className="space-y-4">
+              <Skeleton className="h-[90px] w-full" />
+              <Skeleton className="h-[90px] w-full" />
+              <Skeleton className="h-[90px] w-full" />
+              <Skeleton className="h-[90px] w-full" />
           </div>
           <Skeleton className="h-[300px] w-full" />
        </div>
@@ -66,7 +66,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">{t('dashboard.welcomeMessage')}</p>
         </div>
 
-        <Card className="bg-primary/90 text-primary-foreground shadow-lg">
+        <Card className="bg-primary text-primary-foreground shadow-lg">
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
@@ -91,58 +91,22 @@ export default function DashboardPage() {
             </CardContent>
         </Card>
 
-        <div className="dashboard-grid">
-             <Link href="/transfer" className="dashboard-card-link">
-                <Card className="bg-blue-500/10 border-blue-500/20 h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-start justify-between">
-                            {t('transfer.title')}
-                            <ArrowRightLeft className="h-6 w-6 text-blue-500"/>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{t('transfer.description')}</p>
-                    </CardContent>
-                </Card>
+        <div className="space-y-4">
+            <Link href="/transfer" className="action-card bg-blue-500/10">
+                <h3 className="font-bold text-lg text-slate-800">{t('transfer.title')}</h3>
+                <p className="text-sm text-slate-600">{t('transfer.description')}</p>
             </Link>
-             <Link href="/my-qr" className="dashboard-card-link">
-                <Card className="bg-purple-500/10 border-purple-500/20 h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-start justify-between">
-                            {t('dashboard.myQr.title')}
-                            <UserSquare className="h-6 w-6 text-purple-500"/>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{t('dashboard.myQr.description')}</p>
-                    </CardContent>
-                </Card>
+            <Link href="/my-qr" className="action-card bg-purple-500/10">
+                <h3 className="font-bold text-lg text-slate-800">{t('dashboard.myQr.title')}</h3>
+                <p className="text-sm text-slate-600">{t('dashboard.myQr.description')}</p>
             </Link>
-             <Link href="/qr-pay" className="dashboard-card-link">
-                <Card className="bg-green-500/10 border-green-500/20 h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-start justify-between">
-                            {t('dashboard.scanQr.title')}
-                            <ScanLine className="h-6 w-6 text-green-500"/>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{t('dashboard.scanQr.description')}</p>
-                    </CardContent>
-                </Card>
+            <Link href="/qr-pay" className="action-card bg-green-500/10">
+                 <h3 className="font-bold text-lg text-slate-800">{t('dashboard.scanQr.title')}</h3>
+                <p className="text-sm text-slate-600">{t('dashboard.scanQr.description')}</p>
             </Link>
-             <Link href="/transactions" className="dashboard-card-link">
-                <Card className="bg-orange-500/10 border-orange-500/20 h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-start justify-between">
-                            {t('dashboard.historyCard.title')}
-                            <History className="h-6 w-6 text-orange-500"/>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{t('dashboard.historyCard.description')}</p>
-                    </CardContent>
-                </Card>
+            <Link href="/transactions" className="action-card bg-orange-500/10">
+                <h3 className="font-bold text-lg text-slate-800">{t('dashboard.historyCard.title')}</h3>
+                <p className="text-sm text-slate-600">{t('dashboard.historyCard.description')}</p>
             </Link>
         </div>
 
