@@ -2315,17 +2315,17 @@ function DashboardPage() {
     }
     const chartData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMemo"])(()=>{
         if (!transactions) return [];
-        const spending = transactions.filter((t)=>t.type === 'withdrawal').reduce((acc, t)=>{
+        const spending = transactions.filter((t)=>t.type === 'withdrawal').reduce((acc, tx)=>{
             // Simple categorization for example purposes
             let category = t('dashboard.spending.general');
-            if (/payment to/i.test(t.description)) category = t('dashboard.spending.transfers');
-            else if (/dinner|food|restaurant/i.test(t.description)) category = t('dashboard.spending.dining');
-            else if (/groceries|market/i.test(t.description)) category = t('dashboard.spending.groceries');
-            else if (/transport|gas/i.test(t.description)) category = t('dashboard.spending.transport');
+            if (/payment to/i.test(tx.description)) category = t('dashboard.spending.transfers');
+            else if (/dinner|food|restaurant/i.test(tx.description)) category = t('dashboard.spending.dining');
+            else if (/groceries|market/i.test(tx.description)) category = t('dashboard.spending.groceries');
+            else if (/transport|gas/i.test(tx.description)) category = t('dashboard.spending.transport');
             if (!acc[category]) {
                 acc[category] = 0;
             }
-            acc[category] += t.amount;
+            acc[category] += tx.amount;
             return acc;
         }, {});
         return Object.entries(spending).map(([name, value])=>({

@@ -2609,17 +2609,17 @@ function DashboardPage() {
             const spending = transactions.filter({
                 "DashboardPage.useMemo[chartData].spending": (t)=>t.type === 'withdrawal'
             }["DashboardPage.useMemo[chartData].spending"]).reduce({
-                "DashboardPage.useMemo[chartData].spending": (acc, t)=>{
+                "DashboardPage.useMemo[chartData].spending": (acc, tx)=>{
                     // Simple categorization for example purposes
                     let category = t('dashboard.spending.general');
-                    if (/payment to/i.test(t.description)) category = t('dashboard.spending.transfers');
-                    else if (/dinner|food|restaurant/i.test(t.description)) category = t('dashboard.spending.dining');
-                    else if (/groceries|market/i.test(t.description)) category = t('dashboard.spending.groceries');
-                    else if (/transport|gas/i.test(t.description)) category = t('dashboard.spending.transport');
+                    if (/payment to/i.test(tx.description)) category = t('dashboard.spending.transfers');
+                    else if (/dinner|food|restaurant/i.test(tx.description)) category = t('dashboard.spending.dining');
+                    else if (/groceries|market/i.test(tx.description)) category = t('dashboard.spending.groceries');
+                    else if (/transport|gas/i.test(tx.description)) category = t('dashboard.spending.transport');
                     if (!acc[category]) {
                         acc[category] = 0;
                     }
-                    acc[category] += t.amount;
+                    acc[category] += tx.amount;
                     return acc;
                 }
             }["DashboardPage.useMemo[chartData].spending"], {});

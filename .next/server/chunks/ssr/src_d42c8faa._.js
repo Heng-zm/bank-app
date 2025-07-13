@@ -531,7 +531,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$i
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/alert-dialog.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$ai$2f$flows$2f$data$3a$379378__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__ = __turbopack_context__.i("[project]/src/ai/flows/data:379378 [app-ssr] (ecmascript) <text/javascript>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/utils.ts [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$translation$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/use-translation.tsx [app-ssr] (ecmascript)");
 "use client";
+;
 ;
 ;
 ;
@@ -561,6 +563,7 @@ function QrPayPage() {
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$auth$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
     const { toast } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useToast"])();
     const { handleAddTransaction, isProcessing, transactions } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$account$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAccount"])(user?.uid);
+    const { t } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$translation$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useTranslation"])();
     const videoRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const canvasRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const streamRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
@@ -613,10 +616,11 @@ function QrPayPage() {
         } catch (err) {
             console.error("Error accessing camera:", err);
             setHasCameraPermission(false);
-            setError("Camera access is required. Please enable camera permissions in your browser settings.");
+            setError(t('qrpay.cameraError'));
         }
     }, [
-        stopCamera
+        stopCamera,
+        t
     ]);
     const processQrCodeData = (codeData)=>{
         try {
@@ -629,10 +633,10 @@ function QrPayPage() {
                     setFinalAmount(data.amount);
                 }
             } else {
-                setError("Invalid QR code format. Expected a recipient.");
+                setError(t('qrpay.invalidQrFormat'));
             }
         } catch (e) {
-            setError("Failed to parse QR code data. Please use a valid payment QR code.");
+            setError(t('qrpay.qrParseError'));
         }
     };
     const tick = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(()=>{
@@ -708,8 +712,8 @@ function QrPayPage() {
             console.error('Error toggling flashlight:', err);
             toast({
                 variant: 'destructive',
-                title: 'Flashlight Error',
-                description: 'Could not toggle the flashlight.'
+                title: t('qrpay.flashError.title'),
+                description: t('qrpay.flashError.description')
             });
         }
     };
@@ -737,8 +741,8 @@ function QrPayPage() {
                         } else {
                             toast({
                                 variant: 'destructive',
-                                title: 'Scan Failed',
-                                description: 'No QR code could be found in the selected image.'
+                                title: t('qrpay.import.failTitle'),
+                                description: t('qrpay.import.failDescription')
                             });
                         }
                     }
@@ -761,11 +765,14 @@ function QrPayPage() {
             setIsPaymentSuccessful(true);
             setError(null);
             toast({
-                title: "Payment Successful",
-                description: `You paid ${finalAmount.toFixed(2)} to ${scannedData.recipient}.`
+                title: t('qrpay.paymentSuccess.title'),
+                description: t('qrpay.paymentSuccess.description', {
+                    amount: finalAmount.toFixed(2),
+                    recipient: scannedData.recipient
+                })
             });
         } catch (e) {
-            setError(e.message || "An unexpected error occurred during payment.");
+            setError(e.message || t('qrpay.paymentError.unexpected'));
         }
     };
     const handleConfirmPayment = async ()=>{
@@ -787,8 +794,8 @@ function QrPayPage() {
             console.error("Fraud analysis failed:", e);
             toast({
                 variant: "destructive",
-                title: "Could not analyze transaction",
-                description: "Proceeding with payment, but please be cautious."
+                title: t('qrpay.analysisError.title'),
+                description: t('qrpay.analysisError.description')
             });
             await proceedWithPayment();
         }
@@ -812,10 +819,10 @@ function QrPayPage() {
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                             className: "text-muted-foreground",
-                            children: "Amount"
+                            children: t('amount')
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                            lineNumber: 306,
+                            lineNumber: 308,
                             columnNumber: 14
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -826,13 +833,13 @@ function QrPayPage() {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                            lineNumber: 307,
+                            lineNumber: 309,
                             columnNumber: 14
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                    lineNumber: 305,
+                    lineNumber: 307,
                     columnNumber: 10
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -843,28 +850,28 @@ function QrPayPage() {
                         className: "animate-spin"
                     }, void 0, false, {
                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                        lineNumber: 310,
+                        lineNumber: 312,
                         columnNumber: 30
-                    }, this) : `Confirm Payment`
+                    }, this) : t('qrpay.confirmPaymentButton')
                 }, void 0, false, {
                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                    lineNumber: 309,
+                    lineNumber: 311,
                     columnNumber: 10
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
                     variant: "outline",
                     onClick: handleScanAgain,
                     className: "w-full",
-                    children: "Cancel"
+                    children: t('cancel')
                 }, void 0, false, {
                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                    lineNumber: 312,
+                    lineNumber: 314,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-            lineNumber: 304,
+            lineNumber: 306,
             columnNumber: 6
         }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -884,61 +891,61 @@ function QrPayPage() {
                                             className: "text-destructive"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                            lineNumber: 324,
+                                            lineNumber: 326,
                                             columnNumber: 17
                                         }, this),
-                                        "Security Check"
+                                        t('qrpay.securityCheck.title')
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                    lineNumber: 323,
+                                    lineNumber: 325,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogDescription"], {
-                                    children: riskAnalysis?.reason || "This transaction appears unusual. Please review before proceeding."
+                                    children: riskAnalysis?.reason || t('qrpay.securityCheck.defaultReason')
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                    lineNumber: 327,
+                                    lineNumber: 329,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                            lineNumber: 322,
+                            lineNumber: 324,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogFooter"], {
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogCancel"], {
-                                    children: "Cancel"
+                                    children: t('cancel')
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                    lineNumber: 332,
+                                    lineNumber: 334,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogAction"], {
                                     onClick: proceedWithPayment,
-                                    children: "Confirm Payment"
+                                    children: t('qrpay.confirmPaymentButton')
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                    lineNumber: 333,
+                                    lineNumber: 335,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                            lineNumber: 331,
+                            lineNumber: 333,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                    lineNumber: 321,
+                    lineNumber: 323,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                lineNumber: 320,
+                lineNumber: 322,
                 columnNumber: 8
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -951,27 +958,27 @@ function QrPayPage() {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$qr$2d$code$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__QrCode$3e$__["QrCode"], {}, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 343,
+                                        lineNumber: 345,
                                         columnNumber: 13
                                     }, this),
-                                    "Scan to Pay"
+                                    t('nav.qrPay')
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                lineNumber: 342,
+                                lineNumber: 344,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardDescription"], {
-                                children: isPaymentSuccessful ? 'Payment was completed successfully.' : scannedData ? 'Confirm your payment details.' : 'Position a QR code inside the frame.'
+                                children: isPaymentSuccessful ? t('qrpay.status.completed') : scannedData ? t('qrpay.status.confirmDetails') : t('qrpay.status.positionQr')
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                lineNumber: 346,
+                                lineNumber: 348,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                        lineNumber: 341,
+                        lineNumber: 343,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -984,27 +991,27 @@ function QrPayPage() {
                                         className: "h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 358,
+                                        lineNumber: 360,
                                         columnNumber: 16
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertTitle"], {
-                                        children: "Error"
+                                        children: t('error')
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 359,
+                                        lineNumber: 361,
                                         columnNumber: 16
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDescription"], {
                                         children: error
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 360,
+                                        lineNumber: 362,
                                         columnNumber: 16
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                lineNumber: 357,
+                                lineNumber: 359,
                                 columnNumber: 14
                             }, this),
                             !isPaymentSuccessful && !scannedData && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1018,7 +1025,7 @@ function QrPayPage() {
                                         muted: true
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 366,
+                                        lineNumber: 368,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("canvas", {
@@ -1028,7 +1035,7 @@ function QrPayPage() {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 367,
+                                        lineNumber: 369,
                                         columnNumber: 17
                                     }, this),
                                     hasCameraPermission === null && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1037,26 +1044,26 @@ function QrPayPage() {
                                             className: "h-8 w-8 animate-spin text-white"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                            lineNumber: 371,
+                                            lineNumber: 373,
                                             columnNumber: 25
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 370,
+                                        lineNumber: 372,
                                         columnNumber: 21
                                     }, this),
                                     hasCameraPermission === false && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "absolute inset-0 flex items-center justify-center bg-black/50 text-white p-4 text-center",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            children: "Camera access denied. Please enable it in your browser settings."
+                                            children: t('qrpay.cameraDenied')
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                            lineNumber: 376,
+                                            lineNumber: 378,
                                             columnNumber: 25
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 375,
+                                        lineNumber: 377,
                                         columnNumber: 21
                                     }, this),
                                     hasCameraPermission && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1067,12 +1074,12 @@ function QrPayPage() {
                                                     className: "absolute w-2/3 h-2/3 border-4 border-dashed border-white/50 rounded-lg"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                    lineNumber: 382,
+                                                    lineNumber: 384,
                                                     columnNumber: 29
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                lineNumber: 381,
+                                                lineNumber: 383,
                                                 columnNumber: 25
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1086,7 +1093,7 @@ function QrPayPage() {
                                                         accept: "image/*"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                        lineNumber: 385,
+                                                        lineNumber: 387,
                                                         columnNumber: 30
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -1094,17 +1101,17 @@ function QrPayPage() {
                                                         variant: "outline",
                                                         onClick: handleImportClick,
                                                         className: "rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75",
-                                                        title: "Import QR Code from image",
+                                                        title: t('qrpay.import.buttonTitle'),
                                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$upload$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Upload$3e$__["Upload"], {
                                                             className: "h-5 w-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                            lineNumber: 399,
+                                                            lineNumber: 401,
                                                             columnNumber: 33
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                        lineNumber: 392,
+                                                        lineNumber: 394,
                                                         columnNumber: 29
                                                     }, this),
                                                     isFlashSupported && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -1112,23 +1119,23 @@ function QrPayPage() {
                                                         variant: "outline",
                                                         onClick: toggleFlashlight,
                                                         className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75", isFlashOn && "bg-yellow-400/80 text-black hover:bg-yellow-400"),
-                                                        title: "Toggle flashlight",
+                                                        title: t('qrpay.flashButtonTitle'),
                                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$zap$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Zap$3e$__["Zap"], {
                                                             className: "h-5 w-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                            lineNumber: 412,
+                                                            lineNumber: 414,
                                                             columnNumber: 37
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                        lineNumber: 402,
+                                                        lineNumber: 404,
                                                         columnNumber: 33
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                lineNumber: 384,
+                                                lineNumber: 386,
                                                 columnNumber: 25
                                             }, this)
                                         ]
@@ -1136,7 +1143,7 @@ function QrPayPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                lineNumber: 365,
+                                lineNumber: 367,
                                 columnNumber: 14
                             }, this),
                             isPaymentSuccessful ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1146,53 +1153,50 @@ function QrPayPage() {
                                         className: "h-16 w-16 text-green-500 mx-auto"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 423,
+                                        lineNumber: 425,
                                         columnNumber: 18
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                         className: "text-xl font-bold",
-                                        children: "Payment Complete!"
+                                        children: t('qrpay.paymentComplete.title')
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 424,
+                                        lineNumber: 426,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        children: [
-                                            "You successfully paid $",
-                                            finalAmount?.toFixed(2),
-                                            " to ",
-                                            scannedData?.recipient,
-                                            "."
-                                        ]
-                                    }, void 0, true, {
+                                        children: t('qrpay.paymentComplete.description', {
+                                            amount: finalAmount?.toFixed(2),
+                                            recipient: scannedData?.recipient
+                                        })
+                                    }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 425,
+                                        lineNumber: 427,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
                                         onClick: handleScanAgain,
                                         className: "w-full",
-                                        children: "Scan Another Code"
+                                        children: t('qrpay.scanAnotherButton')
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 426,
+                                        lineNumber: 428,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                lineNumber: 422,
+                                lineNumber: 424,
                                 columnNumber: 13
                             }, this) : scannedData ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "space-y-4",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                         className: "text-lg font-semibold",
-                                        children: "Payment Details"
+                                        children: t('qrpay.paymentDetails')
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 432,
+                                        lineNumber: 434,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1200,10 +1204,10 @@ function QrPayPage() {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "text-muted-foreground",
-                                                children: "Recipient"
+                                                children: t('recipient')
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                lineNumber: 434,
+                                                lineNumber: 436,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1211,13 +1215,13 @@ function QrPayPage() {
                                                 children: scannedData.recipient
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                lineNumber: 435,
+                                                lineNumber: 437,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 433,
+                                        lineNumber: 435,
                                         columnNumber: 15
                                     }, this),
                                     finalAmount ? renderConfirmation() : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Form"], {
@@ -1232,10 +1236,10 @@ function QrPayPage() {
                                                     render: ({ field })=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormItem"], {
                                                             children: [
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormLabel"], {
-                                                                    children: "Amount"
+                                                                    children: t('amount')
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                                    lineNumber: 446,
+                                                                    lineNumber: 448,
                                                                     columnNumber: 33
                                                                 }, void 0),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -1247,82 +1251,82 @@ function QrPayPage() {
                                                                         autoFocus: true
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                                        lineNumber: 448,
+                                                                        lineNumber: 450,
                                                                         columnNumber: 37
                                                                     }, void 0)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                                    lineNumber: 447,
+                                                                    lineNumber: 449,
                                                                     columnNumber: 33
                                                                 }, void 0),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                                    lineNumber: 450,
+                                                                    lineNumber: 452,
                                                                     columnNumber: 33
                                                                 }, void 0)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                            lineNumber: 445,
+                                                            lineNumber: 447,
                                                             columnNumber: 33
                                                         }, void 0)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                    lineNumber: 441,
+                                                    lineNumber: 443,
                                                     columnNumber: 26
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
                                                     type: "submit",
                                                     className: "w-full",
-                                                    children: "Set Amount"
+                                                    children: t('qrpay.setAmountButton')
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                    lineNumber: 454,
+                                                    lineNumber: 456,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
                                                     variant: "outline",
                                                     onClick: handleScanAgain,
                                                     className: "w-full",
-                                                    children: "Cancel"
+                                                    children: t('cancel')
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                                    lineNumber: 457,
+                                                    lineNumber: 459,
                                                     columnNumber: 26
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                            lineNumber: 440,
+                                            lineNumber: 442,
                                             columnNumber: 21
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                        lineNumber: 439,
+                                        lineNumber: 441,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                                lineNumber: 431,
+                                lineNumber: 433,
                                 columnNumber: 13
                             }, this) : null
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                        lineNumber: 355,
+                        lineNumber: 357,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-                lineNumber: 340,
+                lineNumber: 342,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(authed)/qr-pay/page.tsx",
-        lineNumber: 319,
+        lineNumber: 321,
         columnNumber: 5
     }, this);
 }
