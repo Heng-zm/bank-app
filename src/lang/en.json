@@ -15,9 +15,6 @@
     },
     "nav": {
         "dashboard": "Dashboard",
-        "transactions": "Transactions",
-        "qrPay": "Scan to Pay",
-        "myQr": "My QR Code",
         "settings": "Settings",
         "transfer": "Transfer"
     },

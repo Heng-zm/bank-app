@@ -48,16 +48,27 @@ export default function AuthedLayout({
 
   const navItems = useMemo(() => [
     { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { href: '/transactions', label: t('nav.transactions'), icon: History },
     { href: '/transfer', label: t('nav.transfer'), icon: ArrowRightLeft },
-    { href: '/qr-pay', label: t('nav.qrPay'), icon: QrCode },
-    { href: '/my-qr', label: t('nav.myQr'), icon: User },
     { href: '/settings', label: t('nav.settings'), icon: Settings },
   ], [t]);
 
   const currentPage = useMemo(() => {
-    return navItems.find(item => item.href === pathname) || { label: ' ' };
-  }, [pathname, navItems]);
+    let current = navItems.find(item => item.href === pathname);
+    if (!current) {
+        // Check for pages not in the main nav
+        if (pathname.startsWith('/transactions')) {
+            return { label: t('transactions.title') };
+        }
+        if (pathname.startsWith('/my-qr')) {
+            return { label: t('dashboard.myQr.title') };
+        }
+        if (pathname.startsWith('/qr-pay')) {
+            return { label: t('dashboard.scanQr.title') };
+        }
+        return { label: ' ' };
+    }
+    return current;
+  }, [pathname, navItems, t]);
 
   const handleLogout = async () => {
     await signOut(auth);
