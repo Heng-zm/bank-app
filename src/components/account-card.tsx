@@ -3,13 +3,17 @@
 
 import type { Account } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Wallet } from "lucide-react";
+import { User, Copy } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "./ui/button";
 
 interface AccountCardProps {
   account: Account;
 }
 
 export function AccountCard({ account }: AccountCardProps) {
+  const { toast } = useToast();
+
   const formattedBalance = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -19,6 +23,15 @@ export function AccountCard({ account }: AccountCardProps) {
     if (!number) return "";
     return number.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3');
   }
+  
+  const handleCopyAccountNumber = () => {
+    if (!account.accountNumber) return;
+    navigator.clipboard.writeText(account.accountNumber);
+    toast({
+      title: "Copied!",
+      description: "Account number copied to clipboard.",
+    });
+  };
 
   return (
     <Card className="shadow-lg animate-fade-in-up">
@@ -33,7 +46,10 @@ export function AccountCard({ account }: AccountCardProps) {
             </div>
             <div className="text-right">
                 <div className="text-xs text-muted-foreground">Account Number</div>
-                <div className="font-mono text-sm font-semibold">{formatAccountNumber(account.accountNumber)}</div>
+                <Button variant="ghost" size="sm" className="font-mono text-sm font-semibold h-auto p-1" onClick={handleCopyAccountNumber}>
+                    {formatAccountNumber(account.accountNumber)}
+                    <Copy className="ml-2 h-4 w-4"/>
+                </Button>
             </div>
         </div>
       </CardHeader>
