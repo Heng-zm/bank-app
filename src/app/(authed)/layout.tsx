@@ -17,7 +17,8 @@ import {
   User,
   History,
   Settings,
-  ArrowRightLeft
+  ArrowRightLeft,
+  ArrowLeft
 } from 'lucide-react';
 import {
   Sheet,
@@ -185,7 +186,13 @@ function NavLink({
               </SheetContent>
             </Sheet>
             
-          <div className="w-full flex-1">
+          <div className="w-full flex-1 flex items-center gap-4">
+            {pathname !== '/dashboard' && (
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5" />
+                    <span className="sr-only">Back</span>
+                </Button>
+            )}
              <h1 className="font-semibold text-lg">{currentPage.label}</h1>
           </div>
           
