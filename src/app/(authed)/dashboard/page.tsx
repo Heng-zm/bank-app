@@ -115,7 +115,7 @@ export default function DashboardPage() {
                 <Card className="bg-blue-500/10 border-blue-500/20 h-full">
                     <CardHeader>
                         <CardTitle className="flex items-start justify-between">
-                            {t('nav.transfer')}
+                            {t('transfer.title')}
                             <ArrowRightLeft className="h-6 w-6 text-blue-500"/>
                         </CardTitle>
                     </CardHeader>
