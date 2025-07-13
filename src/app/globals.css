@@ -7,6 +7,10 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+body.font-khmer {
+    font-family: 'Kantumruy Pro', sans-serif;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

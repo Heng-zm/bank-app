@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { TransactionFormData } from "@/lib/types";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useTranslation } from "@/hooks/use-translation";
 
 const formSchema = z.object({
   recipient: z.string().min(1, { message: "Recipient is required." }),
@@ -41,6 +42,7 @@ interface TransactionFormProps {
 export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps) {
   const [recipientName, setRecipientName] = useState<string | null>(null);
   const [isRecipientLoading, setIsRecipientLoading] = useState(false);
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,11 +80,11 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
             const recipientData = querySnapshot.docs[0].data();
             setRecipientName(recipientData.holderName);
           } else {
-            setRecipientName("Account not found");
+            setRecipientName(t('transactionForm.recipientNotFound'));
           }
         } catch (error) {
           console.error("Error fetching recipient:", error);
-          setRecipientName("Error finding account");
+          setRecipientName(t('transactionForm.errorFindingAccount'));
         } finally {
           setIsRecipientLoading(false);
         }
@@ -92,7 +94,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
     };
 
     findRecipient();
-  }, [debouncedRecipient]);
+  }, [debouncedRecipient, t]);
 
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -112,9 +114,9 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <ArrowRightLeft className="h-5 w-5 text-primary"/>
-            New Transaction
+            {t('transactionForm.title')}
         </CardTitle>
-        <CardDescription>Send money using a 9-digit account number.</CardDescription>
+        <CardDescription>{t('transactionForm.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -124,18 +126,18 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
               name="recipient"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Recipient Account #</FormLabel>
+                  <FormLabel>{t('transactionForm.recipientLabel')}</FormLabel>
                   <FormControl>
                     <div className="relative">
                        <Send className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input placeholder="e.g., 001-002-003" {...field} className="pl-10" />
+                       <Input placeholder={t('transactionForm.recipientPlaceholder')} {...field} className="pl-10" />
                     </div>
                   </FormControl>
                   <FormMessage />
                   {isRecipientLoading && (
                     <div className="flex items-center text-sm text-muted-foreground pt-1">
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Searching...
+                      {t('searching')}...
                     </div>
                   )}
                   {recipientName && !isRecipientLoading && (
@@ -152,9 +154,9 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t('transactionForm.descriptionLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Dinner with friends" {...field} />
+                    <Input placeholder={t('transactionForm.descriptionPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -165,7 +167,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>{t('amount')}</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} step="0.01" />
                   </FormControl>
@@ -176,7 +178,7 @@ export function TransactionForm({ onSubmit, isProcessing }: TransactionFormProps
             
             <Button type="submit" className="w-full" disabled={isProcessing}>
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Submit Transaction
+              {t('transactionForm.submitButton')}
             </Button>
           </form>
         </Form>

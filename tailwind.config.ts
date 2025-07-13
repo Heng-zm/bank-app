@@ -19,6 +19,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
+        khmer: ['Kantumruy Pro', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
       },

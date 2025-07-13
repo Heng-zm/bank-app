@@ -11,6 +11,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { generateUniqueAccountNumber } from "@/hooks/use-account";
+import { useTranslation } from "@/hooks/use-translation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ export default function SignupPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,7 +56,7 @@ export default function SignupPage() {
     setError(null);
 
     if (!auth || !db) {
-        setError("Firebase is not configured. Please check your environment variables.");
+        setError(t('firebase.notConfigured'));
         setIsLoading(false);
         return;
     }
@@ -75,14 +77,14 @@ export default function SignupPage() {
       await setDoc(doc(db, "accounts", user.uid), accountData);
 
       toast({
-        title: "Account Created!",
-        description: "You have been successfully signed up. Please log in.",
+        title: t('signup.toastSuccessTitle'),
+        description: t('signup.toastSuccessDescription'),
       });
       router.push("/login");
     } catch (error: any) {
       let errorMessage = error.message;
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'This email address is already in use. Please try another one.';
+        errorMessage = t('signup.emailInUseError');
       }
       setError(errorMessage);
     } finally {
@@ -96,15 +98,15 @@ export default function SignupPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserPlus />
-            Create an Account
+            {t('signup.title')}
           </CardTitle>
-          <CardDescription>Join FinSim today to start managing your finances.</CardDescription>
+          <CardDescription>{t('signup.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Signup Failed</AlertTitle>
+              <AlertTitle>{t('signup.failTitle')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -115,7 +117,7 @@ export default function SignupPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t('email')}</FormLabel>
                     <FormControl>
                       <Input placeholder="you@example.com" {...field} />
                     </FormControl>
@@ -128,7 +130,7 @@ export default function SignupPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t('password')}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -141,7 +143,7 @@ export default function SignupPage() {
                 name="initialBalance"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Initial Balance</FormLabel>
+                    <FormLabel>{t('signup.initialBalanceLabel')}</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="1000.00" {...field} step="0.01" />
                     </FormControl>
@@ -151,14 +153,14 @@ export default function SignupPage() {
               />
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="animate-spin" />}
-                Create Account
+                {t('signup.createAccountButton')}
               </Button>
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
+            {t('signup.alreadyHaveAccount')}{" "}
             <Link href="/login" className="underline">
-              Log in
+              {t('signup.loginLink')}
             </Link>
           </div>
         </CardContent>

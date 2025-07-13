@@ -1,0 +1,244 @@
+
+{
+    "logout": "Logout",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "share": "Share",
+    "amount": "Amount",
+    "recipient": "Recipient",
+    "pending": "Pending",
+    "searching": "Searching",
+    "firebase": {
+        "notConfigured": "Firebase is not configured. Please check your environment variables."
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "transactions": "Transactions",
+        "qrPay": "Scan to Pay",
+        "myQr": "My QR Code",
+        "settings": "Settings"
+    },
+    "account": {
+        "copied": "Copied!",
+        "copiedDescription": "Account number copied to clipboard.",
+        "accountNumber": "Account Number",
+        "availableBalance": "Available Balance",
+        "account": "Acct"
+    },
+    "dashboard": {
+        "spending": {
+            "title": "Spending Summary",
+            "description": "A breakdown of your spending by category.",
+            "noData": "No spending data to display.",
+            "general": "General",
+            "transfers": "Transfers",
+            "dining": "Dining",
+            "groceries": "Groceries",
+            "transport": "Transport"
+        },
+        "history": {
+            "title": "Recent Transactions"
+        },
+        "admin": {
+            "title": "Admin Action",
+            "description": "Simulate a new feature announcement for the current user.",
+            "button": "Announce New Feature",
+            "toastSuccessTitle": "Announcement Sent!",
+            "toastSuccessDescription": "A new feature notification has been created.",
+            "toastErrorDescription": "Could not send announcement."
+        }
+    },
+    "transactionForm": {
+        "title": "New Transaction",
+        "description": "Send money using a 9-digit account number.",
+        "recipientLabel": "Recipient Account #",
+        "recipientPlaceholder": "e.g., 001-002-003",
+        "recipientNotFound": "Account not found",
+        "errorFindingAccount": "Error finding account",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "e.g., Dinner with friends",
+        "submitButton": "Submit Transaction"
+    },
+    "transactions": {
+        "title": "Full Transaction History",
+        "description": "A record of all your account activity.",
+        "recentDescription": "Your {{count}} most recent transactions.",
+        "noTransactions": "No transactions found.",
+        "pending": "Pending",
+        "filter": {
+            "typePlaceholder": "Filter by type",
+            "allTypes": "All Types",
+            "deposit": "Deposit",
+            "withdrawal": "Withdrawal",
+            "datePlaceholder": "Pick a date range",
+            "resetTitle": "Reset filters"
+        },
+        "table": {
+            "description": "Description",
+            "date": "Date",
+            "type": "Type",
+            "amount": "Amount"
+        },
+        "types": {
+            "deposit": "Deposit",
+            "withdrawal": "Withdrawal"
+        }
+    },
+    "qrpay": {
+        "title": "Scan to Pay",
+        "cameraError": "Camera access is required. Please enable camera permissions in your browser settings.",
+        "invalidQrFormat": "Invalid QR code format. Expected a recipient.",
+        "qrParseError": "Failed to parse QR code data. Please use a valid payment QR code.",
+        "flashError": {
+            "title": "Flashlight Error",
+            "description": "Could not toggle the flashlight."
+        },
+        "import": {
+            "failTitle": "Scan Failed",
+            "failDescription": "No QR code could be found in the selected image.",
+            "buttonTitle": "Import QR Code from image"
+        },
+        "paymentSuccess": {
+            "title": "Payment Successful",
+            "description": "You paid {{amount}} to {{recipient}}."
+        },
+        "paymentError": {
+            "unexpected": "An unexpected error occurred during payment."
+        },
+        "analysisError": {
+            "title": "Could not analyze transaction",
+            "description": "Proceeding with payment, but please be cautious."
+        },
+        "confirmPaymentButton": "Confirm Payment",
+        "status": {
+            "completed": "Payment was completed successfully.",
+            "confirmDetails": "Confirm your payment details.",
+            "positionQr": "Position a QR code inside the frame."
+        },
+        "cameraDenied": "Camera access denied. Please enable it in your browser settings.",
+        "flashButtonTitle": "Toggle flashlight",
+        "paymentComplete": {
+            "title": "Payment Complete!",
+            "description": "You successfully paid ${{amount}} to {{recipient}}."
+        },
+        "scanAnotherButton": "Scan Another Code",
+        "paymentDetails": "Payment Details",
+        "setAmountButton": "Set Amount",
+        "securityCheck": {
+            "title": "Security Check",
+            "defaultReason": "This transaction appears unusual. Please review before proceeding."
+        }
+    },
+    "myqr": {
+        "title": "Receive Payment",
+        "description": "Share this QR code to get paid. You can add an amount below.",
+        "requesting": "Requesting",
+        "requestingPayment": "Requesting payment",
+        "to": "To",
+        "scanToPay": "Scan to pay {{name}}",
+        "share": {
+            "withAmount": "Here is my payment QR code to receive ${{amount}} from {{name}}.",
+            "withoutAmount": "Here is my payment QR code to receive money from {{name}}.",
+            "title": "FinSim Payment Request",
+            "errorTitle": "Share Failed",
+            "errorDescription": "Could not share the QR code.",
+            "notSupportedTitle": "Share Not Supported",
+            "notSupportedDescription": "Your browser does not support the Web Share API."
+        },
+        "save": {
+            "button": "Save QR Code",
+            "errorTitle": "Save Failed",
+            "errorNotReady": "QR code data is not ready.",
+            "errorNoCanvas": "Could not find the QR code canvas to save.",
+            "errorCreateImage": "Could not create image.",
+            "successTitle": "QR Code Saved",
+            "successDescription": "Your custom QR code has been downloaded."
+        },
+        "form": {
+            "amountLabel": "Specific Amount (Optional)",
+            "setAmountButton": "Set Amount"
+        }
+    },
+    "settings": {
+        "saveChanges": "Save Changes",
+        "savePreferences": "Save Preferences",
+        "profile": {
+            "title": "Profile",
+            "description": "Update your personal information.",
+            "toastSuccess": "Your profile has been updated.",
+            "form": {
+                "nameLabel": "Display Name",
+                "namePlaceholder": "Your Name"
+            }
+        },
+        "language": {
+            "title": "Language",
+            "description": "Choose your preferred language.",
+            "selectLabel": "Select Language",
+            "selectPlaceholder": "Select a language"
+        },
+        "password": {
+            "title": "Change Password",
+            "description": "Choose a new, strong password.",
+            "notLoggedInError": "You are not logged in.",
+            "toastSuccess": "Your password has been changed.",
+            "toastErrorTitle": "Error updating password",
+            "form": {
+                "newPasswordLabel": "New Password",
+                "confirmPasswordLabel": "Confirm New Password"
+            },
+            "updateButton": "Update Password"
+        },
+        "notifications": {
+            "title": "Notification Preferences",
+            "description": "Manage how you receive notifications from us.",
+            "toastSuccess": "Your notification preferences have been updated.",
+            "depositsLabel": "Deposits & Transfers",
+            "depositsDescription": "Receive a notification when you get paid.",
+            "alertsLabel": "Security & Balance Alerts",
+            "alertsDescription": "Get alerts for low balances or suspicious activity.",
+            "infoLabel": "Feature Announcements",
+            "infoDescription": "Find out about new features and updates."
+        }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "noNotifications": "You have no notifications.",
+        "justNow": "just now"
+    },
+    "login": {
+        "title": "Welcome Back",
+        "description": "Log in to access your FinSim account.",
+        "failTitle": "Login Failed",
+        "invalidCredentials": "Invalid email or password. Please try again.",
+        "button": "Log In",
+        "noAccount": "Don't have an account?",
+        "signUpLink": "Sign up",
+        "forgotPasswordLink": "Forgot your password?"
+    },
+    "signup": {
+        "title": "Create an Account",
+        "description": "Join FinSim today to start managing your finances.",
+        "failTitle": "Signup Failed",
+        "emailInUseError": "This email address is already in use. Please try another one.",
+        "initialBalanceLabel": "Initial Balance",
+        "createAccountButton": "Create Account",
+        "alreadyHaveAccount": "Already have an account?",
+        "loginLink": "Log in",
+        "toastSuccessTitle": "Account Created!",
+        "toastSuccessDescription": "You have been successfully signed up. Please log in."
+    },
+    "forgotPassword": {
+        "title": "Forgot Password",
+        "description": "Enter your email to receive a password reset link.",
+        "descriptionSent": "Follow the instructions sent to your email to reset your password.",
+        "successMessage": "If an account exists for this email, a password reset link has been sent.",
+        "emailSentTitle": "Email Sent",
+        "sendLinkButton": "Send Reset Link",
+        "backToLogin": "Back to Login"
+    },
+    "email": "Email",
+    "password": "Password"
+}

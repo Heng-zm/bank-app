@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useTranslation } from "@/hooks/use-translation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ export default function ForgotPasswordPage() {
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,7 +49,7 @@ export default function ForgotPasswordPage() {
     setSuccessMessage(null);
 
     if (!auth) {
-        setError("Firebase is not configured. Please check your environment variables.");
+        setError(t('firebase.notConfigured'));
         setIsLoading(false);
         return;
     }
@@ -55,7 +57,7 @@ export default function ForgotPasswordPage() {
     try {
       await sendPasswordResetEmail(auth, values.email);
       setIsSent(true);
-      setSuccessMessage("If an account exists for this email, a password reset link has been sent.");
+      setSuccessMessage(t('forgotPassword.successMessage'));
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -69,12 +71,12 @@ export default function ForgotPasswordPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <KeyRound />
-            Forgot Password
+            {t('forgotPassword.title')}
           </CardTitle>
           <CardDescription>
             {isSent 
-              ? "Follow the instructions sent to your email to reset your password."
-              : "Enter your email to receive a password reset link."
+              ? t('forgotPassword.descriptionSent')
+              : t('forgotPassword.description')
             }
           </CardDescription>
         </CardHeader>
@@ -82,14 +84,14 @@ export default function ForgotPasswordPage() {
            {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>{t('error')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
            {successMessage && !error &&(
             <Alert className="mb-4 border-green-500 text-green-700">
                <AlertCircle className="h-4 w-4 text-green-700" />
-              <AlertTitle>Email Sent</AlertTitle>
+              <AlertTitle>{t('forgotPassword.emailSentTitle')}</AlertTitle>
               <AlertDescription>{successMessage}</AlertDescription>
             </Alert>
           )}
@@ -102,7 +104,7 @@ export default function ForgotPasswordPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('email')}</FormLabel>
                       <FormControl>
                         <Input placeholder="you@example.com" {...field} />
                       </FormControl>
@@ -111,14 +113,14 @@ export default function ForgotPasswordPage() {
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="animate-spin" /> : "Send Reset Link" }
+                  {isLoading ? <Loader2 className="animate-spin" /> : t('forgotPassword.sendLinkButton') }
                 </Button>
               </form>
             </Form>
           ) : null}
            <div className="mt-4 text-center text-sm">
             <Link href="/login" className="underline">
-                Back to Login
+                {t('forgotPassword.backToLogin')}
             </Link>
           </div>
         </CardContent>

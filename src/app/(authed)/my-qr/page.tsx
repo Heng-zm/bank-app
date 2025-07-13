@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Share2, User, RefreshCcw, Download, Landmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from '@/hooks/use-translation';
 
 const formSchema = z.object({
   amount: z.coerce.number().min(0, { message: "Amount cannot be negative." }).optional(),
@@ -26,6 +27,7 @@ export default function MyQrPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { account, isLoading: isAccountLoading } = useAccount(user?.uid);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [qrCodeValue, setQrCodeValue] = useState('');
   const [requestedAmount, setRequestedAmount] = useState<number | undefined>(undefined);
@@ -70,12 +72,12 @@ export default function MyQrPage() {
   const handleShare = async () => {
     if (navigator.share) {
       const shareText = requestedAmount && requestedAmount > 0 
-        ? `Here is my payment QR code to receive $${Number(requestedAmount).toFixed(2)} from ${account.holderName}.`
-        : `Here is my payment QR code to receive money from ${account.holderName}.`;
+        ? t('myqr.share.withAmount', { amount: Number(requestedAmount).toFixed(2), name: account.holderName })
+        : t('myqr.share.withoutAmount', { name: account.holderName });
 
       try {
         await navigator.share({
-          title: 'FinSim Payment Request',
+          title: t('myqr.share.title'),
           text: shareText,
           url: window.location.href,
         });
@@ -83,24 +85,24 @@ export default function MyQrPage() {
         console.error('Error sharing:', error);
         toast({
             variant: "destructive",
-            title: "Share Failed",
-            description: "Could not share the QR code."
+            title: t('myqr.share.errorTitle'),
+            description: t('myqr.share.errorDescription')
         });
       }
     } else {
-        toast({ title: "Share Not Supported", description: "Your browser does not support the Web Share API."})
+        toast({ title: t('myqr.share.notSupportedTitle'), description: t('myqr.share.notSupportedDescription')})
     }
   }
 
   const handleSaveQrCode = () => {
     if (!qrCodeRef.current || !account) {
-        toast({ variant: "destructive", title: "Save Failed", description: "QR code data is not ready."});
+        toast({ variant: "destructive", title: t('myqr.save.errorTitle'), description: t('myqr.save.errorNotReady')});
         return;
     }
 
     const qrCanvas = qrCodeRef.current.querySelector("canvas");
     if (!qrCanvas) {
-        toast({ variant: "destructive", title: "Save Failed", description: "Could not find the QR code canvas to save."});
+        toast({ variant: "destructive", title: t('myqr.save.errorTitle'), description: t('myqr.save.errorNoCanvas')});
         return;
     }
     
@@ -111,7 +113,7 @@ export default function MyQrPage() {
     const ctx = finalCanvas.getContext('2d');
 
     if (!ctx) {
-         toast({ variant: "destructive", title: "Save Failed", description: "Could not create image."});
+         toast({ variant: "destructive", title: t('myqr.save.errorTitle'), description: t('myqr.save.errorCreateImage')});
         return;
     }
 
@@ -132,7 +134,7 @@ export default function MyQrPage() {
 
     ctx.font = '16px Inter, sans-serif';
     ctx.fillStyle = '#64748b'; // text-slate-500
-    ctx.fillText(`Account: ${account.accountNumber}`, finalCanvas.width / 2, 130);
+    ctx.fillText(`${t('account.accountNumber')}: ${account.accountNumber}`, finalCanvas.width / 2, 130);
 
     // QR Code
     const qrSize = 250;
@@ -144,11 +146,11 @@ export default function MyQrPage() {
     if (requestedAmount && requestedAmount > 0) {
       ctx.font = 'bold 22px Inter, sans-serif';
       ctx.fillStyle = '#1e40af';
-      ctx.fillText(`Requesting: $${requestedAmount.toFixed(2)}`, finalCanvas.width / 2, 450);
+      ctx.fillText(`${t('myqr.requesting')}: $${requestedAmount.toFixed(2)}`, finalCanvas.width / 2, 450);
     } else {
       ctx.font = '18px Inter, sans-serif';
       ctx.fillStyle = '#334155';
-      ctx.fillText(`Scan to pay ${account.holderName}`, finalCanvas.width / 2, 450);
+      ctx.fillText(t('myqr.scanToPay', { name: account.holderName }), finalCanvas.width / 2, 450);
     }
 
     // Footer
@@ -165,7 +167,7 @@ export default function MyQrPage() {
     downloadLink.click();
     document.body.removeChild(downloadLink);
 
-    toast({ title: "QR Code Saved", description: "Your custom QR code has been downloaded."});
+    toast({ title: t('myqr.save.successTitle'), description: t('myqr.save.successDescription')});
   };
 
 
@@ -196,10 +198,10 @@ export default function MyQrPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User />
-            Receive Payment
+            {t('myqr.title')}
           </CardTitle>
           <CardDescription>
-            Share this QR code to get paid. You can add an amount below.
+            {t('myqr.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -210,12 +212,12 @@ export default function MyQrPage() {
                     </div>
                     <div className="text-center">
                         {requestedAmount && requestedAmount > 0 ? (
-                            <p className="text-lg">Requesting <span className='font-bold text-primary'>${Number(requestedAmount).toFixed(2)}</span></p>
+                            <p className="text-lg">{t('myqr.requesting')} <span className='font-bold text-primary'>${Number(requestedAmount).toFixed(2)}</span></p>
                         ) : (
-                            <p className="text-lg">Requesting payment</p>
+                            <p className="text-lg">{t('myqr.requestingPayment')}</p>
                         )}
-                         <p className="text-sm text-muted-foreground">To: {account?.holderName}</p>
-                         <p className="text-xs text-muted-foreground font-mono">Acct: {account.accountNumber}</p>
+                         <p className="text-sm text-muted-foreground">{t('myqr.to')}: {account?.holderName}</p>
+                         <p className="text-xs text-muted-foreground font-mono">{t('account.account')}: {account.accountNumber}</p>
                     </div>
                 </div>
             ) : (
@@ -231,7 +233,7 @@ export default function MyQrPage() {
                     name="amount"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Specific Amount (Optional)</FormLabel>
+                        <FormLabel>{t('myqr.form.amountLabel')}</FormLabel>
                         <FormControl>
                             <Input type="number" placeholder="0.00" {...field} step="0.01"/>
                         </FormControl>
@@ -241,10 +243,10 @@ export default function MyQrPage() {
                     />
                     <div className="flex flex-col sm:flex-row gap-2">
                         <Button type="submit" className="flex-1">
-                            Set Amount
+                            {t('myqr.form.setAmountButton')}
                         </Button>
                         <Button type="button" variant="secondary" onClick={resetAmount} className="flex-1">
-                            <RefreshCcw className="mr-2 h-4 w-4" /> Reset
+                            <RefreshCcw className="mr-2 h-4 w-4" /> {t('reset')}
                         </Button>
                     </div>
                 </form>
@@ -253,11 +255,11 @@ export default function MyQrPage() {
             <div className="flex flex-col sm:flex-row gap-2">
                 <Button onClick={handleShare} className="w-full flex-1" variant="outline">
                     <Share2 className="mr-2 h-4 w-4"/>
-                    Share
+                    {t('share')}
                 </Button>
                  <Button onClick={handleSaveQrCode} className="w-full flex-1" variant="outline">
                     <Download className="mr-2 h-4 w-4"/>
-                    Save QR Code
+                    {t('myqr.save.button')}
                 </Button>
             </div>
 

@@ -11,6 +11,7 @@ import { Bell, Info, AlertTriangle, DollarSign } from "lucide-react"
 import type { Notification } from "@/lib/types"
 import { formatDistanceToNow } from "date-fns"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/hooks/use-translation"
 
 interface NotificationBellProps {
   notifications: Notification[],
@@ -25,6 +26,7 @@ const notificationIcons = {
 
 export function NotificationBell({ notifications, onOpen }: NotificationBellProps) {
   const unreadCount = notifications.filter(n => !n.isRead).length;
+  const { t } = useTranslation();
 
   return (
     <Popover onOpenChange={(open) => {
@@ -42,11 +44,11 @@ export function NotificationBell({ notifications, onOpen }: NotificationBellProp
       </PopoverTrigger>
       <PopoverContent className="w-screen max-w-[320px] sm:max-w-sm p-0">
         <div className="p-4 font-semibold border-b">
-          Notifications
+          {t('notifications.title')}
         </div>
         <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-                <p className="p-4 text-sm text-muted-foreground">You have no notifications.</p>
+                <p className="p-4 text-sm text-muted-foreground">{t('notifications.noNotifications')}</p>
             ) : (
                 notifications.map(n => (
                     <div key={n.id} className={cn(
@@ -59,7 +61,7 @@ export function NotificationBell({ notifications, onOpen }: NotificationBellProp
                        <div className="flex-1 space-y-1">
                             <p className="text-sm">{n.message}</p>
                             <p className="text-xs text-muted-foreground">
-                                {n.timestamp ? formatDistanceToNow(new Date(n.timestamp), { addSuffix: true }) : 'just now'}
+                                {n.timestamp ? formatDistanceToNow(new Date(n.timestamp), { addSuffix: true }) : t('notifications.justNow')}
                             </p>
                        </div>
                     </div>

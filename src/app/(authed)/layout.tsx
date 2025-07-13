@@ -30,46 +30,8 @@ import { useState, useMemo } from 'react';
 import { NotificationBell } from '@/components/notification-bell';
 import { useAccount } from '@/hooks/use-account';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from '@/hooks/use-translation';
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/transactions', label: 'Transactions', icon: History },
-  { href: '/qr-pay', label: 'Scan to Pay', icon: QrCode },
-  { href: '/my-qr', label: 'My QR Code', icon: User },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
-
-function NavLink({
-  href,
-  label,
-  icon: Icon,
-  isMobile = false,
-  onClose,
-}: {
-  href: string;
-  label:string;
-  icon: React.ElementType;
-  isMobile?: boolean;
-  onClose?: () => void;
-}) {
-  const pathname = usePathname();
-  const isActive = pathname === href;
-
-  return (
-    <Link
-      href={href}
-      onClick={onClose}
-      className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-        isActive && 'bg-primary/10 text-primary font-semibold',
-        isMobile && 'text-lg'
-      )}
-    >
-      <Icon className="h-5 w-5" />
-      {label}
-    </Link>
-  );
-}
 
 export default function AuthedLayout({
   children,
@@ -81,10 +43,19 @@ export default function AuthedLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const navItems = useMemo(() => [
+    { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { href: '/transactions', label: t('nav.transactions'), icon: History },
+    { href: '/qr-pay', label: t('nav.qrPay'), icon: QrCode },
+    { href: '/my-qr', label: t('nav.myQr'), icon: User },
+    { href: '/settings', label: t('nav.settings'), icon: Settings },
+  ], [t]);
 
   const currentPage = useMemo(() => {
-    return navItems.find(item => item.href === pathname) || { label: 'Dashboard' };
-  }, [pathname]);
+    return navItems.find(item => item.href === pathname) || { label: t('nav.dashboard') };
+  }, [pathname, navItems, t]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -109,6 +80,37 @@ export default function AuthedLayout({
     )
   }
 
+function NavLink({
+  href,
+  label,
+  icon: Icon,
+  isMobile = false,
+  onClose,
+}: {
+  href: string;
+  label:string;
+  icon: React.ElementType;
+  isMobile?: boolean;
+  onClose?: () => void;
+}) {
+  const isActive = pathname === href;
+
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className={cn(
+        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+        isActive && 'bg-primary/10 text-primary font-semibold',
+        isMobile && 'text-lg'
+      )}
+    >
+      <Icon className="h-5 w-5" />
+      {label}
+    </Link>
+  );
+}
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr] bg-muted/40">
       {/* Desktop Sidebar */}
@@ -128,7 +130,7 @@ export default function AuthedLayout({
           <div className="mt-auto p-4">
              <Button variant="ghost" onClick={handleLogout} className="w-full justify-start">
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              {t('logout')}
             </Button>
           </div>
         </div>
@@ -163,7 +165,7 @@ export default function AuthedLayout({
                  <div className="mt-auto">
                     <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-lg">
                         <LogOut className="mr-3 h-5 w-5" />
-                        Logout
+                        {t('logout')}
                     </Button>
                 </div>
               </SheetContent>

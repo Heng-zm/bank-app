@@ -384,6 +384,10 @@ body {
   bottom: 0;
 }
 
+.bottom-4 {
+  bottom: 1rem;
+}
+
 .left-0 {
   left: 0;
 }
@@ -454,10 +458,6 @@ body {
 
 .top-\[50\%\] {
   top: 50%;
-}
-
-.bottom-4 {
-  bottom: 1rem;
 }
 
 .z-10 {
@@ -551,10 +551,6 @@ body {
 
 .mt-auto {
   margin-top: auto;
-}
-
-.ml-2 {
-  margin-left: .5rem;
 }
 
 .block {
@@ -1548,6 +1544,11 @@ body {
   color: hsl(var(--accent-foreground));
 }
 
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
@@ -1631,21 +1632,6 @@ body {
   color: hsl(var(--secondary-foreground));
 }
 
-.text-white {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
-}
-
-.text-yellow-500 {
-  --tw-text-opacity: 1;
-  color: rgb(234 179 8 / var(--tw-text-opacity, 1));
-}
-
-.text-black {
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
-}
-
 .text-slate-400 {
   --tw-text-opacity: 1;
   color: rgb(148 163 184 / var(--tw-text-opacity, 1));
@@ -1659,6 +1645,16 @@ body {
 .text-slate-700 {
   --tw-text-opacity: 1;
   color: rgb(51 65 85 / var(--tw-text-opacity, 1));
+}
+
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.text-yellow-500 {
+  --tw-text-opacity: 1;
+  color: rgb(234 179 8 / var(--tw-text-opacity, 1));
 }
 
 .underline {
@@ -1837,6 +1833,10 @@ body {
   font-family: Inter, sans-serif;
 }
 
+body.font-khmer {
+  font-family: Kantumruy Pro, sans-serif;
+}
+
 .file\:border-0::file-selector-button {
   border-width: 0;
 }
@@ -1878,6 +1878,10 @@ body {
   background-color: hsl(var(--accent));
 }
 
+.hover\:bg-black\/75:hover {
+  background-color: #000000bf;
+}
+
 .hover\:bg-destructive\/80:hover {
   background-color: hsl(var(--destructive) / .8);
 }
@@ -1908,10 +1912,6 @@ body {
 
 .hover\:bg-secondary\/80:hover {
   background-color: hsl(var(--secondary) / .8);
-}
-
-.hover\:bg-black\/75:hover {
-  background-color: #000000bf;
 }
 
 .hover\:bg-yellow-400:hover {

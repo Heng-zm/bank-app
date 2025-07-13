@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/hooks/use-auth';
+import { LanguageProvider } from '@/hooks/use-translation';
 
 export const metadata: Metadata = {
   title: 'FinSim - Simulated Banking',
@@ -21,11 +22,14 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("antialiased font-body", "h-full bg-background")}>
-        <AuthProvider>
-            {children}
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+              {children}
+          </AuthProvider>
+        </LanguageProvider>
         <Toaster />
       </body>
     </html>

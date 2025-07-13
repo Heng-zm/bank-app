@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useTranslation } from "@/hooks/use-translation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +37,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,7 +52,7 @@ export default function LoginPage() {
     setError(null);
 
     if (!auth) {
-        setError("Firebase is not configured. Please check your environment variables.");
+        setError(t('firebase.notConfigured'));
         setIsLoading(false);
         return;
     }
@@ -62,7 +63,7 @@ export default function LoginPage() {
     } catch (error: any) {
        let errorMessage = error.message;
         if (error.code === 'auth/invalid-credential') {
-            errorMessage = 'Invalid email or password. Please try again.';
+            errorMessage = t('login.invalidCredentials');
         }
         setError(errorMessage);
     } finally {
@@ -76,15 +77,15 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <LogIn />
-            Welcome Back
+            {t('login.title')}
           </CardTitle>
-          <CardDescription>Log in to access your FinSim account.</CardDescription>
+          <CardDescription>{t('login.description')}</CardDescription>
         </CardHeader>
         <CardContent>
            {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Login Failed</AlertTitle>
+              <AlertTitle>{t('login.failTitle')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -95,7 +96,7 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t('email')}</FormLabel>
                     <FormControl>
                       <Input placeholder="you@example.com" {...field} />
                     </FormControl>
@@ -108,7 +109,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t('password')}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -118,20 +119,20 @@ export default function LoginPage() {
               />
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="animate-spin" />}
-                Log In
+                {t('login.button')}
               </Button>
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
             <p>
-              Don't have an account?{" "}
+              {t('login.noAccount')}{" "}
               <Link href="/signup" className="underline">
-                Sign up
+                {t('login.signUpLink')}
               </Link>
             </p>
             <p>
               <Link href="/forgot-password"className="underline text-muted-foreground">
-                Forgot your password?
+                {t('login.forgotPasswordLink')}
               </Link>
             </p>
           </div>

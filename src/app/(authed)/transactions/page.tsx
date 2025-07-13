@@ -7,10 +7,12 @@ import { TransactionHistory } from "@/components/transaction-history";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { History } from "lucide-react";
+import { useTranslation } from "@/hooks/use-translation";
 
 export default function TransactionsPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const { transactions, isLoading: isAccountLoading } = useAccount(user?.uid);
+    const { t } = useTranslation();
 
     if (isAuthLoading || isAccountLoading) {
         return <Skeleton className="w-full h-[70vh]" />
@@ -19,7 +21,7 @@ export default function TransactionsPage() {
     return (
         <TransactionHistory 
             transactions={transactions} 
-            title="Full Transaction History"
+            title={t('transactions.title')}
             showFilters={true}
         />
     )

@@ -22,6 +22,7 @@ import { Calendar } from "@/components/ui/calendar";
 import type { DateRange } from "react-day-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "./ui/scroll-area";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -36,6 +37,7 @@ export function TransactionHistory({
 }: TransactionHistoryProps) {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [typeFilter, setTypeFilter] = useState<"all" | "deposit" | "withdrawal">("all");
+  const { t } = useTranslation();
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
@@ -70,19 +72,19 @@ export function TransactionHistory({
         <div className="grid gap-2 flex-1">
             <CardTitle>{title}</CardTitle>
             <CardDescription>
-                {showFilters ? 'A record of all your account activity.' : `Your ${transactions.length} most recent transactions.`}
+                {showFilters ? t('transactions.description') : t('transactions.recentDescription', { count: transactions.length })}
             </CardDescription>
         </div>
          {showFilters && (
             <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 mt-4 md:mt-0">
                 <Select value={typeFilter} onValueChange={(value: "all" | "deposit" | "withdrawal") => setTypeFilter(value)}>
                     <SelectTrigger>
-                        <SelectValue placeholder="Filter by type" />
+                        <SelectValue placeholder={t('transactions.filter.typePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="deposit">Deposit</SelectItem>
-                        <SelectItem value="withdrawal">Withdrawal</SelectItem>
+                        <SelectItem value="all">{t('transactions.filter.allTypes')}</SelectItem>
+                        <SelectItem value="deposit">{t('transactions.filter.deposit')}</SelectItem>
+                        <SelectItem value="withdrawal">{t('transactions.filter.withdrawal')}</SelectItem>
                     </SelectContent>
                 </Select>
 
@@ -106,7 +108,7 @@ export function TransactionHistory({
                             format(dateRange.from, "LLL dd, y")
                         )
                         ) : (
-                        <span>Pick a date range</span>
+                        <span>{t('transactions.filter.datePlaceholder')}</span>
                         )}
                     </Button>
                     </PopoverTrigger>
@@ -120,7 +122,7 @@ export function TransactionHistory({
                     />
                     </PopoverContent>
                 </Popover>
-                 <Button variant="ghost" size="icon" onClick={resetFilters} title="Reset filters">
+                 <Button variant="ghost" size="icon" onClick={resetFilters} title={t('transactions.filter.resetTitle')}>
                     <FilterX className="h-4 w-4" />
                  </Button>
             </div>
@@ -146,7 +148,7 @@ export function TransactionHistory({
                                 </div>
                                 <div className="space-y-1">
                                     <p className="font-medium">{tx.description}</p>
-                                    <p className="text-sm text-muted-foreground">{tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}</p>
+                                    <p className="text-sm text-muted-foreground">{tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : t('pending')}</p>
                                 </div>
                            </div>
                            <div className={cn(
@@ -161,7 +163,7 @@ export function TransactionHistory({
                 </ScrollArea>
             ) : (
                  <div className="text-center h-24 flex items-center justify-center">
-                    No transactions found.
+                    {t('transactions.noTransactions')}
                 </div>
             )}
         </div>
@@ -172,10 +174,10 @@ export function TransactionHistory({
             <Table>
                 <TableHeader>
                 <TableRow>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>{t('transactions.table.description')}</TableHead>
+                    <TableHead>{t('transactions.table.date')}</TableHead>
+                    <TableHead>{t('transactions.table.type')}</TableHead>
+                    <TableHead className="text-right">{t('transactions.table.amount')}</TableHead>
                 </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -186,14 +188,14 @@ export function TransactionHistory({
                             <span className="font-medium">{tx.description}</span>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                        {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : 'Pending'}
+                        {tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : t('pending')}
                         </TableCell>
                         <TableCell>
                         <Badge variant={tx.type === 'deposit' ? 'secondary' : 'outline'} className={cn(
                             tx.type === 'deposit' && "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border-emerald-200"
                         )}>
                             {tx.type === 'deposit' ? <ArrowDownLeft className="mr-1 h-3 w-3" /> : <ArrowUpRight className="mr-1 h-3 w-3" />}
-                            {tx.type}
+                            {t(`transactions.types.${tx.type}`)}
                         </Badge>
                         </TableCell>
                         <TableCell className={cn(
@@ -207,7 +209,7 @@ export function TransactionHistory({
                 ) : (
                     <TableRow>
                     <TableCell colSpan={4} className="h-24 text-center">
-                        No transactions found.
+                        {t('transactions.noTransactions')}
                     </TableCell>
                     </TableRow>
                 )}

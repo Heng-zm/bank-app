@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface AccountCardProps {
   account: Account;
@@ -13,6 +14,7 @@ interface AccountCardProps {
 
 export function AccountCard({ account }: AccountCardProps) {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const formattedBalance = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -28,8 +30,8 @@ export function AccountCard({ account }: AccountCardProps) {
     if (!account.accountNumber) return;
     navigator.clipboard.writeText(account.accountNumber);
     toast({
-      title: "Copied!",
-      description: "Account number copied to clipboard.",
+      title: t('account.copied'),
+      description: t('account.copiedDescription'),
     });
   };
 
@@ -45,7 +47,7 @@ export function AccountCard({ account }: AccountCardProps) {
                 <CardTitle className="text-4xl font-bold">{formattedBalance}</CardTitle>
             </div>
             <div className="text-right">
-                <div className="text-xs text-muted-foreground">Account Number</div>
+                <div className="text-xs text-muted-foreground">{t('account.accountNumber')}</div>
                 <Button variant="ghost" size="sm" className="font-mono text-sm font-semibold h-auto p-1" onClick={handleCopyAccountNumber}>
                     {formatAccountNumber(account.accountNumber)}
                 </Button>
@@ -53,7 +55,7 @@ export function AccountCard({ account }: AccountCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-xs text-muted-foreground">Available Balance</div>
+        <div className="text-xs text-muted-foreground">{t('account.availableBalance')}</div>
       </CardContent>
     </Card>
   );

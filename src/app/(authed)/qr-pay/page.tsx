@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { analyzeTransaction, AnalyzeTransactionOutput } from '@/ai/flows/analyze-transaction-flow';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/use-translation';
 
 
 interface QrCodeData {
@@ -45,6 +46,7 @@ export default function QrPayPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { handleAddTransaction, isProcessing, transactions } = useAccount(user?.uid);
+  const { t } = useTranslation();
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -104,9 +106,9 @@ export default function QrPayPage() {
     } catch (err) {
         console.error("Error accessing camera:", err);
         setHasCameraPermission(false);
-        setError("Camera access is required. Please enable camera permissions in your browser settings.");
+        setError(t('qrpay.cameraError'));
     }
-  }, [stopCamera]);
+  }, [stopCamera, t]);
 
 
   const processQrCodeData = (codeData: string) => {
@@ -120,10 +122,10 @@ export default function QrPayPage() {
                 setFinalAmount(data.amount);
             }
         } else {
-            setError("Invalid QR code format. Expected a recipient.");
+            setError(t('qrpay.invalidQrFormat'));
         }
     } catch (e) {
-        setError("Failed to parse QR code data. Please use a valid payment QR code.");
+        setError(t('qrpay.qrParseError'));
     }
   };
 
@@ -197,7 +199,7 @@ export default function QrPayPage() {
         setIsFlashOn(!isFlashOn);
     } catch (err) {
         console.error('Error toggling flashlight:', err);
-        toast({ variant: 'destructive', title: 'Flashlight Error', description: 'Could not toggle the flashlight.' });
+        toast({ variant: 'destructive', title: t('qrpay.flashError.title'), description: t('qrpay.flashError.description') });
     }
   };
   
@@ -225,7 +227,7 @@ export default function QrPayPage() {
                     if (code) {
                         processQrCodeData(code.data);
                     } else {
-                        toast({ variant: 'destructive', title: 'Scan Failed', description: 'No QR code could be found in the selected image.' });
+                        toast({ variant: 'destructive', title: t('qrpay.import.failTitle'), description: t('qrpay.import.failDescription') });
                     }
                 }
             }
@@ -249,11 +251,11 @@ export default function QrPayPage() {
         setIsPaymentSuccessful(true);
         setError(null);
         toast({
-            title: "Payment Successful",
-            description: `You paid ${finalAmount.toFixed(2)} to ${scannedData.recipient}.`
+            title: t('qrpay.paymentSuccess.title'),
+            description: t('qrpay.paymentSuccess.description', { amount: finalAmount.toFixed(2), recipient: scannedData.recipient })
         });
     } catch (e: any) {
-        setError(e.message || "An unexpected error occurred during payment.");
+        setError(e.message || t('qrpay.paymentError.unexpected'));
     }
   }
 
@@ -280,8 +282,8 @@ export default function QrPayPage() {
       console.error("Fraud analysis failed:", e);
       toast({
         variant: "destructive",
-        title: "Could not analyze transaction",
-        description: "Proceeding with payment, but please be cautious.",
+        title: t('qrpay.analysisError.title'),
+        description: t('qrpay.analysisError.description'),
       });
       await proceedWithPayment();
     }
@@ -303,14 +305,14 @@ export default function QrPayPage() {
   const renderConfirmation = () => (
      <div className="space-y-4">
          <div className="flex justify-between items-center">
-             <span className="text-muted-foreground">Amount</span>
+             <span className="text-muted-foreground">{t('amount')}</span>
              <span className="font-bold text-2xl text-primary">${finalAmount?.toFixed(2)}</span>
          </div>
          <Button onClick={handleConfirmPayment} className="w-full" disabled={isProcessing}>
-             {isProcessing ? <Loader2 className="animate-spin" /> : `Confirm Payment`}
+             {isProcessing ? <Loader2 className="animate-spin" /> : t('qrpay.confirmPaymentButton')}
          </Button>
           <Button variant="outline" onClick={handleScanAgain} className="w-full">
-             Cancel
+             {t('cancel')}
            </Button>
      </div>
   );
@@ -322,16 +324,16 @@ export default function QrPayPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="text-destructive"/>
-                Security Check
+                {t('qrpay.securityCheck.title')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {riskAnalysis?.reason || "This transaction appears unusual. Please review before proceeding."}
+              {riskAnalysis?.reason || t('qrpay.securityCheck.defaultReason')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={proceedWithPayment}>
-                Confirm Payment
+                {t('qrpay.confirmPaymentButton')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -341,14 +343,14 @@ export default function QrPayPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <QrCode />
-            Scan to Pay
+            {t('nav.qrPay')}
           </CardTitle>
           <CardDescription>
             {isPaymentSuccessful 
-              ? 'Payment was completed successfully.'
+              ? t('qrpay.status.completed')
               : scannedData 
-              ? 'Confirm your payment details.' 
-              : 'Position a QR code inside the frame.'
+              ? t('qrpay.status.confirmDetails')
+              : t('qrpay.status.positionQr')
             }
           </CardDescription>
         </CardHeader>
@@ -356,7 +358,7 @@ export default function QrPayPage() {
           {error && (
              <Alert variant="destructive" className="mb-4">
                <AlertTriangle className="h-4 w-4" />
-               <AlertTitle>Error</AlertTitle>
+               <AlertTitle>{t('error')}</AlertTitle>
                <AlertDescription>{error}</AlertDescription>
              </Alert>
           )}
@@ -373,7 +375,7 @@ export default function QrPayPage() {
                 )}
                 { hasCameraPermission === false && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white p-4 text-center">
-                        <p>Camera access denied. Please enable it in your browser settings.</p>
+                        <p>{t('qrpay.cameraDenied')}</p>
                     </div>
                 )}
                 { hasCameraPermission && (
@@ -394,7 +396,7 @@ export default function QrPayPage() {
                                 variant="outline"
                                 onClick={handleImportClick} 
                                 className="rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75"
-                                title="Import QR Code from image"
+                                title={t('qrpay.import.buttonTitle')}
                             >
                                 <Upload className="h-5 w-5"/>
                             </Button>
@@ -407,7 +409,7 @@ export default function QrPayPage() {
                                         "rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75",
                                         isFlashOn && "bg-yellow-400/80 text-black hover:bg-yellow-400"
                                     )}
-                                    title="Toggle flashlight"
+                                    title={t('qrpay.flashButtonTitle')}
                                 >
                                     <Zap className="h-5 w-5"/>
                                 </Button>
@@ -421,17 +423,17 @@ export default function QrPayPage() {
           {isPaymentSuccessful ? (
             <div className="text-center space-y-4 py-8">
                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-                <h3 className="text-xl font-bold">Payment Complete!</h3>
-                <p>You successfully paid ${finalAmount?.toFixed(2)} to {scannedData?.recipient}.</p>
+                <h3 className="text-xl font-bold">{t('qrpay.paymentComplete.title')}</h3>
+                <p>{t('qrpay.paymentComplete.description', { amount: finalAmount?.toFixed(2), recipient: scannedData?.recipient })}</p>
                 <Button onClick={handleScanAgain} className="w-full">
-                    Scan Another Code
+                    {t('qrpay.scanAnotherButton')}
                 </Button>
             </div>
           ) : scannedData ? (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Payment Details</h3>
+              <h3 className="text-lg font-semibold">{t('qrpay.paymentDetails')}</h3>
               <div className="flex justify-between items-center p-3 bg-muted rounded-md">
-                <span className="text-muted-foreground">Recipient</span>
+                <span className="text-muted-foreground">{t('recipient')}</span>
                 <span className="font-mono font-bold">{scannedData.recipient}</span>
               </div>
 
@@ -443,7 +445,7 @@ export default function QrPayPage() {
                             name="amount"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Amount</FormLabel>
+                                <FormLabel>{t('amount')}</FormLabel>
                                 <FormControl>
                                     <Input type="number" placeholder="0.00" {...field} step="0.01" autoFocus/>
                                 </FormControl>
@@ -452,10 +454,10 @@ export default function QrPayPage() {
                             )}
                         />
                         <Button type="submit" className="w-full">
-                           Set Amount
+                           {t('qrpay.setAmountButton')}
                         </Button>
                          <Button variant="outline" onClick={handleScanAgain} className="w-full">
-                            Cancel
+                            {t('cancel')}
                         </Button>
                     </form>
                 </Form>

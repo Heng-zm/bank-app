@@ -12,6 +12,7 @@ import { useAccount } from "@/hooks/use-account";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import type { NotificationPreferences } from "@/lib/types";
+import { useTranslation } from "@/hooks/use-translation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,7 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const profileFormSchema = z.object({
   holderName: z.string().min(2, "Name must be at least 2 characters."),
@@ -43,6 +44,7 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { account, updateAccountDetails } = useAccount(user?.uid);
+  const { t, setLanguage, language } = useTranslation();
 
   const [isProfileProcessing, setIsProfileProcessing] = useState(false);
   const [isPasswordProcessing, setIsPasswordProcessing] = useState(false);
@@ -76,9 +78,9 @@ export default function SettingsPage() {
     setIsProfileProcessing(true);
     try {
       await updateAccountDetails({ holderName: values.holderName });
-      toast({ title: "Success", description: "Your profile has been updated." });
+      toast({ title: t('success'), description: t('settings.profile.toastSuccess') });
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+      toast({ variant: "destructive", title: t('error'), description: error.message });
     } finally {
       setIsProfileProcessing(false);
     }
@@ -86,16 +88,16 @@ export default function SettingsPage() {
 
   const onPasswordSubmit = async (values: z.infer<typeof passwordFormSchema>) => {
     if (!user) {
-        toast({ variant: "destructive", title: "Error", description: "You are not logged in." });
+        toast({ variant: "destructive", title: t('error'), description: t('settings.password.notLoggedInError') });
         return;
     }
     setIsPasswordProcessing(true);
     try {
       await updatePassword(user, values.newPassword);
-      toast({ title: "Success", description: "Your password has been changed." });
+      toast({ title: t('success'), description: t('settings.password.toastSuccess') });
       passwordForm.reset();
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error updating password", description: error.message });
+      toast({ variant: "destructive", title: t('settings.password.toastErrorTitle'), description: error.message });
     } finally {
       setIsPasswordProcessing(false);
     }
@@ -105,21 +107,20 @@ export default function SettingsPage() {
     setIsNotificationsProcessing(true);
     try {
       await updateAccountDetails({ notificationPreferences: values });
-      toast({ title: "Success", description: "Your notification preferences have been updated." });
+      toast({ title: t('success'), description: t('settings.notifications.toastSuccess') });
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+      toast({ variant: "destructive", title: t('error'), description: error.message });
     } finally {
       setIsNotificationsProcessing(false);
     }
   };
 
-
   return (
     <div className="grid gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Update your personal information.</CardDescription>
+          <CardTitle>{t('settings.profile.title')}</CardTitle>
+          <CardDescription>{t('settings.profile.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...profileForm}>
@@ -129,9 +130,9 @@ export default function SettingsPage() {
                 name="holderName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Display Name</FormLabel>
+                    <FormLabel>{t('settings.profile.form.nameLabel')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your Name" {...field} />
+                      <Input placeholder={t('settings.profile.form.namePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,7 +140,7 @@ export default function SettingsPage() {
               />
               <Button type="submit" disabled={isProfileProcessing}>
                 {isProfileProcessing && <Loader2 className="animate-spin" />}
-                Save Changes
+                {t('settings.saveChanges')}
               </Button>
             </form>
           </Form>
@@ -148,8 +149,29 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>Choose a new, strong password.</CardDescription>
+          <CardTitle>{t('settings.language.title')}</CardTitle>
+          <CardDescription>{t('settings.language.description')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <div className="space-y-2">
+                <Label htmlFor="language-select">{t('settings.language.selectLabel')}</Label>
+                <Select value={language} onValueChange={(value) => setLanguage(value as 'en' | 'km')}>
+                    <SelectTrigger id="language-select">
+                        <SelectValue placeholder={t('settings.language.selectPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="km">ភាសាខ្មែរ (Khmer)</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('settings.password.title')}</CardTitle>
+          <CardDescription>{t('settings.password.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...passwordForm}>
@@ -159,7 +181,7 @@ export default function SettingsPage() {
                 name="newPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New Password</FormLabel>
+                    <FormLabel>{t('settings.password.form.newPasswordLabel')}</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -172,7 +194,7 @@ export default function SettingsPage() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm New Password</FormLabel>
+                    <FormLabel>{t('settings.password.form.confirmPasswordLabel')}</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -182,7 +204,7 @@ export default function SettingsPage() {
               />
               <Button type="submit" disabled={isPasswordProcessing}>
                 {isPasswordProcessing && <Loader2 className="animate-spin" />}
-                Update Password
+                {t('settings.password.updateButton')}
               </Button>
             </form>
           </Form>
@@ -191,8 +213,8 @@ export default function SettingsPage() {
 
        <Card>
         <CardHeader>
-          <CardTitle>Notification Preferences</CardTitle>
-          <CardDescription>Manage how you receive notifications from us.</CardDescription>
+          <CardTitle>{t('settings.notifications.title')}</CardTitle>
+          <CardDescription>{t('settings.notifications.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...notificationsForm}>
@@ -203,8 +225,8 @@ export default function SettingsPage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">Deposits & Transfers</FormLabel>
-                      <p className="text-sm text-muted-foreground">Receive a notification when you get paid.</p>
+                      <FormLabel className="text-base">{t('settings.notifications.depositsLabel')}</FormLabel>
+                      <p className="text-sm text-muted-foreground">{t('settings.notifications.depositsDescription')}</p>
                     </div>
                     <FormControl>
                       <Switch
@@ -221,8 +243,8 @@ export default function SettingsPage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">Security & Balance Alerts</FormLabel>
-                      <p className="text-sm text-muted-foreground">Get alerts for low balances or suspicious activity.</p>
+                      <FormLabel className="text-base">{t('settings.notifications.alertsLabel')}</FormLabel>
+                      <p className="text-sm text-muted-foreground">{t('settings.notifications.alertsDescription')}</p>
                     </div>
                     <FormControl>
                       <Switch
@@ -239,8 +261,8 @@ export default function SettingsPage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">Feature Announcements</FormLabel>
-                      <p className="text-sm text-muted-foreground">Find out about new features and updates.</p>
+                      <FormLabel className="text-base">{t('settings.notifications.infoLabel')}</FormLabel>
+                      <p className="text-sm text-muted-foreground">{t('settings.notifications.infoDescription')}</p>
                     </div>
                     <FormControl>
                       <Switch
@@ -253,7 +275,7 @@ export default function SettingsPage() {
               />
               <Button type="submit" disabled={isNotificationsProcessing}>
                 {isNotificationsProcessing && <Loader2 className="animate-spin" />}
-                Save Preferences
+                {t('settings.savePreferences')}
               </Button>
             </form>
           </Form>

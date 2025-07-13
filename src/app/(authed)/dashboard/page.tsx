@@ -37,12 +37,14 @@ import {
 } from '@dnd-kit/sortable';
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { DndItem } from "@/components/dnd-item";
+import { useTranslation } from "@/hooks/use-translation";
 
 const DEFAULT_WIDGET_ORDER = ["account", "spending", "transactionForm", "history", "admin"];
 
 export default function DashboardPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { 
     account, 
     transactions, 
@@ -74,15 +76,16 @@ export default function DashboardPage() {
   }
 
   const chartData = useMemo(() => {
+    if (!transactions) return [];
     const spending = transactions
       .filter(t => t.type === 'withdrawal')
       .reduce((acc, t) => {
         // Simple categorization for example purposes
-        let category = "General";
-        if (/payment to/i.test(t.description)) category = "Transfers";
-        else if (/dinner|food|restaurant/i.test(t.description)) category = "Dining";
-        else if (/groceries|market/i.test(t.description)) category = "Groceries";
-        else if (/transport|gas/i.test(t.description)) category = "Transport";
+        let category = t('dashboard.spending.general');
+        if (/payment to/i.test(t.description)) category = t('dashboard.spending.transfers');
+        else if (/dinner|food|restaurant/i.test(t.description)) category = t('dashboard.spending.dining');
+        else if (/groceries|market/i.test(t.description)) category = t('dashboard.spending.groceries');
+        else if (/transport|gas/i.test(t.description)) category = t('dashboard.spending.transport');
         
         if (!acc[category]) {
           acc[category] = 0;
@@ -92,7 +95,7 @@ export default function DashboardPage() {
       }, {} as {[key: string]: number});
     
     return Object.entries(spending).map(([name, value]) => ({ name, value, fill: `hsl(var(--chart-${Object.keys(spending).indexOf(name) + 1}))` }));
-  }, [transactions]);
+  }, [transactions, t]);
   
   const chartConfig = useMemo(() => {
     return chartData.reduce((acc, item, index) => {
@@ -115,10 +118,10 @@ export default function DashboardPage() {
         isRead: false,
         timestamp: serverTimestamp(),
       });
-      toast({ title: "Announcement Sent!", description: "A new feature notification has been created." });
+      toast({ title: t('dashboard.admin.toastSuccessTitle'), description: t('dashboard.admin.toastSuccessDescription') });
     } catch (error) {
       console.error("Error announcing feature:", error);
-      toast({ variant: "destructive", title: "Error", description: "Could not send announcement."});
+      toast({ variant: "destructive", title: t('error'), description: t('dashboard.admin.toastErrorDescription')});
     }
   }
 
@@ -143,9 +146,9 @@ export default function DashboardPage() {
         <CardHeader>
             <CardTitle className="flex items-center gap-2">
                 <PieChart className="h-5 w-5"/>
-                Spending Summary
+                {t('dashboard.spending.title')}
             </CardTitle>
-            <CardDescription>A breakdown of your spending by category.</CardDescription>
+            <CardDescription>{t('dashboard.spending.description')}</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px]">
           {chartData.length > 0 ? (
@@ -162,20 +165,20 @@ export default function DashboardPage() {
             </ChartContainer>
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              No spending data to display.
+              {t('dashboard.spending.noData')}
             </div>
           )}
         </CardContent>
       </Card>
     ),
     transactionForm: <TransactionForm onSubmit={handleAddTransaction} isProcessing={isProcessing} />,
-    history: <TransactionHistory title="Recent Transactions" transactions={transactions.slice(0, 10)} />,
+    history: <TransactionHistory title={t('dashboard.history.title')} transactions={transactions.slice(0, 10)} />,
     admin: (
       <div className="p-4 border rounded-xl bg-card text-card-foreground shadow-sm space-y-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-        <h3 className="font-semibold text-sm">Admin Action</h3>
-        <p className="text-xs text-muted-foreground">Simulate a new feature announcement for the current user.</p>
+        <h3 className="font-semibold text-sm">{t('dashboard.admin.title')}</h3>
+        <p className="text-xs text-muted-foreground">{t('dashboard.admin.description')}</p>
         <Button onClick={handleAnnounceFeature} size="sm" className="w-full" variant="secondary">
-          <Megaphone className="mr-2 h-4 w-4"/> Announce New Feature
+          <Megaphone className="mr-2 h-4 w-4"/> {t('dashboard.admin.button')}
         </Button>
       </div>
     ),
