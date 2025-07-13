@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
-import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle, Zap } from 'lucide-react';
+import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle, Zap, Upload } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -49,6 +49,7 @@ export default function QrPayPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameId = useRef<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [scannedData, setScannedData] = useState<QrCodeData | null>(null);
@@ -92,7 +93,6 @@ export default function QrPayPage() {
             streamRef.current = stream;
         }
         
-        // Check for flashlight support
         const videoTrack = stream.getVideoTracks()[0];
         const capabilities = videoTrack.getCapabilities();
         if (capabilities.torch) {
@@ -103,9 +103,28 @@ export default function QrPayPage() {
     } catch (err) {
         console.error("Error accessing camera:", err);
         setHasCameraPermission(false);
-        setError("Camera access is required to scan QR codes. Please enable camera permissions in your browser settings.");
+        setError("Camera access is required. Please enable camera permissions in your browser settings.");
     }
   }, [stopCamera]);
+
+
+  const processQrCodeData = (codeData: string) => {
+    try {
+        const data = JSON.parse(codeData) as QrCodeData;
+        if (data.recipient && typeof data.recipient === 'string') {
+            stopCamera();
+            setScannedData(data);
+            setError(null);
+            if (data.amount && typeof data.amount === 'number' && data.amount > 0) {
+                setFinalAmount(data.amount);
+            }
+        } else {
+            setError("Invalid QR code format. Expected a recipient.");
+        }
+    } catch (e) {
+        setError("Failed to parse QR code data. Please use a valid payment QR code.");
+    }
+  };
 
 
   const tick = useCallback(() => {
@@ -127,21 +146,7 @@ export default function QrPayPage() {
               });
 
               if (code) {
-                  try {
-                      const data = JSON.parse(code.data) as QrCodeData;
-                      if (data.recipient && typeof data.recipient === 'string') {
-                          stopCamera();
-                          setScannedData(data);
-                          setError(null);
-                          if (data.amount && typeof data.amount === 'number' && data.amount > 0) {
-                             setFinalAmount(data.amount);
-                          }
-                      } else {
-                          setError("Invalid QR code format. Expected a recipient.");
-                      }
-                  } catch (e) {
-                      setError("Failed to parse QR code data. Please use a valid payment QR code.");
-                  }
+                processQrCodeData(code.data);
               }
           }
         }
@@ -193,6 +198,42 @@ export default function QrPayPage() {
         console.error('Error toggling flashlight:', err);
         toast({ variant: 'destructive', title: 'Flashlight Error', description: 'Could not toggle the flashlight.' });
     }
+  };
+  
+  const handleImportClick = () => {
+      fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const image = new Image();
+        image.onload = () => {
+            if (canvasRef.current) {
+                const canvas = canvasRef.current;
+                const context = canvas.getContext('2d');
+                if (context) {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    context.drawImage(image, 0, 0, image.width, image.height);
+                    const imageData = context.getImageData(0, 0, image.width, image.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    if (code) {
+                        processQrCodeData(code.data);
+                    } else {
+                        toast({ variant: 'destructive', title: 'Scan Failed', description: 'No QR code could be found in the selected image.' });
+                    }
+                }
+            }
+        };
+        image.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+    // Reset file input value to allow re-selection of the same file
+    event.target.value = '';
   };
 
 
@@ -339,19 +380,38 @@ export default function QrPayPage() {
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white p-4">
                             <div className="absolute w-2/3 h-2/3 border-4 border-dashed border-white/50 rounded-lg"/>
                         </div>
-                        {isFlashSupported && (
+                        <div className="absolute bottom-4 right-4 flex gap-2">
+                             <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                                accept="image/*"
+                            />
                             <Button 
                                 size="icon" 
                                 variant="outline"
-                                onClick={toggleFlashlight} 
-                                className={cn(
-                                    "absolute bottom-4 right-4 rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75",
-                                    isFlashOn && "bg-yellow-400/80 text-black hover:bg-yellow-400"
-                                )}
+                                onClick={handleImportClick} 
+                                className="rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75"
+                                title="Import QR Code from image"
                             >
-                                <Zap className="h-5 w-5"/>
+                                <Upload className="h-5 w-5"/>
                             </Button>
-                        )}
+                            {isFlashSupported && (
+                                <Button 
+                                    size="icon" 
+                                    variant="outline"
+                                    onClick={toggleFlashlight} 
+                                    className={cn(
+                                        "rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75",
+                                        isFlashOn && "bg-yellow-400/80 text-black hover:bg-yellow-400"
+                                    )}
+                                    title="Toggle flashlight"
+                                >
+                                    <Zap className="h-5 w-5"/>
+                                </Button>
+                            )}
+                        </div>
                     </>
                 )}
             </div>
