@@ -38,3 +38,8 @@ export interface Notification {
     isRead: boolean;
     timestamp: string;
 }
+
+export interface FrequentRecipient {
+    accountNumber: string;
+    name: string;
+}

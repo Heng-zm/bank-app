@@ -38,8 +38,9 @@ import {
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { DndItem } from "@/components/dnd-item";
 import { useTranslation } from "@/hooks/use-translation";
+import { QuickPayWidget } from "@/components/quick-pay-widget";
 
-const DEFAULT_WIDGET_ORDER = ["account", "spending", "transactionForm", "history", "admin"];
+const DEFAULT_WIDGET_ORDER = ["account", "quickPay", "spending", "transactionForm", "history", "admin"];
 
 export default function DashboardPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -50,6 +51,7 @@ export default function DashboardPage() {
     transactions, 
     isProcessing, 
     isLoading: isAccountLoading,
+    frequentRecipients,
     handleAddTransaction,
   } = useAccount(user?.uid);
   
@@ -78,7 +80,7 @@ export default function DashboardPage() {
   const chartData = useMemo(() => {
     if (!transactions) return [];
     const spending = transactions
-      .filter(t => t.type === 'withdrawal')
+      .filter(tx => tx.type === 'withdrawal')
       .reduce((acc, tx) => {
         // Simple categorization for example purposes
         let category = t('dashboard.spending.general');
@@ -130,6 +132,7 @@ export default function DashboardPage() {
        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="lg:col-span-4 space-y-4">
             <Skeleton className="h-[125px] w-full" />
+            <Skeleton className="h-[150px] w-full" />
             <Skeleton className="h-[450px] w-full" />
         </div>
         <div className="lg:col-span-3">
@@ -141,6 +144,13 @@ export default function DashboardPage() {
 
   const widgets: { [key: string]: React.ReactNode } = {
     account: <AccountCard account={account} />,
+    quickPay: (
+      <QuickPayWidget 
+        recipients={frequentRecipients} 
+        onPay={handleAddTransaction}
+        isProcessing={isProcessing}
+      />
+    ),
     spending: (
       <Card className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         <CardHeader>
@@ -186,6 +196,7 @@ export default function DashboardPage() {
 
   const mainWidgets = {
     account: widgets.account,
+    quickPay: widgets.quickPay,
     spending: widgets.spending,
     transactionForm: widgets.transactionForm,
     admin: widgets.admin,

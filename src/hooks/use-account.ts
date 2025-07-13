@@ -20,7 +20,7 @@ import {
   limit,
   updateDoc
 } from "firebase/firestore";
-import type { Account, Transaction, TransactionFormData, Notification } from "@/lib/types";
+import type { Account, Transaction, TransactionFormData, Notification, FrequentRecipient } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 
@@ -51,6 +51,7 @@ export function useAccount(userId?: string) {
   });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [frequentRecipients, setFrequentRecipients] = useState<FrequentRecipient[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const notificationsRef = useRef<Notification[]>([]);
@@ -111,7 +112,7 @@ export function useAccount(userId?: string) {
         where("accountId", "==", userId),
         orderBy("timestamp", "desc")
     );
-    const unsubscribeTransactions = onSnapshot(transactionsQuery, (querySnapshot) => {
+    const unsubscribeTransactions = onSnapshot(transactionsQuery, async (querySnapshot) => {
         const txs: Transaction[] = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
@@ -122,6 +123,41 @@ export function useAccount(userId?: string) {
             } as Transaction);
         });
         setTransactions(txs);
+        
+        // Analyze for frequent recipients
+        const recipientCounts = txs
+            .filter(tx => tx.type === 'withdrawal' && tx.recipient)
+            .reduce((acc, tx) => {
+                const recipient = tx.recipient!;
+                acc[recipient] = (acc[recipient] || 0) + 1;
+                return acc;
+            }, {} as Record<string, number>);
+
+        const sortedRecipients = Object.entries(recipientCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 3)
+            .map(([accountNumber]) => accountNumber);
+        
+        if (sortedRecipients.length > 0) {
+            const q = query(collection(db, "accounts"), where("accountNumber", "in", sortedRecipients));
+            const recipientDocs = await getDocs(q);
+            const recipientData: Record<string, string> = {};
+            recipientDocs.forEach(doc => {
+                const data = doc.data();
+                recipientData[data.accountNumber] = data.holderName;
+            });
+
+            const frequentWithNames = sortedRecipients.map(accountNumber => ({
+                accountNumber,
+                name: recipientData[accountNumber] || "Unknown User"
+            }));
+            
+            setFrequentRecipients(frequentWithNames);
+        } else {
+            setFrequentRecipients([]);
+        }
+
+
         setIsLoading(false);
     }, (error) => {
         console.error("Error listening to transactions:", error);
@@ -327,6 +363,7 @@ export function useAccount(userId?: string) {
     account,
     transactions,
     notifications,
+    frequentRecipients,
     isProcessing,
     isLoading,
     handleAddTransaction,

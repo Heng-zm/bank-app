@@ -86,6 +86,16 @@
             "withdrawal": "Withdrawal"
         }
     },
+    "quickpay": {
+        "title": "Quick Pay",
+        "description": "Send money to your frequent contacts.",
+        "noRecipients": "Once you make a few transactions, your frequent contacts will appear here.",
+        "dialog": {
+            "title": "Pay {{name}}",
+            "description": "Confirm the details to send your payment quickly.",
+            "sendButton": "Send Payment"
+        }
+    },
     "qrpay": {
         "title": "Scan to Pay",
         "cameraError": "Camera access is required. Please enable camera permissions in your browser settings.",
