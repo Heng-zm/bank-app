@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard,
+  Home,
   LogOut,
   QrCode,
   Landmark,
@@ -48,7 +48,7 @@ export default function AuthedLayout({
   const { t } = useTranslation();
 
   const navItems = useMemo(() => [
-    { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { href: '/dashboard', label: t('nav.dashboard'), icon: Home },
     { href: '/settings', label: t('nav.settings'), icon: Settings },
   ], [t]);
 

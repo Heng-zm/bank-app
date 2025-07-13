@@ -14,7 +14,7 @@
         "notConfigured": "Firebase is not configured. Please check your environment variables."
     },
     "nav": {
-        "dashboard": "Dashboard",
+        "dashboard": "Home",
         "settings": "Settings"
     },
     "account": {
