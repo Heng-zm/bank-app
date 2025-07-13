@@ -380,7 +380,7 @@ export default function QrPayPage() {
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white p-4">
                             <div className="absolute w-2/3 h-2/3 border-4 border-dashed border-white/50 rounded-lg"/>
                         </div>
-                        <div className="absolute bottom-4 right-4 flex gap-2">
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                              <input
                                 type="file"
                                 ref={fileInputRef}
