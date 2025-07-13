@@ -17,6 +17,9 @@ import {
   User,
   History,
   Settings,
+  Award,
+  ReceiptText,
+  ArrowRightLeft
 } from 'lucide-react';
 import {
   Sheet,
@@ -48,6 +51,10 @@ export default function AuthedLayout({
   const navItems = useMemo(() => [
     { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { href: '/transactions', label: t('nav.transactions'), icon: History },
+    { href: '/transfer', label: t('nav.transfer'), icon: ArrowRightLeft },
+    { href: '/bill-pay', label: t('nav.billPay'), icon: ReceiptText },
+    { href: '/rewards', label: t('nav.rewards'), icon: Award },
+    { href: '/statement', label: t('nav.statement'), icon: ReceiptText },
     { href: '/qr-pay', label: t('nav.qrPay'), icon: QrCode },
     { href: '/my-qr', label: t('nav.myQr'), icon: User },
     { href: '/settings', label: t('nav.settings'), icon: Settings },

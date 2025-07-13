@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Megaphone, PieChart, Wallet, CreditCard, Banknote, Landmark } from "lucide-react";
+import { Megaphone, PieChart, Wallet, CreditCard, Banknote, Landmark, ArrowRightLeft, ReceiptText, Award, Receipt } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import Link from 'next/link';
 
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { DndItem } from "@/components/dnd-item";
@@ -90,53 +91,61 @@ export default function DashboardPage() {
         </Card>
 
         <div className="dashboard-grid">
-             <Card className="bg-red-500/10 border-red-500/20">
-                <CardHeader>
-                    <CardTitle className="flex items-start justify-between">
-                        Bill Pay
-                        <CreditCard className="h-6 w-6 text-red-500"/>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Due on May 14th</p>
-                </CardContent>
-            </Card>
+             <Link href="/bill-pay" className="hover:scale-[1.02] transition-transform duration-200">
+                <Card className="bg-red-500/10 border-red-500/20 h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-start justify-between">
+                            {t('nav.billPay')}
+                            <CreditCard className="h-6 w-6 text-red-500"/>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">{t('billPay.dueNext')}</p>
+                    </CardContent>
+                </Card>
+            </Link>
 
-            <Card className="bg-purple-500/10 border-purple-500/20">
-                <CardHeader>
-                    <CardTitle className="flex items-start justify-between">
-                        Rewards
-                        <Wallet className="h-6 w-6 text-purple-500"/>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">12,324 Points</p>
-                </CardContent>
-            </Card>
+            <Link href="/rewards" className="hover:scale-[1.02] transition-transform duration-200">
+                <Card className="bg-purple-500/10 border-purple-500/20 h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-start justify-between">
+                            {t('nav.rewards')}
+                            <Award className="h-6 w-6 text-purple-500"/>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">12,324 {t('rewards.points')}</p>
+                    </CardContent>
+                </Card>
+            </Link>
             
-            <Card className="bg-green-500/10 border-green-500/20">
-                <CardHeader>
-                    <CardTitle className="flex items-start justify-between">
-                        Statement
-                        <Banknote className="h-6 w-6 text-green-500"/>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">June 2024 Available</p>
-                </CardContent>
-            </Card>
+            <Link href="/statement" className="hover:scale-[1.02] transition-transform duration-200">
+                <Card className="bg-green-500/10 border-green-500/20 h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-start justify-between">
+                            {t('nav.statement')}
+                            <ReceiptText className="h-6 w-6 text-green-500"/>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">{t('statement.available')}</p>
+                    </CardContent>
+                </Card>
+            </Link>
 
-             <Card className="bg-blue-500/10 border-blue-500/20">
-                <CardHeader>
-                    <CardTitle className="flex items-start justify-between">
-                        Transfer
-                        <Landmark className="h-6 w-6 text-blue-500"/>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Send & Request Funds</p>
-                </CardContent>
-            </Card>
+             <Link href="/transfer" className="hover:scale-[1.02] transition-transform duration-200">
+                <Card className="bg-blue-500/10 border-blue-500/20 h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-start justify-between">
+                            {t('nav.transfer')}
+                            <ArrowRightLeft className="h-6 w-6 text-blue-500"/>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">{t('transfer.description')}</p>
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
 
         <TransactionHistory title={t('dashboard.history.title')} transactions={transactions.slice(0, 5)} />
