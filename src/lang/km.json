@@ -49,6 +49,14 @@
             "toastSuccessTitle": "ការប្រកាសបានផ្ញើ!",
             "toastSuccessDescription": "ការជូនដំណឹងអំពីមុខងារថ្មីត្រូវបានបង្កើត។",
             "toastErrorDescription": "មិនអាចផ្ញើការប្រកាសបានទេ។"
+        },
+        "myQr": {
+            "title": "QR កូដរបស់ខ្ញុំ",
+            "description": "បង្ហាញ QR របស់អ្នកដើម្បីទទួលប្រាក់។"
+        },
+        "scanQr": {
+            "title": "ស្កេនដើម្បីបង់ប្រាក់",
+            "description": "បង់ប្រាក់ឱ្យនរណាម្នាក់ដោយស្កេន QR កូដរបស់ពួកគេ។"
         }
     },
     "transactionForm": {

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Megaphone, ArrowRightLeft } from "lucide-react";
+import { Megaphone, ArrowRightLeft, User, QrCode } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from 'next/link';
 
@@ -121,6 +121,32 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground">{t('transfer.description')}</p>
+                    </CardContent>
+                </Card>
+            </Link>
+             <Link href="/my-qr" className="hover:scale-[1.02] transition-transform duration-200">
+                <Card className="bg-purple-500/10 border-purple-500/20 h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-start justify-between">
+                            {t('dashboard.myQr.title')}
+                            <User className="h-6 w-6 text-purple-500"/>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">{t('dashboard.myQr.description')}</p>
+                    </CardContent>
+                </Card>
+            </Link>
+             <Link href="/qr-pay" className="hover:scale-[1.02] transition-transform duration-200">
+                <Card className="bg-green-500/10 border-green-500/20 h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-start justify-between">
+                            {t('dashboard.scanQr.title')}
+                            <QrCode className="h-6 w-6 text-green-500"/>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">{t('dashboard.scanQr.description')}</p>
                     </CardContent>
                 </Card>
             </Link>

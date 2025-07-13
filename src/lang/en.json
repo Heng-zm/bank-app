@@ -49,6 +49,14 @@
             "toastSuccessTitle": "Announcement Sent!",
             "toastSuccessDescription": "A new feature notification has been created.",
             "toastErrorDescription": "Could not send announcement."
+        },
+        "myQr": {
+            "title": "My QR Code",
+            "description": "Display your QR to receive money."
+        },
+        "scanQr": {
+            "title": "Scan to Pay",
+            "description": "Pay someone by scanning their QR code."
         }
     },
     "transactionForm": {
