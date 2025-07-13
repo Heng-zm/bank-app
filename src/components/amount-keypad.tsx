@@ -10,10 +10,9 @@ import { useTranslation } from '@/hooks/use-translation';
 interface AmountKeypadProps {
   onSubmit: (amount: number) => void;
   onCancel: () => void;
-  commissionRate?: number;
 }
 
-export function AmountKeypad({ onSubmit, onCancel, commissionRate = 0 }: AmountKeypadProps) {
+export function AmountKeypad({ onSubmit, onCancel }: AmountKeypadProps) {
   const [amountValue, setAmountValue] = useState('0');
   const { t } = useTranslation();
 
@@ -50,8 +49,6 @@ export function AmountKeypad({ onSubmit, onCancel, commissionRate = 0 }: AmountK
   };
 
   const numericAmount = parseFloat(amountValue) || 0;
-  const commission = numericAmount * commissionRate;
-  const totalAmount = numericAmount + commission;
   const isAmountValid = numericAmount > 0;
 
   const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'backspace'];
@@ -63,11 +60,6 @@ export function AmountKeypad({ onSubmit, onCancel, commissionRate = 0 }: AmountK
             <span className="absolute left-0 top-1/2 -translate-y-1/2 text-3xl text-muted-foreground">$</span>
             <span className="text-5xl font-bold tracking-tight pl-6 pr-1">{amountValue}</span>
         </div>
-        {commissionRate > 0 && isAmountValid && (
-          <p className="text-sm text-muted-foreground">
-            {commissionRate * 100}% commission. Total amount ${totalAmount.toFixed(2)}
-          </p>
-        )}
       </div>
 
       <div className="keypad-grid">

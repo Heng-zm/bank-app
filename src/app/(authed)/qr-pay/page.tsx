@@ -423,7 +423,6 @@ export default function QrPayPage() {
                 <AmountKeypad 
                   onSubmit={handleAmountSubmit} 
                   onCancel={handleScanAgain}
-                  commissionRate={0.02} 
                 />
               )}
             </div>
