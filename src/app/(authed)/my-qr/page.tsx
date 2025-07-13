@@ -23,6 +23,10 @@ const formSchema = z.object({
   amount: z.coerce.number().min(0, { message: "Amount cannot be negative." }).optional(),
 });
 
+// SVG icon for the QR code center, converted to a data URI
+const landmarkIconDataUri = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxZTRmYWYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1sYW5kbWFyayI+PGxpbmUgeDE9IjMiIHgyPSIyMSIgeTE9IjIyIiB5Mj0iMjIiLz48bGluZSB4MT0iNiIgeDI9IjYiIHkxPSIxOCIgeTI9IjExIi8+PGxpbmUgeDE9IjEwIiB4Mj0iMTAiIHkxPSIxOCIgeTI9IjExIi8+PGxpbmUgeDE9IjE0IiB4Mj0iMTQiIHkxPSIxOCIgeTI9IjExIi8+PGxpbmUgeDE9IjE4IiB4Mj0iMTgiIHkxPSIxOCIgeTI9IjExIi8+PHBvbHlnb24gcG9pbnRzPSIxMiAyIDIwIDcgNCA3Ii8+PC9zdmc+";
+
+
 export default function MyQrPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { account, isLoading: isAccountLoading } = useAccount(user?.uid);
@@ -196,7 +200,7 @@ export default function MyQrPage() {
                         level="Q"
                         includeMargin={false}
                         imageSettings={{
-                            src: "https://placehold.co/100x100.png",
+                            src: landmarkIconDataUri,
                             x: undefined,
                             y: undefined,
                             height: 48,
