@@ -5,9 +5,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
 import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle, Zap, Upload } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 
 import { useAccount } from '@/hooks/use-account';
 import { useAuth } from '@/hooks/use-auth';
@@ -15,8 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,16 +25,13 @@ import {
 import { analyzeTransaction, AnalyzeTransactionOutput } from '@/ai/flows/analyze-transaction-flow';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
+import { AmountKeypad } from '@/components/amount-keypad';
 
 
 interface QrCodeData {
   recipient: string;
   amount?: number;
 }
-
-const paymentFormSchema = z.object({
-    amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
-});
 
 export default function QrPayPage() {
   const router = useRouter();
@@ -65,14 +57,6 @@ export default function QrPayPage() {
 
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [isFlashSupported, setIsFlashSupported] = useState(false);
-
-
-  const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
-    resolver: zodResolver(paymentFormSchema),
-    defaultValues: {
-      amount: '' as any,
-    },
-  });
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -235,7 +219,6 @@ export default function QrPayPage() {
         image.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
-    // Reset file input value to allow re-selection of the same file
     event.target.value = '';
   };
 
@@ -294,12 +277,11 @@ export default function QrPayPage() {
       setError(null);
       setIsPaymentSuccessful(false);
       setFinalAmount(null);
-      paymentForm.reset();
       startCamera();
   }
   
-  const onPaymentFormSubmit = (values: z.infer<typeof paymentFormSchema>) => {
-    setFinalAmount(values.amount);
+  const handleAmountSubmit = (amount: number) => {
+    setFinalAmount(amount);
   }
   
   const renderConfirmation = () => (
@@ -432,35 +414,17 @@ export default function QrPayPage() {
           ) : scannedData ? (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">{t('qrpay.paymentDetails')}</h3>
-              <div className="flex justify-between items-center p-3 bg-muted rounded-md">
+              <div className="flex justify-between items-center p-3 bg-muted rounded-md mb-4">
                 <span className="text-muted-foreground">{t('recipient')}</span>
                 <span className="font-mono font-bold">{scannedData.recipient}</span>
               </div>
 
               {finalAmount ? renderConfirmation() : (
-                <Form {...paymentForm}>
-                    <form onSubmit={paymentForm.handleSubmit(onPaymentFormSubmit)} className="space-y-4">
-                         <FormField
-                            control={paymentForm.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>{t('amount')}</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="0.00" {...field} step="0.01" autoFocus/>
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit" className="w-full">
-                           {t('qrpay.setAmountButton')}
-                        </Button>
-                         <Button variant="outline" onClick={handleScanAgain} className="w-full">
-                            {t('cancel')}
-                        </Button>
-                    </form>
-                </Form>
+                <AmountKeypad 
+                  onSubmit={handleAmountSubmit} 
+                  onCancel={handleScanAgain}
+                  commissionRate={0.02} 
+                />
               )}
             </div>
           ) : null}

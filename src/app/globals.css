@@ -113,4 +113,10 @@ body.font-khmer {
     .dashboard-card-link {
         @apply hover:scale-[1.02] transition-transform duration-200;
     }
+
+    .keypad-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
 }
