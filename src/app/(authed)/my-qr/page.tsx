@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Share2, User, RefreshCcw, Download } from 'lucide-react';
+import { Share2, User, RefreshCcw, Download, Landmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -93,24 +93,79 @@ export default function MyQrPage() {
   }
 
   const handleSaveQrCode = () => {
-    if (qrCodeRef.current) {
-        const canvas = qrCodeRef.current.querySelector("canvas");
-        if (canvas) {
-            const pngUrl = canvas
-                .toDataURL("image/png")
-                .replace("image/png", "image/octet-stream");
-            
-            const downloadLink = document.createElement("a");
-            downloadLink.href = pngUrl;
-            downloadLink.download = "finsim-qr-code.png";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-             toast({ title: "QR Code Saved", description: "The QR code has been downloaded as a PNG file."});
-        } else {
-             toast({ variant: "destructive", title: "Save Failed", description: "Could not find the QR code canvas to save."});
-        }
+    if (!qrCodeRef.current || !account) {
+        toast({ variant: "destructive", title: "Save Failed", description: "QR code data is not ready."});
+        return;
     }
+
+    const qrCanvas = qrCodeRef.current.querySelector("canvas");
+    if (!qrCanvas) {
+        toast({ variant: "destructive", title: "Save Failed", description: "Could not find the QR code canvas to save."});
+        return;
+    }
+    
+    // Create a new canvas to draw the final image
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = 400;
+    finalCanvas.height = 550;
+    const ctx = finalCanvas.getContext('2d');
+
+    if (!ctx) {
+         toast({ variant: "destructive", title: "Save Failed", description: "Could not create image."});
+        return;
+    }
+
+    // Background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    
+    // Header with Logo
+    ctx.fillStyle = '#1e40af'; // primary color
+    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.fillText('FinSim', 70, 50);
+
+    // User Info
+    ctx.fillStyle = '#334155'; // text-slate-700
+    ctx.font = '600 20px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(account.holderName, finalCanvas.width / 2, 100);
+
+    ctx.font = '16px Inter, sans-serif';
+    ctx.fillStyle = '#64748b'; // text-slate-500
+    ctx.fillText(`Account: ${account.accountNumber}`, finalCanvas.width / 2, 130);
+
+    // QR Code
+    const qrSize = 250;
+    const qrX = (finalCanvas.width - qrSize) / 2;
+    const qrY = 160;
+    ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+
+    // Amount
+    if (requestedAmount && requestedAmount > 0) {
+      ctx.font = 'bold 22px Inter, sans-serif';
+      ctx.fillStyle = '#1e40af';
+      ctx.fillText(`Requesting: $${requestedAmount.toFixed(2)}`, finalCanvas.width / 2, 450);
+    } else {
+      ctx.font = '18px Inter, sans-serif';
+      ctx.fillStyle = '#334155';
+      ctx.fillText(`Scan to pay ${account.holderName}`, finalCanvas.width / 2, 450);
+    }
+
+    // Footer
+    ctx.font = '12px Inter, sans-serif';
+    ctx.fillStyle = '#94a3b8'; // text-slate-400
+    ctx.fillText('Powered by FinSim Bank', finalCanvas.width / 2, 520);
+
+    // Trigger Download
+    const pngUrl = finalCanvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    const downloadLink = document.createElement("a");
+    downloadLink.href = pngUrl;
+    downloadLink.download = `finsim-payment-qr-${account.accountNumber}.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    toast({ title: "QR Code Saved", description: "Your custom QR code has been downloaded."});
   };
 
 
