@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Megaphone, ArrowRightLeft, User, QrCode } from "lucide-react";
+import { Megaphone, ArrowRightLeft, User, QrCode, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from 'next/link';
 
@@ -81,15 +81,15 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
         <div>
-            <h1 className="text-2xl font-bold">Hi, {account.holderName.split(' ')[0]}</h1>
-            <p className="text-muted-foreground">What do you want to do today?</p>
+            <h1 className="text-2xl font-bold">{t('dashboard.greeting', { name: account.holderName.split(' ')[0] })}</h1>
+            <p className="text-muted-foreground">{t('dashboard.welcomeMessage')}</p>
         </div>
 
         <Card className="bg-primary/90 text-primary-foreground shadow-lg">
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardDescription className="text-primary-foreground/80">Checking Account Balance</CardDescription>
+                        <CardDescription className="text-primary-foreground/80">{t('account.checkingBalance')}</CardDescription>
                         <CardTitle className="text-4xl font-bold">{formattedBalance}</CardTitle>
                     </div>
                      <div className="text-right">
@@ -111,7 +111,7 @@ export default function DashboardPage() {
         </Card>
 
         <div className="dashboard-grid">
-             <Link href="/transfer" className="hover:scale-[1.02] transition-transform duration-200">
+             <Link href="/transfer" className="dashboard-card-link">
                 <Card className="bg-blue-500/10 border-blue-500/20 h-full">
                     <CardHeader>
                         <CardTitle className="flex items-start justify-between">
@@ -124,7 +124,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
             </Link>
-             <Link href="/my-qr" className="hover:scale-[1.02] transition-transform duration-200">
+             <Link href="/my-qr" className="dashboard-card-link">
                 <Card className="bg-purple-500/10 border-purple-500/20 h-full">
                     <CardHeader>
                         <CardTitle className="flex items-start justify-between">
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
             </Link>
-             <Link href="/qr-pay" className="hover:scale-[1.02] transition-transform duration-200">
+             <Link href="/qr-pay" className="dashboard-card-link">
                 <Card className="bg-green-500/10 border-green-500/20 h-full">
                     <CardHeader>
                         <CardTitle className="flex items-start justify-between">
@@ -147,6 +147,19 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground">{t('dashboard.scanQr.description')}</p>
+                    </CardContent>
+                </Card>
+            </Link>
+             <Link href="/transactions" className="dashboard-card-link">
+                <Card className="bg-orange-500/10 border-orange-500/20 h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-start justify-between">
+                            {t('dashboard.historyCard.title')}
+                            <History className="h-6 w-6 text-orange-500"/>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">{t('dashboard.historyCard.description')}</p>
                     </CardContent>
                 </Card>
             </Link>

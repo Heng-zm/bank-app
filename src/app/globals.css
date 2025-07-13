@@ -100,11 +100,17 @@ body.font-khmer {
 @layer components {
     .dashboard-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr);
         gap: 1.5rem;
     }
 
-    .dashboard-grid > div {
-        min-height: 150px;
+    @media (min-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    .dashboard-card-link {
+        @apply hover:scale-[1.02] transition-transform duration-200;
     }
 }

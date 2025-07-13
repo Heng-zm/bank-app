@@ -26,9 +26,12 @@
         "copiedDescription": "Account number copied to clipboard.",
         "accountNumber": "Account Number",
         "availableBalance": "Available Balance",
+        "checkingBalance": "Checking Account Balance",
         "account": "Acct"
     },
     "dashboard": {
+        "greeting": "Hi, {{name}}",
+        "welcomeMessage": "What do you want to do today?",
         "spending": {
             "title": "Spending Summary",
             "description": "A breakdown of your spending by category.",
@@ -56,7 +59,11 @@
         },
         "scanQr": {
             "title": "Scan to Pay",
-            "description": "Pay someone by scanning their QR code."
+            "description": "Pay by scanning a QR code."
+        },
+        "historyCard": {
+            "title": "Transaction History",
+            "description": "View all your past transactions."
         }
     },
     "transactionForm": {

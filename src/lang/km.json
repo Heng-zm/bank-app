@@ -26,9 +26,12 @@
         "copiedDescription": "លេខគណនីបានចម្លងទៅក្ដារតម្បៀតខ្ទាស់។",
         "accountNumber": "លេខគណនី",
         "availableBalance": "សមតុល្យដែលអាចប្រើបាន",
+        "checkingBalance": "សមតុល្យគណនីចរន្ត",
         "account": "គណនី"
     },
     "dashboard": {
+        "greeting": "សួស្តី, {{name}}",
+        "welcomeMessage": "តើ​អ្នក​ចង់​ធ្វើអ្វី​នៅ​ថ្ងៃនេះ?",
         "spending": {
             "title": "សង្ខេបការចំណាយ",
             "description": "ការបំបែកការចំណាយរបស់អ្នកតាមប្រភេទ។",
@@ -56,7 +59,11 @@
         },
         "scanQr": {
             "title": "ស្កេនដើម្បីបង់ប្រាក់",
-            "description": "បង់ប្រាក់ឱ្យនរណាម្នាក់ដោយស្កេន QR កូដរបស់ពួកគេ។"
+            "description": "បង់ប្រាក់ដោយស្កេន QR កូដ។"
+        },
+        "historyCard": {
+            "title": "ប្រវត្តិប្រតិបត្តិការ",
+            "description": "មើលប្រតិបត្តិការកន្លងមករបស់អ្នកទាំងអស់។"
         }
     },
     "transactionForm": {
