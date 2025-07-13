@@ -135,25 +135,25 @@ export function TransactionHistory({
                  <ScrollArea className={scrollAreaHeight}>
                     <div className="space-y-4">
                     {filteredTransactions.map((tx) => (
-                        <div key={tx.id} className="p-4 border rounded-lg flex justify-between items-start">
-                           <div className="flex items-center gap-4">
+                        <div key={tx.id} className="p-4 border rounded-lg flex items-center justify-between gap-4">
+                           <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div className={cn(
-                                    "flex items-center justify-center rounded-full h-10 w-10",
-                                     tx.type === 'deposit' ? 'bg-emerald-100' : 'bg-gray-100'
+                                    "flex items-center justify-center rounded-full h-10 w-10 shrink-0",
+                                     tx.type === 'deposit' ? 'bg-emerald-100' : 'bg-rose-100'
                                 )}>
                                     {tx.type === 'deposit' ? 
                                         <ArrowDownLeft className="h-5 w-5 text-emerald-600" /> : 
-                                        <ArrowUpRight className="h-5 w-5 text-gray-600" />
+                                        <ArrowUpRight className="h-5 w-5 text-rose-600" />
                                     }
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="font-medium">{tx.description}</p>
+                                <div className="space-y-1 overflow-hidden">
+                                    <p className="font-medium truncate">{tx.description}</p>
                                     <p className="text-sm text-muted-foreground">{tx.timestamp ? format(new Date(tx.timestamp), "MMM d, yyyy") : t('pending')}</p>
                                 </div>
                            </div>
                            <div className={cn(
-                                "font-semibold",
-                                tx.type === 'deposit' ? 'text-emerald-600' : 'text-gray-800'
+                                "font-semibold shrink-0",
+                                tx.type === 'deposit' ? 'text-emerald-600' : 'text-slate-800'
                            )}>
                              {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
                            </div>
