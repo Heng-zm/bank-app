@@ -8,9 +8,7 @@ import { TransactionHistory } from "@/components/transaction-history";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { Megaphone, ArrowRightLeft, User, QrCode, History } from "lucide-react";
+import { ArrowRightLeft, User, QrCode, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from 'next/link';
 
@@ -44,23 +42,6 @@ export default function DashboardPage() {
       description: t('account.copiedDescription'),
     });
   };
-
-  const handleAnnounceFeature = async () => {
-    if (!user || !db) return;
-    try {
-      await addDoc(collection(db, "notifications"), {
-        userId: user.uid,
-        message: "New feature available! You can now categorize your spending.",
-        type: 'info',
-        isRead: false,
-        timestamp: serverTimestamp(),
-      });
-      toast({ title: t('dashboard.admin.toastSuccessTitle'), description: t('dashboard.admin.toastSuccessDescription') });
-    } catch (error) {
-      console.error("Error announcing feature:", error);
-      toast({ variant: "destructive", title: t('error'), description: t('dashboard.admin.toastErrorDescription')});
-    }
-  }
 
   if (isAuthLoading || isAccountLoading) {
     return (
@@ -166,14 +147,6 @@ export default function DashboardPage() {
         </div>
 
         <TransactionHistory title={t('dashboard.history.title')} transactions={transactions.slice(0, 5)} />
-      
-        <div className="p-4 border rounded-xl bg-card text-card-foreground shadow-sm space-y-2">
-            <h3 className="font-semibold text-sm">{t('dashboard.admin.title')}</h3>
-            <p className="text-xs text-muted-foreground">{t('dashboard.admin.description')}</p>
-            <Button onClick={handleAnnounceFeature} size="sm" className="w-full" variant="secondary">
-            <Megaphone className="mr-2 h-4 w-4"/> {t('dashboard.admin.button')}
-            </Button>
-        </div>
     </div>
   );
 }
