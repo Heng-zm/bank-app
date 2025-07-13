@@ -19,10 +19,7 @@
         "qrPay": "Scan to Pay",
         "myQr": "My QR Code",
         "settings": "Settings",
-        "rewards": "Rewards",
-        "billPay": "Bill Pay",
-        "transfer": "Transfer",
-        "statement": "Statement"
+        "transfer": "Transfer"
     },
     "account": {
         "copied": "Copied!",
@@ -255,43 +252,6 @@
     },
     "email": "Email",
     "password": "Password",
-    "billPay": {
-        "title": "Bill Payments",
-        "description": "Manage and pay your upcoming bills.",
-        "dueNext": "Due on May 14th",
-        "table": {
-            "bill": "Bill",
-            "dueDate": "Due Date"
-        },
-        "payNow": "Pay Now",
-        "paid": "Paid"
-    },
-    "rewards": {
-        "points": "Points",
-        "currentPoints": "Your Reward Points",
-        "keepItUp": "Keep up the great work!",
-        "redeem": {
-            "button": "Redeem",
-            "notEnoughPoints": "Not Enough Points",
-            "points": "{{points}} points",
-            "toastSuccessTitle": "Reward Redeemed!",
-            "toastSuccessDescription": "You have successfully redeemed '{{title}}' for {{points}} points."
-        }
-    },
-    "statement": {
-        "title": "Download Statements",
-        "description": "Access your official monthly statements.",
-        "available": "June 2024 Available",
-        "select": {
-            "label": "Select a statement period",
-            "placeholder": "Select a month"
-        },
-        "download": {
-            "button": "Download Statement",
-            "toastSuccessTitle": "Download Started",
-            "toastSuccessDescription": "Your statement is downloading."
-        }
-    },
     "transfer": {
         "description": "Send & Request Funds"
     }
