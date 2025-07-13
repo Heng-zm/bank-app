@@ -40,6 +40,20 @@ export default function DashboardPage() {
     currency: "USD",
   }).format(account?.balance || 0);
 
+  const formatAccountNumber = (number: string) => {
+    if (!number) return "";
+    return number.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3');
+  }
+
+  const handleCopyAccountNumber = () => {
+    if (!account.accountNumber) return;
+    navigator.clipboard.writeText(account.accountNumber);
+    toast({
+      title: t('account.copied'),
+      description: t('account.copiedDescription'),
+    });
+  };
+
   const handleAnnounceFeature = async () => {
     if (!user || !db) return;
     try {
@@ -82,8 +96,23 @@ export default function DashboardPage() {
 
         <Card className="bg-primary/90 text-primary-foreground shadow-lg">
             <CardHeader>
-                <CardDescription className="text-primary-foreground/80">Checking Account Balance</CardDescription>
-                <CardTitle className="text-4xl font-bold">{formattedBalance}</CardTitle>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardDescription className="text-primary-foreground/80">Checking Account Balance</CardDescription>
+                        <CardTitle className="text-4xl font-bold">{formattedBalance}</CardTitle>
+                    </div>
+                     <div className="text-right">
+                        <div className="text-xs text-primary-foreground/80">{t('account.accountNumber')}</div>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="font-mono text-sm font-semibold h-auto p-1 text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/20" 
+                            onClick={handleCopyAccountNumber}
+                        >
+                            {formatAccountNumber(account.accountNumber)}
+                        </Button>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent>
                 <div className="text-xs text-primary-foreground/80">{t('account.availableBalance')}</div>

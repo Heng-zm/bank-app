@@ -1,0 +1,3 @@
+{
+  "/(authed)/transfer/page": "app/(authed)/transfer/page.js"
+}
