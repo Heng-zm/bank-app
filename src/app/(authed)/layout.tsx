@@ -11,13 +11,9 @@ import { Button } from '@/components/ui/button';
 import {
   Home,
   LogOut,
-  QrCode,
-  Landmark,
   Menu,
-  User,
-  History,
+  Landmark,
   Settings,
-  ArrowRightLeft,
   ArrowLeft
 } from 'lucide-react';
 import {
@@ -57,7 +53,7 @@ export default function AuthedLayout({
     if (!current) {
         // Check for pages not in the main nav
         if (pathname.startsWith('/transfer')) {
-            return { label: t('transactionForm.title') };
+            return { label: t('transfer.title') };
         }
         if (pathname.startsWith('/transactions')) {
             return { label: t('transactions.title') };
@@ -202,8 +198,10 @@ function NavLink({
           <NotificationBell notifications={notifications} onOpen={markNotificationsAsRead} />
         </header>
 
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-fade-in-up">
-           {children}
+        <main className="flex flex-1 flex-col animate-fade-in-up">
+           <div className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+             {children}
+           </div>
         </main>
       </div>
     </div>
