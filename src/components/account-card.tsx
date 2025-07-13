@@ -3,7 +3,7 @@
 
 import type { Account } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Copy } from "lucide-react";
+import { User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
 
@@ -48,7 +48,6 @@ export function AccountCard({ account }: AccountCardProps) {
                 <div className="text-xs text-muted-foreground">Account Number</div>
                 <Button variant="ghost" size="sm" className="font-mono text-sm font-semibold h-auto p-1" onClick={handleCopyAccountNumber}>
                     {formatAccountNumber(account.accountNumber)}
-                    <Copy className="ml-2 h-4 w-4"/>
                 </Button>
             </div>
         </div>
