@@ -27,12 +27,14 @@ import { useTranslation } from "@/hooks/use-translation";
 interface TransactionHistoryProps {
   transactions: Transaction[];
   title?: string;
+  description?: string;
   showFilters?: boolean;
 }
 
 export function TransactionHistory({ 
     transactions, 
-    title = "Transaction History", 
+    title,
+    description,
     showFilters = false 
 }: TransactionHistoryProps) {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -67,13 +69,11 @@ export function TransactionHistory({
   const scrollAreaHeight = showFilters ? "h-[65vh]" : "h-auto";
 
   return (
-    <Card className="shadow-lg h-full animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+    <>
       <CardHeader className="flex flex-col md:flex-row md:items-center">
         <div className="grid gap-2 flex-1">
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>
-                {showFilters ? t('transactions.description') : t('transactions.recentDescription', { count: transactions.length })}
-            </CardDescription>
+            {title && <CardTitle>{title}</CardTitle>}
+            {description && <CardDescription>{description}</CardDescription>}
         </div>
          {showFilters && (
             <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 mt-4 md:mt-0">
@@ -218,6 +218,6 @@ export function TransactionHistory({
             </ScrollArea>
         </div>
       </CardContent>
-    </Card>
+    </>
   );
 }

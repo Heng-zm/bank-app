@@ -8,7 +8,7 @@ import { TransactionHistory } from "@/components/transaction-history";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRightLeft, User, QrCode, History } from "lucide-react";
+import { ArrowRightLeft, User, QrCode, History, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from 'next/link';
 
@@ -146,7 +146,22 @@ export default function DashboardPage() {
             </Link>
         </div>
 
-        <TransactionHistory title={t('dashboard.history.title')} transactions={transactions.slice(0, 5)} />
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div className="space-y-1">
+                    <CardTitle>{t('dashboard.history.title')}</CardTitle>
+                    <CardDescription>{t('transactions.recentDescription', { count: 5 })}</CardDescription>
+                </div>
+                 <Button asChild variant="outline" size="sm">
+                    <Link href="/transactions">
+                        {t('dashboard.history.viewAll')} <ArrowRight className="ml-2 h-4 w-4"/>
+                    </Link>
+                </Button>
+            </CardHeader>
+            <CardContent>
+                <TransactionHistory transactions={transactions.slice(0, 5)} />
+            </CardContent>
+        </Card>
     </div>
   );
 }

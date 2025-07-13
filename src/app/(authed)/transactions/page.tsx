@@ -19,10 +19,13 @@ export default function TransactionsPage() {
     }
 
     return (
-        <TransactionHistory 
-            transactions={transactions} 
-            title={t('transactions.title')}
-            showFilters={true}
-        />
+        <Card>
+            <TransactionHistory 
+                transactions={transactions} 
+                title={t('transactions.title')}
+                description={t('transactions.description')}
+                showFilters={true}
+            />
+        </Card>
     )
 }
