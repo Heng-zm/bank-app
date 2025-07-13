@@ -99,7 +99,7 @@ body.font-khmer {
 
 @layer components {
     .action-card {
-        @apply block p-5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+        @apply block p-5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex flex-col justify-end;
     }
     
     .keypad-grid {
