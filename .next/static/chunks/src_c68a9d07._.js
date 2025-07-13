@@ -219,7 +219,7 @@ const ToastViewport = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$proje
         ...props
     }, void 0, false, {
         fileName: "[project]/src/components/ui/toast.tsx",
-        lineNumber: 16,
+        lineNumber: 17,
         columnNumber: 3
     }, this));
 _c1 = ToastViewport;
@@ -227,7 +227,7 @@ ToastViewport.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node
 const toastVariants = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$class$2d$variance$2d$authority$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cva"])("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full", {
     variants: {
         variant: {
-            default: "border bg-background text-foreground",
+            default: "border-border bg-background text-foreground",
             destructive: "destructive group border-destructive bg-destructive text-destructive-foreground"
         }
     },
@@ -244,7 +244,7 @@ const Toast = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$
         ...props
     }, void 0, false, {
         fileName: "[project]/src/components/ui/toast.tsx",
-        lineNumber: 49,
+        lineNumber: 50,
         columnNumber: 5
     }, this);
 });
@@ -256,7 +256,7 @@ const ToastAction = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project
         ...props
     }, void 0, false, {
         fileName: "[project]/src/components/ui/toast.tsx",
-        lineNumber: 62,
+        lineNumber: 63,
         columnNumber: 3
     }, this));
 _c5 = ToastAction;
@@ -270,12 +270,12 @@ const ToastClose = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$
             className: "h-4 w-4"
         }, void 0, false, {
             fileName: "[project]/src/components/ui/toast.tsx",
-            lineNumber: 86,
+            lineNumber: 87,
             columnNumber: 5
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/ui/toast.tsx",
-        lineNumber: 77,
+        lineNumber: 78,
         columnNumber: 3
     }, this));
 _c7 = ToastClose;
@@ -286,7 +286,7 @@ const ToastTitle = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$
         ...props
     }, void 0, false, {
         fileName: "[project]/src/components/ui/toast.tsx",
-        lineNumber: 95,
+        lineNumber: 96,
         columnNumber: 3
     }, this));
 _c9 = ToastTitle;
@@ -297,7 +297,7 @@ const ToastDescription = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$pr
         ...props
     }, void 0, false, {
         fileName: "[project]/src/components/ui/toast.tsx",
-        lineNumber: 107,
+        lineNumber: 108,
         columnNumber: 3
     }, this));
 _c11 = ToastDescription;

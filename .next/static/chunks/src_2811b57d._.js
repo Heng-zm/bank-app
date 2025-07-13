@@ -519,6 +519,7 @@ function useAccount(userId) {
     });
     const [transactions, setTransactions] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [notifications, setNotifications] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [frequentRecipients, setFrequentRecipients] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [isProcessing, setIsProcessing] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const notificationsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])([]);
@@ -592,7 +593,7 @@ function useAccount(userId) {
             }["useAccount.useEffect.unsubscribeAccount"]);
             const transactionsQuery = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["query"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["collection"])(db, "transactions"), (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["where"])("accountId", "==", userId), (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["orderBy"])("timestamp", "desc"));
             const unsubscribeTransactions = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["onSnapshot"])(transactionsQuery, {
-                "useAccount.useEffect.unsubscribeTransactions": (querySnapshot)=>{
+                "useAccount.useEffect.unsubscribeTransactions": async (querySnapshot)=>{
                     const txs = [];
                     querySnapshot.forEach({
                         "useAccount.useEffect.unsubscribeTransactions": (doc)=>{
@@ -605,6 +606,41 @@ function useAccount(userId) {
                         }
                     }["useAccount.useEffect.unsubscribeTransactions"]);
                     setTransactions(txs);
+                    // Analyze for frequent recipients
+                    const recipientCounts = txs.filter({
+                        "useAccount.useEffect.unsubscribeTransactions.recipientCounts": (tx)=>tx.type === 'withdrawal' && tx.recipient
+                    }["useAccount.useEffect.unsubscribeTransactions.recipientCounts"]).reduce({
+                        "useAccount.useEffect.unsubscribeTransactions.recipientCounts": (acc, tx)=>{
+                            const recipient = tx.recipient;
+                            acc[recipient] = (acc[recipient] || 0) + 1;
+                            return acc;
+                        }
+                    }["useAccount.useEffect.unsubscribeTransactions.recipientCounts"], {});
+                    const sortedRecipients = Object.entries(recipientCounts).sort({
+                        "useAccount.useEffect.unsubscribeTransactions.sortedRecipients": ([, a], [, b])=>b - a
+                    }["useAccount.useEffect.unsubscribeTransactions.sortedRecipients"]).slice(0, 3).map({
+                        "useAccount.useEffect.unsubscribeTransactions.sortedRecipients": ([accountNumber])=>accountNumber
+                    }["useAccount.useEffect.unsubscribeTransactions.sortedRecipients"]);
+                    if (sortedRecipients.length > 0) {
+                        const q = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["query"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["collection"])(db, "accounts"), (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["where"])("accountNumber", "in", sortedRecipients));
+                        const recipientDocs = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getDocs"])(q);
+                        const recipientData = {};
+                        recipientDocs.forEach({
+                            "useAccount.useEffect.unsubscribeTransactions": (doc)=>{
+                                const data = doc.data();
+                                recipientData[data.accountNumber] = data.holderName;
+                            }
+                        }["useAccount.useEffect.unsubscribeTransactions"]);
+                        const frequentWithNames = sortedRecipients.map({
+                            "useAccount.useEffect.unsubscribeTransactions.frequentWithNames": (accountNumber)=>({
+                                    accountNumber,
+                                    name: recipientData[accountNumber] || "Unknown User"
+                                })
+                        }["useAccount.useEffect.unsubscribeTransactions.frequentWithNames"]);
+                        setFrequentRecipients(frequentWithNames);
+                    } else {
+                        setFrequentRecipients([]);
+                    }
                     setIsLoading(false);
                 }
             }["useAccount.useEffect.unsubscribeTransactions"], {
@@ -818,6 +854,7 @@ function useAccount(userId) {
         account,
         transactions,
         notifications,
+        frequentRecipients,
         isProcessing,
         isLoading,
         handleAddTransaction,
@@ -825,7 +862,7 @@ function useAccount(userId) {
         updateAccountDetails
     };
 }
-_s(useAccount, "0l+uwEtQrqEqwEz/3MhV3bEad0g=", false, function() {
+_s(useAccount, "LgmHp2+RQWT4dn1rh7y/hcmjnZE=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"]
     ];

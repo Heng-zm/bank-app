@@ -13,7 +13,7 @@ body.font-khmer {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 20% 97%; /* Light Gray */
     --foreground: 224 71.4% 4.1%;
  
     --card: 0 0% 100%;
@@ -25,13 +25,13 @@ body.font-khmer {
     --primary: 221 83% 53%; /* Vibrant Blue */
     --primary-foreground: 210 20% 98%;
  
-    --secondary: 215 27.9% 93.5%;
+    --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 224 71.4% 4.1%;
  
-    --muted: 215 27.9% 93.5%;
+    --muted: 220 14.3% 95.9%;
     --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 151 83% 41%; /* Teal/Green */
+    --accent: 174 83% 41%; /* Teal */
     --accent-foreground: 210 20% 98%;
  
     --destructive: 0 84.2% 60.2%;
@@ -41,10 +41,10 @@ body.font-khmer {
     --input: 215 20.2% 87.1%;
     --ring: 221 83% 53%;
  
-    --radius: 0.5rem;
+    --radius: 0.8rem;
 
     --chart-1: 221 83% 53%;
-    --chart-2: 151 83% 41%;
+    --chart-2: 174 83% 41%;
     --chart-3: 35 92% 55%;
     --chart-4: 262 74% 59%;
     --chart-5: 341 93% 65%;
@@ -69,7 +69,7 @@ body.font-khmer {
     --muted: 215 27.9% 16.9%;
     --muted-foreground: 217.9 10.6% 47.5%;
  
-    --accent: 151 83% 41%;
+    --accent: 174 83% 41%;
     --accent-foreground: 210 20% 98%;
  
     --destructive: 0 62.8% 30.6%;
@@ -80,7 +80,7 @@ body.font-khmer {
     --ring: 217 91.2% 59.8%;
     
     --chart-1: 217 91.2% 59.8%;
-    --chart-2: 151 83% 41%;
+    --chart-2: 174 83% 41%;
     --chart-3: 35 92% 55%;
     --chart-4: 262 74% 59%;
     --chart-5: 341 93% 65%;
@@ -95,4 +95,16 @@ body.font-khmer {
     @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+}
+
+@layer components {
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .dashboard-grid > div {
+        min-height: 150px;
+    }
 }

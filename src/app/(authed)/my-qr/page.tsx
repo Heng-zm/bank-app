@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Share2, User, RefreshCcw, Download, Landmark } from 'lucide-react';
+import { Share2, RefreshCcw, Download, Landmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/use-translation';
@@ -32,6 +32,8 @@ export default function MyQrPage() {
   const [qrCodeValue, setQrCodeValue] = useState('');
   const [requestedAmount, setRequestedAmount] = useState<number | undefined>(undefined);
   const qrCodeRef = useRef<HTMLDivElement>(null);
+  
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -173,59 +175,45 @@ export default function MyQrPage() {
 
   if (isAuthLoading || isAccountLoading || !account.accountNumber) {
     return (
-        <div className="flex items-center justify-center h-full">
-            <Card className="w-full max-w-md mx-auto">
-                <CardHeader>
-                    <Skeleton className="h-8 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex justify-center">
-                        <Skeleton className="h-64 w-64" />
-                    </div>
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                </CardContent>
-            </Card>
+        <div className="flex flex-col items-center justify-center h-full">
+            <Skeleton className="h-64 w-64 rounded-xl mb-4" />
+            <Skeleton className="h-8 w-40 mb-2" />
+            <Skeleton className="h-4 w-64" />
         </div>
     )
   }
 
-
   return (
-    <div className="flex items-center justify-center h-full animate-fade-in-up">
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User />
-            {t('myqr.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('myqr.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            {qrCodeValue ? (
-                <div className="flex flex-col items-center space-y-4">
-                    <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md">
-                        <QRCode value={qrCodeValue} size={256} />
-                    </div>
-                    <div className="text-center">
-                        {requestedAmount && requestedAmount > 0 ? (
-                            <p className="text-lg">{t('myqr.requesting')} <span className='font-bold text-primary'>${Number(requestedAmount).toFixed(2)}</span></p>
-                        ) : (
-                            <p className="text-lg">{t('myqr.requestingPayment')}</p>
-                        )}
-                         <p className="text-sm text-muted-foreground">{t('myqr.to')}: {account?.holderName}</p>
-                         <p className="text-xs text-muted-foreground font-mono">{t('account.account')}: {account.accountNumber}</p>
-                    </div>
+    <div className="flex flex-col h-full animate-fade-in-up">
+        <div className="flex-grow flex items-center justify-center">
+            <div className="flex flex-col items-center text-center">
+                 <div ref={qrCodeRef} className="p-6 bg-white rounded-2xl shadow-2xl mb-6">
+                    <QRCode
+                        value={qrCodeValue}
+                        size={220}
+                        bgColor="#ffffff"
+                        fgColor="#000000"
+                        level="Q"
+                        includeMargin={false}
+                        imageSettings={{
+                            src: "https://placehold.co/100x100.png",
+                            x: undefined,
+                            y: undefined,
+                            height: 48,
+                            width: 48,
+                            excavate: true,
+                        }}
+                    />
                 </div>
-            ) : (
-                 <div className="flex justify-center">
-                    <Skeleton className="h-64 w-64" />
-                </div>
-            )}
-            
+                <h2 className="text-2xl font-bold">{account.holderName}</h2>
+                <p className="text-muted-foreground">{t('myqr.scanToPay', { name: account.holderName.split(' ')[0] })}</p>
+                {requestedAmount && requestedAmount > 0 && (
+                    <p className="text-lg mt-2">{t('myqr.requesting')} <span className='font-bold text-primary'>${Number(requestedAmount).toFixed(2)}</span></p>
+                )}
+            </div>
+        </div>
+
+        <div className="p-4 bg-card rounded-t-2xl shadow-upper">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
@@ -241,18 +229,18 @@ export default function MyQrPage() {
                         </FormItem>
                     )}
                     />
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex gap-2">
                         <Button type="submit" className="flex-1">
                             {t('myqr.form.setAmountButton')}
                         </Button>
-                        <Button type="button" variant="secondary" onClick={resetAmount} className="flex-1">
+                        <Button type="button" variant="secondary" onClick={resetAmount}>
                             <RefreshCcw className="mr-2 h-4 w-4" /> {t('reset')}
                         </Button>
                     </div>
                 </form>
             </Form>
             
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex gap-2 mt-4">
                 <Button onClick={handleShare} className="w-full flex-1" variant="outline">
                     <Share2 className="mr-2 h-4 w-4"/>
                     {t('share')}
@@ -262,9 +250,8 @@ export default function MyQrPage() {
                     {t('myqr.save.button')}
                 </Button>
             </div>
-
-        </CardContent>
-      </Card>
+        </div>
     </div>
   );
 }
+

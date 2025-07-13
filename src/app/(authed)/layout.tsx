@@ -54,8 +54,8 @@ export default function AuthedLayout({
   ], [t]);
 
   const currentPage = useMemo(() => {
-    return navItems.find(item => item.href === pathname) || { label: t('nav.dashboard') };
-  }, [pathname, navItems, t]);
+    return navItems.find(item => item.href === pathname) || { label: ' ' };
+  }, [pathname, navItems]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -64,7 +64,7 @@ export default function AuthedLayout({
   
   if (isAuthLoading || isAccountLoading) {
     return (
-      <div className="flex min-h-screen w-full bg-muted/40">
+      <div className="flex min-h-screen w-full bg-background">
         <div className="hidden md:flex md:w-[240px] flex-col gap-4 border-r bg-background p-4">
             <Skeleton className="h-8 w-32" />
             <div className="flex-1 space-y-2 mt-4">
@@ -112,9 +112,9 @@ function NavLink({
 }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr] bg-muted/40">
+    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr] bg-background">
       {/* Desktop Sidebar */}
-      <aside className="hidden border-r bg-background md:block">
+      <aside className="hidden border-r bg-card md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
@@ -137,11 +137,12 @@ function NavLink({
       </aside>
       
       <div className="flex flex-col">
-        {/* Mobile Header */}
-        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 md:hidden sticky top-0 z-30">
+        {/* Mobile & Desktop Header */}
+        <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
+            {/* Mobile Nav Trigger */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="shrink-0">
+                <Button variant="outline" size="icon" className="shrink-0 md:hidden">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
@@ -170,16 +171,13 @@ function NavLink({
                 </div>
               </SheetContent>
             </Sheet>
+            
           <div className="w-full flex-1">
              <h1 className="font-semibold text-lg">{currentPage.label}</h1>
           </div>
+          
+          <div className="font-semibold text-sm hidden md:block">{user?.email}</div>
           <NotificationBell notifications={notifications} onOpen={markNotificationsAsRead} />
-        </header>
-        
-        {/* Desktop Header */}
-        <header className="hidden md:flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 justify-end sticky top-0 z-30">
-            <div className="font-semibold">{user?.email}</div>
-            <NotificationBell notifications={notifications} onOpen={markNotificationsAsRead} />
         </header>
 
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-fade-in-up">
