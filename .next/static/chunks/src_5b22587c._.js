@@ -513,28 +513,82 @@ function MyQrPage() {
         }
     };
     const handleSaveQrCode = ()=>{
-        if (qrCodeRef.current) {
-            const canvas = qrCodeRef.current.querySelector("canvas");
-            if (canvas) {
-                const pngUrl = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-                const downloadLink = document.createElement("a");
-                downloadLink.href = pngUrl;
-                downloadLink.download = "finsim-qr-code.png";
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                toast({
-                    title: "QR Code Saved",
-                    description: "The QR code has been downloaded as a PNG file."
-                });
-            } else {
-                toast({
-                    variant: "destructive",
-                    title: "Save Failed",
-                    description: "Could not find the QR code canvas to save."
-                });
-            }
+        if (!qrCodeRef.current || !account) {
+            toast({
+                variant: "destructive",
+                title: "Save Failed",
+                description: "QR code data is not ready."
+            });
+            return;
         }
+        const qrCanvas = qrCodeRef.current.querySelector("canvas");
+        if (!qrCanvas) {
+            toast({
+                variant: "destructive",
+                title: "Save Failed",
+                description: "Could not find the QR code canvas to save."
+            });
+            return;
+        }
+        // Create a new canvas to draw the final image
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = 400;
+        finalCanvas.height = 550;
+        const ctx = finalCanvas.getContext('2d');
+        if (!ctx) {
+            toast({
+                variant: "destructive",
+                title: "Save Failed",
+                description: "Could not create image."
+            });
+            return;
+        }
+        // Background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+        // Header with Logo
+        ctx.fillStyle = '#1e40af'; // primary color
+        ctx.font = 'bold 24px Inter, sans-serif';
+        ctx.fillText('FinSim', 70, 50);
+        // User Info
+        ctx.fillStyle = '#334155'; // text-slate-700
+        ctx.font = '600 20px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(account.holderName, finalCanvas.width / 2, 100);
+        ctx.font = '16px Inter, sans-serif';
+        ctx.fillStyle = '#64748b'; // text-slate-500
+        ctx.fillText(`Account: ${account.accountNumber}`, finalCanvas.width / 2, 130);
+        // QR Code
+        const qrSize = 250;
+        const qrX = (finalCanvas.width - qrSize) / 2;
+        const qrY = 160;
+        ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+        // Amount
+        if (requestedAmount && requestedAmount > 0) {
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.fillStyle = '#1e40af';
+            ctx.fillText(`Requesting: $${requestedAmount.toFixed(2)}`, finalCanvas.width / 2, 450);
+        } else {
+            ctx.font = '18px Inter, sans-serif';
+            ctx.fillStyle = '#334155';
+            ctx.fillText(`Scan to pay ${account.holderName}`, finalCanvas.width / 2, 450);
+        }
+        // Footer
+        ctx.font = '12px Inter, sans-serif';
+        ctx.fillStyle = '#94a3b8'; // text-slate-400
+        ctx.fillText('Powered by FinSim Bank', finalCanvas.width / 2, 520);
+        // Trigger Download
+        const pngUrl = finalCanvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngUrl;
+        downloadLink.download = `finsim-payment-qr-${account.accountNumber}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        toast({
+            title: "QR Code Saved",
+            description: "Your custom QR code has been downloaded."
+        });
     };
     if (isAuthLoading || isAccountLoading || !account.accountNumber) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -548,20 +602,20 @@ function MyQrPage() {
                                 className: "h-8 w-3/4"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                lineNumber: 122,
+                                lineNumber: 177,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-4 w-1/2"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                lineNumber: 123,
+                                lineNumber: 178,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                        lineNumber: 121,
+                        lineNumber: 176,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -573,43 +627,43 @@ function MyQrPage() {
                                     className: "h-64 w-64"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                    lineNumber: 127,
+                                    lineNumber: 182,
                                     columnNumber: 25
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                lineNumber: 126,
+                                lineNumber: 181,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-10 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                lineNumber: 129,
+                                lineNumber: 184,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-10 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                lineNumber: 130,
+                                lineNumber: 185,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                        lineNumber: 125,
+                        lineNumber: 180,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                lineNumber: 120,
+                lineNumber: 175,
                 columnNumber: 13
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-            lineNumber: 119,
+            lineNumber: 174,
             columnNumber: 9
         }, this);
     }
@@ -625,27 +679,27 @@ function MyQrPage() {
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__["User"], {}, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                    lineNumber: 143,
+                                    lineNumber: 198,
                                     columnNumber: 13
                                 }, this),
                                 "Receive Payment"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                            lineNumber: 142,
+                            lineNumber: 197,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                             children: "Share this QR code to get paid. You can add an amount below."
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                            lineNumber: 146,
+                            lineNumber: 201,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                    lineNumber: 141,
+                    lineNumber: 196,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -662,12 +716,12 @@ function MyQrPage() {
                                         size: 256
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                        lineNumber: 154,
+                                        lineNumber: 209,
                                         columnNumber: 25
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                    lineNumber: 153,
+                                    lineNumber: 208,
                                     columnNumber: 21
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -685,20 +739,20 @@ function MyQrPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                    lineNumber: 158,
+                                                    lineNumber: 213,
                                                     columnNumber: 63
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                            lineNumber: 158,
+                                            lineNumber: 213,
                                             columnNumber: 29
                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-lg",
                                             children: "Requesting payment"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                            lineNumber: 160,
+                                            lineNumber: 215,
                                             columnNumber: 29
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -709,7 +763,7 @@ function MyQrPage() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                            lineNumber: 162,
+                                            lineNumber: 217,
                                             columnNumber: 26
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -720,19 +774,19 @@ function MyQrPage() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                            lineNumber: 163,
+                                            lineNumber: 218,
                                             columnNumber: 26
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                    lineNumber: 156,
+                                    lineNumber: 211,
                                     columnNumber: 21
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                            lineNumber: 152,
+                            lineNumber: 207,
                             columnNumber: 17
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "flex justify-center",
@@ -740,12 +794,12 @@ function MyQrPage() {
                                 className: "h-64 w-64"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                lineNumber: 168,
+                                lineNumber: 223,
                                 columnNumber: 21
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                            lineNumber: 167,
+                            lineNumber: 222,
                             columnNumber: 18
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Form"], {
@@ -763,7 +817,7 @@ function MyQrPage() {
                                                         children: "Specific Amount (Optional)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                        lineNumber: 179,
+                                                        lineNumber: 234,
                                                         columnNumber: 25
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -774,28 +828,28 @@ function MyQrPage() {
                                                             step: "0.01"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                            lineNumber: 181,
+                                                            lineNumber: 236,
                                                             columnNumber: 29
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                        lineNumber: 180,
+                                                        lineNumber: 235,
                                                         columnNumber: 25
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                        lineNumber: 183,
+                                                        lineNumber: 238,
                                                         columnNumber: 25
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                lineNumber: 178,
+                                                lineNumber: 233,
                                                 columnNumber: 25
                                             }, void 0)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                        lineNumber: 174,
+                                        lineNumber: 229,
                                         columnNumber: 21
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -807,7 +861,7 @@ function MyQrPage() {
                                                 children: "Set Amount"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                lineNumber: 188,
+                                                lineNumber: 243,
                                                 columnNumber: 25
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -820,31 +874,31 @@ function MyQrPage() {
                                                         className: "mr-2 h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                        lineNumber: 192,
+                                                        lineNumber: 247,
                                                         columnNumber: 29
                                                     }, this),
                                                     " Reset"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                                lineNumber: 191,
+                                                lineNumber: 246,
                                                 columnNumber: 25
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                        lineNumber: 187,
+                                        lineNumber: 242,
                                         columnNumber: 21
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                lineNumber: 173,
+                                lineNumber: 228,
                                 columnNumber: 17
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                            lineNumber: 172,
+                            lineNumber: 227,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -859,14 +913,14 @@ function MyQrPage() {
                                             className: "mr-2 h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                            lineNumber: 200,
+                                            lineNumber: 255,
                                             columnNumber: 21
                                         }, this),
                                         "Share"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                    lineNumber: 199,
+                                    lineNumber: 254,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -878,37 +932,37 @@ function MyQrPage() {
                                             className: "mr-2 h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                            lineNumber: 204,
+                                            lineNumber: 259,
                                             columnNumber: 21
                                         }, this),
                                         "Save QR Code"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                                    lineNumber: 203,
+                                    lineNumber: 258,
                                     columnNumber: 18
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                            lineNumber: 198,
+                            lineNumber: 253,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-                    lineNumber: 150,
+                    lineNumber: 205,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-            lineNumber: 140,
+            lineNumber: 195,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/(authed)/my-qr/page.tsx",
-        lineNumber: 139,
+        lineNumber: 194,
         columnNumber: 5
     }, this);
 }
