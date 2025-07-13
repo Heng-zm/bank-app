@@ -8,7 +8,7 @@
   "static/chunks/node_modules_lodash_ca477838._.js",
   "static/chunks/node_modules_recharts_es6_5f8f53f9._.js",
   "static/chunks/node_modules_@dnd-kit_core_dist_core_esm_deb93fb9.js",
-  "static/chunks/node_modules_de2b419d._.js"
+  "static/chunks/node_modules_b1a7cf69._.js"
 ],
     source: "dynamic"
 });
