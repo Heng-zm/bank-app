@@ -1,8 +1,4 @@
 {
   "/(authed)/dashboard/page": "app/(authed)/dashboard/page.js",
-  "/(authed)/my-qr/page": "app/(authed)/my-qr/page.js",
-  "/(authed)/qr-pay/page": "app/(authed)/qr-pay/page.js",
-  "/(authed)/settings/page": "app/(authed)/settings/page.js",
-  "/(authed)/transactions/page": "app/(authed)/transactions/page.js",
   "/page": "app/page.js"
 }
