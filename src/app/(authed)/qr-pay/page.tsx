@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
-import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { QrCode, ArrowLeft, Loader2, CheckCircle, AlertTriangle, Zap } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { analyzeTransaction, AnalyzeTransactionOutput } from '@/ai/flows/analyze-transaction-flow';
+import { cn } from '@/lib/utils';
 
 
 interface QrCodeData {
@@ -59,6 +59,9 @@ export default function QrPayPage() {
   const [riskAnalysis, setRiskAnalysis] = useState<AnalyzeTransactionOutput | null>(null);
   const [showRiskDialog, setShowRiskDialog] = useState(false);
 
+  const [isFlashOn, setIsFlashOn] = useState(false);
+  const [isFlashSupported, setIsFlashSupported] = useState(false);
+
 
   const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
     resolver: zodResolver(paymentFormSchema),
@@ -75,11 +78,12 @@ export default function QrPayPage() {
     if (videoRef.current) {
         videoRef.current.srcObject = null;
     }
+    setIsFlashOn(false);
+    setIsFlashSupported(false);
   }, []);
 
 
   const startCamera = useCallback(async () => {
-    // Stop any existing stream before starting a new one
     stopCamera();
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -87,6 +91,14 @@ export default function QrPayPage() {
             videoRef.current.srcObject = stream;
             streamRef.current = stream;
         }
+        
+        // Check for flashlight support
+        const videoTrack = stream.getVideoTracks()[0];
+        const capabilities = videoTrack.getCapabilities();
+        if (capabilities.torch) {
+            setIsFlashSupported(true);
+        }
+
         setHasCameraPermission(true);
     } catch (err) {
         console.error("Error accessing camera:", err);
@@ -135,7 +147,6 @@ export default function QrPayPage() {
         }
       }
     }
-    // Continue scanning as long as we don't have scanned data
     if (!scannedData) {
         animationFrameId.current = requestAnimationFrame(tick);
     }
@@ -143,9 +154,9 @@ export default function QrPayPage() {
 
 
   useEffect(() => {
-    startCamera(); // Start camera on component mount
+    startCamera();
 
-    return () => { // Cleanup on unmount
+    return () => {
         stopCamera();
         if (animationFrameId.current) {
             cancelAnimationFrame(animationFrameId.current);
@@ -155,22 +166,34 @@ export default function QrPayPage() {
 
 
   useEffect(() => {
-    // Only start scanning loop if we have camera permission and no data has been scanned yet
     if (hasCameraPermission && !scannedData) {
-        // Cancel any previous frame to avoid multiple loops
         if (animationFrameId.current) {
             cancelAnimationFrame(animationFrameId.current);
         }
         animationFrameId.current = requestAnimationFrame(tick);
     }
 
-    // Cleanup function to cancel animation frame when dependencies change
     return () => {
         if (animationFrameId.current) {
             cancelAnimationFrame(animationFrameId.current);
         }
     }
   }, [hasCameraPermission, scannedData, tick]);
+
+
+  const toggleFlashlight = async () => {
+    if (!streamRef.current || !isFlashSupported) return;
+    const videoTrack = streamRef.current.getVideoTracks()[0];
+    try {
+        await videoTrack.applyConstraints({
+            advanced: [{ torch: !isFlashOn }]
+        });
+        setIsFlashOn(!isFlashOn);
+    } catch (err) {
+        console.error('Error toggling flashlight:', err);
+        toast({ variant: 'destructive', title: 'Flashlight Error', description: 'Could not toggle the flashlight.' });
+    }
+  };
 
 
   const proceedWithPayment = async () => {
@@ -213,7 +236,6 @@ export default function QrPayPage() {
 
     } catch (e: any) {
       console.error("Fraud analysis failed:", e);
-      // Fallback to proceeding with payment if AI fails, but show a toast
       toast({
         variant: "destructive",
         title: "Could not analyze transaction",
@@ -313,9 +335,24 @@ export default function QrPayPage() {
                     </div>
                 )}
                 { hasCameraPermission && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white p-4">
-                        <div className="absolute w-2/3 h-2/3 border-4 border-dashed border-white/50 rounded-lg"/>
-                    </div>
+                    <>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white p-4">
+                            <div className="absolute w-2/3 h-2/3 border-4 border-dashed border-white/50 rounded-lg"/>
+                        </div>
+                        {isFlashSupported && (
+                            <Button 
+                                size="icon" 
+                                variant="outline"
+                                onClick={toggleFlashlight} 
+                                className={cn(
+                                    "absolute bottom-4 right-4 rounded-full bg-black/50 border-white/50 text-white hover:bg-black/75",
+                                    isFlashOn && "bg-yellow-400/80 text-black hover:bg-yellow-400"
+                                )}
+                            >
+                                <Zap className="h-5 w-5"/>
+                            </Button>
+                        )}
+                    </>
                 )}
             </div>
           )}
