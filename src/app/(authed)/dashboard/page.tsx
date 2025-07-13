@@ -8,7 +8,7 @@ import { TransactionHistory } from "@/components/transaction-history";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRightLeft, User, QrCode, History, ArrowRight } from "lucide-react";
+import { ArrowRightLeft, History, ArrowRight, ScanLine, UserSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from 'next/link';
 
@@ -110,7 +110,7 @@ export default function DashboardPage() {
                     <CardHeader>
                         <CardTitle className="flex items-start justify-between">
                             {t('dashboard.myQr.title')}
-                            <User className="h-6 w-6 text-purple-500"/>
+                            <UserSquare className="h-6 w-6 text-purple-500"/>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
                     <CardHeader>
                         <CardTitle className="flex items-start justify-between">
                             {t('dashboard.scanQr.title')}
-                            <QrCode className="h-6 w-6 text-green-500"/>
+                            <ScanLine className="h-6 w-6 text-green-500"/>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
