@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Share2, User, RefreshCcw } from 'lucide-react';
+import { Share2, User, RefreshCcw, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -29,6 +29,7 @@ export default function MyQrPage() {
   
   const [qrCodeValue, setQrCodeValue] = useState('');
   const [requestedAmount, setRequestedAmount] = useState<number | undefined>(undefined);
+  const qrCodeRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -91,6 +92,27 @@ export default function MyQrPage() {
     }
   }
 
+  const handleSaveQrCode = () => {
+    if (qrCodeRef.current) {
+        const canvas = qrCodeRef.current.querySelector("canvas");
+        if (canvas) {
+            const pngUrl = canvas
+                .toDataURL("image/png")
+                .replace("image/png", "image/octet-stream");
+            
+            const downloadLink = document.createElement("a");
+            downloadLink.href = pngUrl;
+            downloadLink.download = "finsim-qr-code.png";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+             toast({ title: "QR Code Saved", description: "The QR code has been downloaded as a PNG file."});
+        } else {
+             toast({ variant: "destructive", title: "Save Failed", description: "Could not find the QR code canvas to save."});
+        }
+    }
+  };
+
 
   if (isAuthLoading || isAccountLoading || !account.accountNumber) {
     return (
@@ -128,7 +150,7 @@ export default function MyQrPage() {
         <CardContent className="space-y-6">
             {qrCodeValue ? (
                 <div className="flex flex-col items-center space-y-4">
-                    <div className="p-4 bg-white rounded-lg shadow-md">
+                    <div ref={qrCodeRef} className="p-4 bg-white rounded-lg shadow-md">
                         <QRCode value={qrCodeValue} size={256} />
                     </div>
                     <div className="text-center">
@@ -173,10 +195,17 @@ export default function MyQrPage() {
                 </form>
             </Form>
             
-            <Button onClick={handleShare} className="w-full" variant="outline">
-                <Share2 className="mr-2 h-4 w-4"/>
-                Share Payment Request
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={handleShare} className="w-full flex-1" variant="outline">
+                    <Share2 className="mr-2 h-4 w-4"/>
+                    Share
+                </Button>
+                 <Button onClick={handleSaveQrCode} className="w-full flex-1" variant="outline">
+                    <Download className="mr-2 h-4 w-4"/>
+                    Save QR Code
+                </Button>
+            </div>
+
         </CardContent>
       </Card>
     </div>

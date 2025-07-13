@@ -793,10 +793,6 @@ body {
   width: 2rem;
 }
 
-.w-80 {
-  width: 20rem;
-}
-
 .w-9 {
   width: 2.25rem;
 }
@@ -833,16 +829,16 @@ body {
   min-width: var(--radix-select-trigger-width);
 }
 
+.max-w-\[320px\] {
+  max-width: 320px;
+}
+
 .max-w-lg {
   max-width: 32rem;
 }
 
 .max-w-md {
   max-width: 28rem;
-}
-
-.max-w-\[320px\] {
-  max-width: 320px;
 }
 
 .flex-1 {
