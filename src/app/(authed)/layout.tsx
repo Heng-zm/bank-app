@@ -49,7 +49,6 @@ export default function AuthedLayout({
 
   const navItems = useMemo(() => [
     { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { href: '/transfer', label: t('nav.transfer'), icon: ArrowRightLeft },
     { href: '/settings', label: t('nav.settings'), icon: Settings },
   ], [t]);
 
@@ -57,6 +56,9 @@ export default function AuthedLayout({
     let current = navItems.find(item => item.href === pathname);
     if (!current) {
         // Check for pages not in the main nav
+        if (pathname.startsWith('/transfer')) {
+            return { label: t('transactionForm.title') };
+        }
         if (pathname.startsWith('/transactions')) {
             return { label: t('transactions.title') };
         }
