@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -155,7 +156,7 @@ export default function QrPayPage() {
     if (!scannedData) {
         animationFrameId.current = requestAnimationFrame(tick);
     }
-  }, [scannedData, stopCamera]);
+  }, [scannedData]);
 
 
   useEffect(() => {
