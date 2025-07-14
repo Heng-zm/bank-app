@@ -62,7 +62,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
         <div>
-            <h1 className="text-2xl font-bold">{t('dashboard.greeting', { name: account.holderName.split(' ')[0] })}</h1>
+            <h1 className="text-2xl font-bold">{t('dashboard.greeting', { name: user?.email.split('@')[0] })}</h1>
             <p className="text-muted-foreground">{t('dashboard.welcomeMessage')}</p>
         </div>
 
@@ -91,20 +91,20 @@ export default function DashboardPage() {
             </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/transfer" className="action-card bg-blue-500/10 aspect-video md:aspect-auto">
+        <div className="space-y-4">
+            <Link href="/transfer" className="action-card bg-blue-500/10">
                 <h3 className="font-bold text-lg text-slate-800">{t('transfer.title')}</h3>
                 <p className="text-sm text-slate-600">{t('transfer.description')}</p>
             </Link>
-            <Link href="/my-qr" className="action-card bg-purple-500/10 aspect-video md:aspect-auto">
+            <Link href="/my-qr" className="action-card bg-purple-500/10">
                 <h3 className="font-bold text-lg text-slate-800">{t('dashboard.myQr.title')}</h3>
                 <p className="text-sm text-slate-600">{t('dashboard.myQr.description')}</p>
             </Link>
-            <Link href="/qr-pay" className="action-card bg-green-500/10 aspect-video md:aspect-auto">
+            <Link href="/qr-pay" className="action-card bg-green-500/10">
                  <h3 className="font-bold text-lg text-slate-800">{t('dashboard.scanQr.title')}</h3>
                 <p className="text-sm text-slate-600">{t('dashboard.scanQr.description')}</p>
             </Link>
-            <Link href="/transactions" className="action-card bg-orange-500/10 aspect-video md:aspect-auto">
+            <Link href="/transactions" className="action-card bg-orange-500/10">
                 <h3 className="font-bold text-lg text-slate-800">{t('dashboard.historyCard.title')}</h3>
                 <p className="text-sm text-slate-600">{t('dashboard.historyCard.description')}</p>
             </Link>

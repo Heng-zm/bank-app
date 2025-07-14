@@ -312,14 +312,12 @@ body {
 
 .action-card {
   border-radius: calc(var(--radius)  + 4px);
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1.25rem;
+  padding: 1.5rem;
   transition-property: all;
   transition-duration: .2s;
   transition-timing-function: cubic-bezier(.4, 0, .2, 1);
   animation-duration: .2s;
-  display: flex;
+  display: block;
 }
 
 .action-card:hover {
@@ -2733,10 +2731,6 @@ body.font-khmer {
 
   .md\:hidden {
     display: none;
-  }
-
-  .md\:aspect-auto {
-    aspect-ratio: auto;
   }
 
   .md\:w-\[240px\] {
