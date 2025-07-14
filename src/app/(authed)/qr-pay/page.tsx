@@ -211,7 +211,7 @@ export default function QrPayPage() {
                     canvas.height = image.height;
                     context.drawImage(image, 0, 0, image.width, image.height);
                     const imageData = context.getImageData(0, 0, image.width, image.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    const code = jsQR(imageData.data, imageData.width, image.height);
                     if (code) {
                         processQrCodeData(code.data);
                     } else {
@@ -362,7 +362,7 @@ export default function QrPayPage() {
                            size="lg" 
                            variant="outline"
                            onClick={handleImportClick} 
-                           className="rounded-full bg-black/50 border-white/50 text-white h-16 w-16"
+                           className="rounded-full bg-black/50 border-white/50 text-white h-16 w-16 flex items-center justify-center"
                            title={t('qrpay.import.buttonTitle')}
                        >
                            <Upload className="h-7 w-7"/>
@@ -373,7 +373,7 @@ export default function QrPayPage() {
                                variant="outline"
                                onClick={toggleFlashlight} 
                                className={cn(
-                                   "rounded-full bg-black/50 border-white/50 text-white h-16 w-16",
+                                   "rounded-full bg-black/50 border-white/50 text-white h-16 w-16 flex items-center justify-center",
                                    isFlashOn && "bg-yellow-400/80 text-black hover:bg-yellow-400"
                                )}
                                title={t('qrpay.flashButtonTitle')}
