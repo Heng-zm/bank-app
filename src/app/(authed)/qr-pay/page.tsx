@@ -76,29 +76,30 @@ export default function QrPayPage() {
   const startCamera = useCallback(async () => {
     setError(null);
     if (streamRef.current) {
-      stopCamera();
-    }
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        setHasCameraPermission(true);
-        if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            streamRef.current = stream;
-            videoRef.current.play(); // Explicitly play the video
+      // Don't stop, just ensure it's playing
+    } else {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            setHasCameraPermission(true);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                streamRef.current = stream;
+                videoRef.current.play(); // Explicitly play the video
+            }
+            
+            const videoTrack = stream.getVideoTracks()[0];
+            const capabilities = videoTrack.getCapabilities();
+            if (capabilities.torch) {
+                setIsFlashSupported(true);
+            }
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            setHasCameraPermission(false);
+            setError(t('qrpay.cameraError'));
+            setStep('error');
         }
-        
-        const videoTrack = stream.getVideoTracks()[0];
-        const capabilities = videoTrack.getCapabilities();
-        if (capabilities.torch) {
-            setIsFlashSupported(true);
-        }
-    } catch (err) {
-        console.error("Error accessing camera:", err);
-        setHasCameraPermission(false);
-        setError(t('qrpay.cameraError'));
-        setStep('error');
     }
-  }, [stopCamera, t]);
+  }, [t]);
 
   const processQrCodeData = (codeData: string) => {
     if (step !== 'scanning') return;
@@ -148,7 +149,7 @@ export default function QrPayPage() {
         }
       }
     }
-    if (step === 'scanning') {
+    if (step === 'scanning' && animationFrameId.current !== null) {
         animationFrameId.current = requestAnimationFrame(tick);
     }
   }, [step, processQrCodeData]);
@@ -161,7 +162,7 @@ export default function QrPayPage() {
 
 
   useEffect(() => {
-    if (hasCameraPermission && step === 'scanning' && !animationFrameId.current) {
+    if (hasCameraPermission && step === 'scanning' && animationFrameId.current === null) {
         animationFrameId.current = requestAnimationFrame(tick);
     } else {
        if (animationFrameId.current && step !== 'scanning') {
@@ -359,7 +360,6 @@ export default function QrPayPage() {
                            accept="image/*"
                        />
                        <Button 
-                           size="lg" 
                            variant="outline"
                            onClick={handleImportClick} 
                            className="rounded-full bg-black/50 border-white/50 text-white h-16 w-16 flex items-center justify-center"
@@ -369,7 +369,6 @@ export default function QrPayPage() {
                        </Button>
                        {isFlashSupported && (
                            <Button 
-                               size="lg" 
                                variant="outline"
                                onClick={toggleFlashlight} 
                                className={cn(
