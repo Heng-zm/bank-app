@@ -139,11 +139,7 @@
         },
         "scanAnotherButton": "ស្កេនកូដមួយទៀត",
         "paymentDetails": "ព័ត៌មានលម្អិតអំពីការទូទាត់",
-        "setAmountButton": "កំណត់ចំនួនទឹកប្រាក់",
-        "securityCheck": {
-            "title": "ការត្រួតពិនិត្យសុវត្ថិភាព",
-            "defaultReason": "ប្រតិបត្តិការនេះហាក់ដូចជាមិនធម្មតា។ សូមពិនិត្យឡើងវិញមុនពេលបន្ត។"
-        }
+        "setAmountButton": "កំណត់ចំនួនទឹកប្រាក់"
     },
     "myqr": {
         "title": "ទទួលការទូទាត់",
@@ -237,6 +233,10 @@
         "description": "ចូលរួមជាមួយ FinSim ថ្ងៃនេះដើម្បីចាប់ផ្តើមគ្រប់គ្រងហិរញ្ញវត្ថុរបស់អ្នក។",
         "failTitle": "ការចុះឈ្មោះបានបរាជ័យ",
         "emailInUseError": "អាសយដ្ឋានអ៊ីមែលនេះកំពុងប្រើប្រាស់រួចហើយ។ សូម​សាកល្បង​មួយ​ផ្សេង​ទៀត។",
+        "firstNameLabel": "នាមខ្លួន",
+        "firstNamePlaceholder": "សុខ",
+        "lastNameLabel": "នាមត្រកូល",
+        "lastNamePlaceholder": "ចាន់",
         "initialBalanceLabel": "សមតុល្យដំបូង",
         "createAccountButton": "បង្កើត​គណនី",
         "alreadyHaveAccount": "មានគណនីហើយ?",

@@ -30,6 +30,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
 const formSchema = z.object({
+  firstName: z.string().min(1, { message: "First name is required." }),
+  lastName: z.string().min(1, { message: "Last name is required." }),
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   initialBalance: z.coerce.number().min(0, { message: "Initial balance cannot be negative." }),
@@ -45,6 +47,8 @@ export default function SignupPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
       initialBalance: 1000,
@@ -69,7 +73,7 @@ export default function SignupPage() {
       const newAccountNumber = await generateUniqueAccountNumber(db);
       const accountData = {
         id: user.uid,
-        holderName: user.email || "New User",
+        holderName: `${values.firstName} ${values.lastName}`,
         accountNumber: newAccountNumber,
         balance: values.initialBalance,
         notificationPreferences: { deposits: true, alerts: true, info: true }
@@ -111,7 +115,35 @@ export default function SignupPage() {
             </Alert>
           )}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>{t('signup.firstNameLabel')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder={t('signup.firstNamePlaceholder')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>{t('signup.lastNameLabel')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder={t('signup.lastNamePlaceholder')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              </div>
               <FormField
                 control={form.control}
                 name="email"

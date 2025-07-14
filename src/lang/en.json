@@ -140,11 +140,7 @@
         },
         "scanAnotherButton": "Scan Another Code",
         "paymentDetails": "Payment Details",
-        "setAmountButton": "Set Amount",
-        "securityCheck": {
-            "title": "Security Check",
-            "defaultReason": "This transaction appears unusual. Please review before proceeding."
-        }
+        "setAmountButton": "Set Amount"
     },
     "myqr": {
         "title": "Receive Payment",
@@ -238,6 +234,10 @@
         "description": "Join FinSim today to start managing your finances.",
         "failTitle": "Signup Failed",
         "emailInUseError": "This email address is already in use. Please try another one.",
+        "firstNameLabel": "First Name",
+        "firstNamePlaceholder": "John",
+        "lastNameLabel": "Last Name",
+        "lastNamePlaceholder": "Doe",
         "initialBalanceLabel": "Initial Balance",
         "createAccountButton": "Create Account",
         "alreadyHaveAccount": "Already have an account?",
