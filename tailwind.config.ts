@@ -23,6 +23,9 @@ export default {
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
       },
+      boxShadow: {
+        'upper': '0 -4px 15px -3px rgb(0 0 0 / 0.1), 0 -2px 6px -4px rgb(0 0 0 / 0.1)',
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -88,6 +91,14 @@ export default {
             height: '0',
           },
         },
+        'fade-in': {
+          '0%': {
+            opacity: '0',
+          },
+          '100%': {
+            opacity: '1',
+          },
+        },
         'fade-in-up': {
           '0%': {
             opacity: '0',
@@ -97,14 +108,42 @@ export default {
             opacity: '1',
             transform: 'translateY(0)',
           },
-        }
+        },
+        'zoom-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'scale(0.9)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scale(1)',
+          },
+        },
+        'scan-line': {
+          '0%': {
+            top: '0%',
+            opacity: '0.1'
+          },
+          '50%': {
+            opacity: '1'
+          },
+          '100%': {
+            top: '100%',
+            opacity: '0.1'
+          }
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-in': 'fade-in 0.5s ease-out forwards',
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+        'zoom-in': 'zoom-in 0.3s ease-out forwards',
+        'scan-line': 'scan-line 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
       },
     },
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
+    
