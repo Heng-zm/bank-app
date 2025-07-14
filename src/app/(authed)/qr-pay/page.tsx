@@ -75,7 +75,9 @@ export default function QrPayPage() {
 
   const startCamera = useCallback(async () => {
     setError(null);
-    stopCamera();
+    if (streamRef.current) {
+      stopCamera();
+    }
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         setHasCameraPermission(true);
@@ -149,26 +151,28 @@ export default function QrPayPage() {
     if (step === 'scanning') {
         animationFrameId.current = requestAnimationFrame(tick);
     }
-  }, [step]);
+  }, [step, processQrCodeData]);
 
 
   useEffect(() => {
     startCamera();
     return () => stopCamera();
-  }, []);
+  }, [startCamera, stopCamera]);
 
 
   useEffect(() => {
-    if (hasCameraPermission && step === 'scanning') {
+    if (hasCameraPermission && step === 'scanning' && !animationFrameId.current) {
         animationFrameId.current = requestAnimationFrame(tick);
     } else {
-       if (animationFrameId.current) {
+       if (animationFrameId.current && step !== 'scanning') {
             cancelAnimationFrame(animationFrameId.current);
+            animationFrameId.current = null;
         }
     }
     return () => {
         if (animationFrameId.current) {
             cancelAnimationFrame(animationFrameId.current);
+            animationFrameId.current = null;
         }
     }
   }, [hasCameraPermission, step, tick]);
@@ -332,6 +336,13 @@ export default function QrPayPage() {
                 </div>
             )}
             
+            {hasCameraPermission === false && step === 'error' && (
+                <div className="flex flex-col items-center gap-2 bg-black/50 p-4 rounded-lg">
+                    <AlertTriangle className="h-8 w-8 text-destructive" />
+                    <p className="text-center max-w-xs">{error}</p>
+                </div>
+            )}
+
             {hasCameraPermission && (
                 <>
                    <p className="text-lg font-semibold bg-black/30 px-4 py-1 rounded-full mb-4">{t('qrpay.status.positionQr')}</p>
@@ -379,7 +390,7 @@ export default function QrPayPage() {
         {/* --- Panel for other steps --- */}
         <div className={cn(
             "absolute bottom-0 left-0 right-0 p-4 pt-6 bg-card text-card-foreground rounded-t-3xl shadow-upper transform transition-transform duration-500 ease-in-out",
-            step === 'scanning' ? 'translate-y-full' : 'translate-y-0'
+            step === 'scanning' || (step === 'error' && hasCameraPermission === false) ? 'translate-y-full' : 'translate-y-0'
         )}>
             <div className="w-full max-w-md mx-auto">
                 {step === 'amount_entry' && scannedData && (
@@ -439,7 +450,7 @@ export default function QrPayPage() {
             </div>
         )}
         
-        {step === 'error' && (
+        {step === 'error' && hasCameraPermission !== false && (
              <div className="absolute inset-0 bg-destructive/90 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 space-y-4 animate-fade-in">
                  <AlertTriangle className="h-20 w-20 text-destructive-foreground animate-zoom-in" />
                  <h3 className="text-3xl font-bold text-destructive-foreground">{t('error')}</h3>
@@ -453,5 +464,3 @@ export default function QrPayPage() {
     </div>
   );
 }
-
-    
