@@ -182,7 +182,14 @@
             "form": {
                 "nameLabel": "Display Name",
                 "namePlaceholder": "Your Name"
-            }
+            },
+            "editButton": "Edit Profile"
+        },
+        "preferences": {
+            "title": "Preferences"
+        },
+        "security": {
+            "title": "Security"
         },
         "language": {
             "title": "Language",
@@ -203,7 +210,7 @@
             "updateButton": "Update Password"
         },
         "notifications": {
-            "title": "Notification Preferences",
+            "title": "Notifications",
             "description": "Manage how you receive notifications from us.",
             "toastSuccess": "Your notification preferences have been updated.",
             "depositsLabel": "Deposits & Transfers",
