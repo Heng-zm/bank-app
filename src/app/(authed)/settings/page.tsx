@@ -44,7 +44,7 @@ export default function SettingsPage() {
         {/* Profile Card */}
         <div className="flex flex-col items-center text-center">
             <Avatar className="w-24 h-24 mb-4 text-3xl">
-                <AvatarImage src={`https://placehold.co/100x100.png`} alt={account.holderName} data-ai-hint="profile picture" />
+                <AvatarImage src={account.photoURL} alt={account.holderName} />
                 <AvatarFallback>
                     <User className="w-12 h-12 text-muted-foreground" />
                 </AvatarFallback>

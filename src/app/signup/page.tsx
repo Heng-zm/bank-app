@@ -76,6 +76,7 @@ export default function SignupPage() {
         holderName: `${values.firstName} ${values.lastName}`,
         accountNumber: newAccountNumber,
         balance: values.initialBalance,
+        photoURL: "",
         notificationPreferences: { deposits: true, alerts: true, info: true }
       };
       await setDoc(doc(db, "accounts", user.uid), accountData);

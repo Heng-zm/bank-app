@@ -5,6 +5,7 @@
   "/(authed)/settings/language/page": "app/(authed)/settings/language/page.js",
   "/(authed)/settings/notifications/page": "app/(authed)/settings/notifications/page.js",
   "/(authed)/settings/page": "app/(authed)/settings/page.js",
+  "/(authed)/settings/password/page": "app/(authed)/settings/password/page.js",
   "/(authed)/settings/profile/page": "app/(authed)/settings/profile/page.js",
   "/(authed)/transactions/page": "app/(authed)/transactions/page.js",
   "/(authed)/transfer/page": "app/(authed)/transfer/page.js",

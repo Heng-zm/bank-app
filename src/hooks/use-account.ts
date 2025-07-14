@@ -20,9 +20,10 @@ import {
   limit,
   updateDoc
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import type { Account, Transaction, TransactionFormData, Notification, FrequentRecipient } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/firebase";
+import { auth, db, storage } from "@/lib/firebase";
 
 const LOW_BALANCE_THRESHOLD = 100;
 
@@ -47,6 +48,7 @@ export function useAccount(userId?: string) {
     holderName: "Guest", 
     accountNumber: "000000000",
     balance: 0,
+    photoURL: "",
     notificationPreferences: { deposits: true, alerts: true, info: true }
   });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -57,8 +59,6 @@ export function useAccount(userId?: string) {
   const notificationsRef = useRef<Notification[]>([]);
   const isInitialLoad = useRef(true);
 
-
-  const db = getFirestore();
 
   useEffect(() => {
     notificationsRef.current = notifications;
@@ -97,6 +97,7 @@ export function useAccount(userId?: string) {
             holderName: user?.email || "New User",
             accountNumber: newAccountNumber,
             balance: 1000,
+            photoURL: "",
             notificationPreferences: { deposits: true, alerts: true, info: true }
         };
         await setDoc(accountRef, newAccount);
@@ -333,12 +334,21 @@ export function useAccount(userId?: string) {
     }
   };
 
-  const updateAccountDetails = async (details: Partial<Account>) => {
-    if (!userId || !db) {
-        throw new Error("User is not authenticated or database is not available.");
+  const updateAccountDetails = async (details: Partial<Account>, imageFile?: File) => {
+    if (!userId || !db || !storage) {
+        throw new Error("User is not authenticated or database/storage is not available.");
     }
     const accountRef = doc(db, "accounts", userId);
-    await updateDoc(accountRef, details);
+    let updatedDetails = { ...details };
+
+    if (imageFile) {
+      const storageRef = ref(storage, `profile-pictures/${userId}/${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      const photoURL = await getDownloadURL(storageRef);
+      updatedDetails.photoURL = photoURL;
+    }
+
+    await updateDoc(accountRef, updatedDetails);
   };
 
   const markNotificationsAsRead = useCallback(async () => {

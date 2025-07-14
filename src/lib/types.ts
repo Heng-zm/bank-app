@@ -10,6 +10,7 @@ export interface Account {
   holderName: string;
   accountNumber: string;
   balance: number;
+  photoURL?: string;
   notificationPreferences?: NotificationPreferences;
 }
 
