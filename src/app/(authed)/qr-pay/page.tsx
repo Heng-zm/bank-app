@@ -56,8 +56,16 @@ export default function QrPayPage() {
   const [showRiskDialog, setShowRiskDialog] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [isFlashSupported, setIsFlashSupported] = useState(false);
+  
+  const stopScanning = useCallback(() => {
+    if (animationFrameId.current) {
+      cancelAnimationFrame(animationFrameId.current);
+      animationFrameId.current = null;
+    }
+  }, []);
 
   const stopCamera = useCallback(() => {
+    stopScanning();
     if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
@@ -66,42 +74,9 @@ export default function QrPayPage() {
         videoRef.current.srcObject = null;
     }
     setIsFlashOn(false);
-    setIsFlashSupported(false);
-    if (animationFrameId.current) {
-      cancelAnimationFrame(animationFrameId.current);
-      animationFrameId.current = null;
-    }
-  }, []);
+  }, [stopScanning]);
 
-  const startCamera = useCallback(async () => {
-    setError(null);
-    if (streamRef.current) {
-      // Don't stop, just ensure it's playing
-    } else {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            setHasCameraPermission(true);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                streamRef.current = stream;
-                videoRef.current.play(); // Explicitly play the video
-            }
-            
-            const videoTrack = stream.getVideoTracks()[0];
-            const capabilities = videoTrack.getCapabilities();
-            if (capabilities.torch) {
-                setIsFlashSupported(true);
-            }
-        } catch (err) {
-            console.error("Error accessing camera:", err);
-            setHasCameraPermission(false);
-            setError(t('qrpay.cameraError'));
-            setStep('error');
-        }
-    }
-  }, [t]);
-
-  const processQrCodeData = (codeData: string) => {
+  const processQrCodeData = useCallback((codeData: string) => {
     if (step !== 'scanning') return;
     try {
         const data = JSON.parse(codeData) as QrCodeData;
@@ -119,13 +94,14 @@ export default function QrPayPage() {
             throw new Error(t('qrpay.invalidQrFormat'));
         }
     } catch (e: any) {
+        stopCamera();
         setError(e.message || t('qrpay.qrParseError'));
         setStep('error');
     }
-  };
-  
+  }, [step, stopCamera, t]);
+
   const tick = useCallback(() => {
-    if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA && step === 'scanning') {
+    if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
       if (canvasRef.current && videoRef.current) {
         const canvas = canvasRef.current;
         const video = videoRef.current;
@@ -144,39 +120,71 @@ export default function QrPayPage() {
 
               if (code) {
                 processQrCodeData(code.data);
+                return; // Stop ticking once a code is found
               }
           }
         }
       }
     }
-    if (step === 'scanning' && animationFrameId.current !== null) {
-        animationFrameId.current = requestAnimationFrame(tick);
+    animationFrameId.current = requestAnimationFrame(tick);
+  }, [processQrCodeData]);
+
+  const startScanning = useCallback(() => {
+    if (animationFrameId.current === null) {
+      animationFrameId.current = requestAnimationFrame(tick);
     }
-  }, [step, processQrCodeData]);
+  }, [tick]);
 
+  const startCamera = useCallback(async () => {
+    setError(null);
+    if (streamRef.current) return;
 
-  useEffect(() => {
-    startCamera();
-    return () => stopCamera();
-  }, [startCamera, stopCamera]);
-
-
-  useEffect(() => {
-    if (hasCameraPermission && step === 'scanning' && animationFrameId.current === null) {
-        animationFrameId.current = requestAnimationFrame(tick);
-    } else {
-       if (animationFrameId.current && step !== 'scanning') {
-            cancelAnimationFrame(animationFrameId.current);
-            animationFrameId.current = null;
-        }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      setHasCameraPermission(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        videoRef.current.play();
+      }
+      
+      const videoTrack = stream.getVideoTracks()[0];
+      const capabilities = videoTrack.getCapabilities();
+      if (capabilities.torch) {
+        setIsFlashSupported(true);
+      }
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      setHasCameraPermission(false);
+      setError(t('qrpay.cameraError'));
+      setStep('error');
     }
+  }, [t]);
+
+  // Effect to manage camera stream lifecycle
+  useEffect(() => {
+    if (step === 'scanning' && !streamRef.current) {
+        startCamera();
+    }
+    // Cleanup on unmount
     return () => {
-        if (animationFrameId.current) {
-            cancelAnimationFrame(animationFrameId.current);
-            animationFrameId.current = null;
+        if (streamRef.current) {
+            stopCamera();
         }
     }
-  }, [hasCameraPermission, step, tick]);
+  }, [step, startCamera, stopCamera]);
+
+
+  // Effect to manage scanning loop
+  useEffect(() => {
+      if (step === 'scanning' && hasCameraPermission) {
+        startScanning();
+      } else {
+        stopScanning();
+      }
+      return () => stopScanning();
+  }, [step, hasCameraPermission, startScanning, stopScanning]);
+
 
   const toggleFlashlight = async () => {
     if (!streamRef.current || !isFlashSupported) return;
@@ -280,7 +288,7 @@ export default function QrPayPage() {
       setFinalAmount(null);
       setRiskAnalysis(null);
       setStep('scanning');
-      startCamera();
+      // The useEffect will handle restarting the camera
   }
   
   const handleAmountSubmit = (amount: number) => {
