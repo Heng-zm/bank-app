@@ -977,27 +977,33 @@ function AuthedLayout({ children }) {
                 "AuthedLayout.useMemo[currentPage].current": (item)=>item.href === pathname
             }["AuthedLayout.useMemo[currentPage].current"]);
             if (!current) {
-                // Check for pages not in the main nav
-                if (pathname.startsWith('/transfer')) {
-                    return {
-                        label: t('transfer.title')
-                    };
-                }
-                if (pathname.startsWith('/transactions')) {
-                    return {
-                        label: t('transactions.title')
-                    };
-                }
-                if (pathname.startsWith('/my-qr')) {
-                    return {
-                        label: t('dashboard.myQr.title')
-                    };
-                }
-                if (pathname.startsWith('/qr-pay')) {
-                    return {
-                        label: t('dashboard.scanQr.title')
-                    };
-                }
+                if (pathname === '/transfer') return {
+                    label: t('transfer.title')
+                };
+                if (pathname === '/transactions') return {
+                    label: t('transactions.title')
+                };
+                if (pathname === '/my-qr') return {
+                    label: t('dashboard.myQr.title')
+                };
+                if (pathname === '/qr-pay') return {
+                    label: t('dashboard.scanQr.title')
+                };
+                if (pathname === '/settings') return {
+                    label: t('nav.settings')
+                };
+                if (pathname === '/settings/profile') return {
+                    label: t('settings.profile.title')
+                };
+                if (pathname === '/settings/language') return {
+                    label: t('settings.language.title')
+                };
+                if (pathname === '/settings/notifications') return {
+                    label: t('settings.notifications.title')
+                };
+                if (pathname === '/settings/password') return {
+                    label: t('settings.password.title')
+                };
                 return {
                     label: ' '
                 };
@@ -1024,7 +1030,7 @@ function AuthedLayout({ children }) {
                             className: "h-8 w-32"
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                            lineNumber: 81,
+                            lineNumber: 77,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1034,33 +1040,33 @@ function AuthedLayout({ children }) {
                                     className: "h-10 w-full"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                    lineNumber: 83,
+                                    lineNumber: 79,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                     className: "h-10 w-full"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                    lineNumber: 84,
+                                    lineNumber: 80,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                     className: "h-10 w-full"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                    lineNumber: 85,
+                                    lineNumber: 81,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                            lineNumber: 82,
+                            lineNumber: 78,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                    lineNumber: 80,
+                    lineNumber: 76,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1069,18 +1075,18 @@ function AuthedLayout({ children }) {
                         className: "h-full w-full"
                     }, void 0, false, {
                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                        lineNumber: 89,
+                        lineNumber: 85,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                    lineNumber: 88,
+                    lineNumber: 84,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/(authed)/layout.tsx",
-            lineNumber: 79,
+            lineNumber: 75,
             columnNumber: 7
         }, this);
     }
@@ -1095,14 +1101,14 @@ function AuthedLayout({ children }) {
                     className: "h-5 w-5"
                 }, void 0, false, {
                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                    lineNumber: 120,
+                    lineNumber: 116,
                     columnNumber: 7
                 }, this),
                 label
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/(authed)/layout.tsx",
-            lineNumber: 111,
+            lineNumber: 107,
             columnNumber: 5
         }, this);
     }
@@ -1124,7 +1130,7 @@ function AuthedLayout({ children }) {
                                         className: "h-6 w-6 text-primary"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                        lineNumber: 133,
+                                        lineNumber: 129,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1132,18 +1138,18 @@ function AuthedLayout({ children }) {
                                         children: "FinSim"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                        lineNumber: 134,
+                                        lineNumber: 130,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                lineNumber: 132,
+                                lineNumber: 128,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                            lineNumber: 131,
+                            lineNumber: 127,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -1152,12 +1158,12 @@ function AuthedLayout({ children }) {
                                     ...item
                                 }, item.href, false, {
                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                    lineNumber: 139,
+                                    lineNumber: 135,
                                     columnNumber: 15
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                            lineNumber: 137,
+                            lineNumber: 133,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1171,30 +1177,30 @@ function AuthedLayout({ children }) {
                                         className: "mr-2 h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                        lineNumber: 144,
+                                        lineNumber: 140,
                                         columnNumber: 15
                                     }, this),
                                     t('logout')
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                lineNumber: 143,
+                                lineNumber: 139,
                                 columnNumber: 14
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                            lineNumber: 142,
+                            lineNumber: 138,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                    lineNumber: 130,
+                    lineNumber: 126,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                lineNumber: 129,
+                lineNumber: 125,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1218,7 +1224,7 @@ function AuthedLayout({ children }) {
                                                     className: "h-5 w-5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                    lineNumber: 158,
+                                                    lineNumber: 154,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1226,18 +1232,18 @@ function AuthedLayout({ children }) {
                                                     children: "Toggle navigation menu"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                    lineNumber: 159,
+                                                    lineNumber: 155,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                                            lineNumber: 157,
+                                            lineNumber: 153,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                        lineNumber: 156,
+                                        lineNumber: 152,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sheet$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SheetContent"], {
@@ -1251,20 +1257,20 @@ function AuthedLayout({ children }) {
                                                         children: "Navigation Menu"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                        lineNumber: 164,
+                                                        lineNumber: 160,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sheet$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SheetDescription"], {
                                                         children: "Main navigation links for the application."
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                        lineNumber: 165,
+                                                        lineNumber: 161,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                lineNumber: 163,
+                                                lineNumber: 159,
                                                 columnNumber: 18
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1277,25 +1283,25 @@ function AuthedLayout({ children }) {
                                                             className: "h-8 w-8 text-primary"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                            lineNumber: 169,
+                                                            lineNumber: 165,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "FinSim"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                            lineNumber: 170,
+                                                            lineNumber: 166,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                    lineNumber: 168,
+                                                    lineNumber: 164,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                lineNumber: 167,
+                                                lineNumber: 163,
                                                 columnNumber: 18
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -1306,12 +1312,12 @@ function AuthedLayout({ children }) {
                                                         onClose: ()=>setIsSheetOpen(false)
                                                     }, item.href, false, {
                                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                        lineNumber: 175,
+                                                        lineNumber: 171,
                                                         columnNumber: 21
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                lineNumber: 173,
+                                                lineNumber: 169,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1325,31 +1331,31 @@ function AuthedLayout({ children }) {
                                                             className: "mr-3 h-5 w-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                            lineNumber: 180,
+                                                            lineNumber: 176,
                                                             columnNumber: 25
                                                         }, this),
                                                         t('logout')
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                    lineNumber: 179,
+                                                    lineNumber: 175,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                lineNumber: 178,
+                                                lineNumber: 174,
                                                 columnNumber: 18
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                        lineNumber: 162,
+                                        lineNumber: 158,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                lineNumber: 155,
+                                lineNumber: 151,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1365,7 +1371,7 @@ function AuthedLayout({ children }) {
                                                 className: "h-5 w-5"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                lineNumber: 190,
+                                                lineNumber: 186,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1373,13 +1379,13 @@ function AuthedLayout({ children }) {
                                                 children: "Back"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                                lineNumber: 191,
+                                                lineNumber: 187,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                        lineNumber: 189,
+                                        lineNumber: 185,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
@@ -1387,13 +1393,13 @@ function AuthedLayout({ children }) {
                                         children: currentPage.label
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                                        lineNumber: 194,
+                                        lineNumber: 190,
                                         columnNumber: 14
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                lineNumber: 187,
+                                lineNumber: 183,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1401,7 +1407,7 @@ function AuthedLayout({ children }) {
                                 children: user?.email
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                lineNumber: 197,
+                                lineNumber: 193,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$notification$2d$bell$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["NotificationBell"], {
@@ -1409,13 +1415,13 @@ function AuthedLayout({ children }) {
                                 onOpen: markNotificationsAsRead
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                                lineNumber: 198,
+                                lineNumber: 194,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                        lineNumber: 153,
+                        lineNumber: 149,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -1425,24 +1431,24 @@ function AuthedLayout({ children }) {
                             children: children
                         }, void 0, false, {
                             fileName: "[project]/src/app/(authed)/layout.tsx",
-                            lineNumber: 202,
+                            lineNumber: 198,
                             columnNumber: 12
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/(authed)/layout.tsx",
-                        lineNumber: 201,
+                        lineNumber: 197,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(authed)/layout.tsx",
-                lineNumber: 151,
+                lineNumber: 147,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(authed)/layout.tsx",
-        lineNumber: 127,
+        lineNumber: 123,
         columnNumber: 5
     }, this);
 }

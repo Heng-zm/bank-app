@@ -175,12 +175,15 @@
     "settings": {
         "saveChanges": "Save Changes",
         "savePreferences": "Save Preferences",
+        "account": {
+            "title": "Account"
+        },
         "profile": {
-            "title": "Profile",
+            "title": "Edit Profile",
             "description": "Update your personal information.",
             "toastSuccess": "Your profile has been updated.",
             "form": {
-                "nameLabel": "Display Name",
+                "nameLabel": "Full Name",
                 "namePlaceholder": "Your Name"
             },
             "editButton": "Edit Profile"
@@ -193,15 +196,15 @@
         },
         "language": {
             "title": "Language",
-            "description": "Choose your preferred language.",
+            "description": "Choose your preferred language for the app.",
             "selectLabel": "Select Language",
             "selectPlaceholder": "Select a language"
         },
         "password": {
             "title": "Change Password",
-            "description": "Choose a new, strong password.",
-            "notLoggedInError": "You are not logged in.",
-            "toastSuccess": "Your password has been changed.",
+            "description": "Choose a new, strong password for your account.",
+            "notLoggedInError": "You must be logged in to change your password.",
+            "toastSuccess": "Your password has been changed successfully.",
             "toastErrorTitle": "Error updating password",
             "form": {
                 "newPasswordLabel": "New Password",

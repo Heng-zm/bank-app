@@ -51,19 +51,15 @@ export default function AuthedLayout({
   const currentPage = useMemo(() => {
     let current = navItems.find(item => item.href === pathname);
     if (!current) {
-        // Check for pages not in the main nav
-        if (pathname.startsWith('/transfer')) {
-            return { label: t('transfer.title') };
-        }
-        if (pathname.startsWith('/transactions')) {
-            return { label: t('transactions.title') };
-        }
-        if (pathname.startsWith('/my-qr')) {
-            return { label: t('dashboard.myQr.title') };
-        }
-        if (pathname.startsWith('/qr-pay')) {
-            return { label: t('dashboard.scanQr.title') };
-        }
+        if (pathname === '/transfer') return { label: t('transfer.title') };
+        if (pathname === '/transactions') return { label: t('transactions.title') };
+        if (pathname === '/my-qr') return { label: t('dashboard.myQr.title') };
+        if (pathname === '/qr-pay') return { label: t('dashboard.scanQr.title') };
+        if (pathname === '/settings') return { label: t('nav.settings') };
+        if (pathname === '/settings/profile') return { label: t('settings.profile.title') };
+        if (pathname === '/settings/language') return { label: t('settings.language.title') };
+        if (pathname === '/settings/notifications') return { label: t('settings.notifications.title') };
+        if (pathname === '/settings/password') return { label: t('settings.password.title') };
         return { label: ' ' };
     }
     return current;
