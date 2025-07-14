@@ -875,6 +875,10 @@ body {
   min-width: var(--radix-select-trigger-width);
 }
 
+.max-w-4xl {
+  max-width: 56rem;
+}
+
 .max-w-\[320px\] {
   max-width: 320px;
 }
@@ -885,10 +889,6 @@ body {
 
 .max-w-md {
   max-width: 28rem;
-}
-
-.max-w-4xl {
-  max-width: 56rem;
 }
 
 .flex-1 {
@@ -2637,14 +2637,6 @@ body.font-khmer {
 @media (width >= 1024px) {
   .lg\:h-\[60px\] {
     height: 60px;
-  }
-
-  .lg\:gap-6 {
-    gap: 1.5rem;
-  }
-
-  .lg\:p-6 {
-    padding: 1.5rem;
   }
 
   .lg\:p-8 {

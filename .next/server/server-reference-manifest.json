@@ -1,17 +1,5 @@
 {
-  "node": {
-    "40d99e467e059c9b8ae5f13dc48459e8427ebf9203": {
-      "workers": {
-        "app/(authed)/qr-pay/page": {
-          "moduleId": "[project]/.next-internal/server/app/(authed)/qr-pay/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/analyze-transaction-flow.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/(authed)/qr-pay/page": "action-browser"
-      }
-    }
-  },
+  "node": {},
   "edge": {},
   "encryptionKey": "xdgFpTt4xzzzOmAabcEiodrdsLkSFIO3Smpr7FF9ZDQ="
 }
