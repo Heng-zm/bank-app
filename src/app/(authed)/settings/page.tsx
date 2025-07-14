@@ -35,11 +35,6 @@ export default function SettingsPage() {
     router.push('/login');
   };
 
-  const getInitials = (name: string) => {
-    if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  }
-
   if (isAccountLoading) {
     return <div className="flex justify-center items-center h-full"><Loader2 className="w-8 h-8 animate-spin" /></div>
   }
@@ -49,8 +44,10 @@ export default function SettingsPage() {
         {/* Profile Card */}
         <div className="flex flex-col items-center text-center">
             <Avatar className="w-24 h-24 mb-4 text-3xl">
-                <AvatarImage src={`https://placehold.co/100x100.png`} alt={account.holderName} />
-                <AvatarFallback>{getInitials(account.holderName)}</AvatarFallback>
+                <AvatarImage src={`https://placehold.co/100x100.png`} alt={account.holderName} data-ai-hint="profile picture" />
+                <AvatarFallback>
+                    <User className="w-12 h-12 text-muted-foreground" />
+                </AvatarFallback>
             </Avatar>
             <h1 className="text-2xl font-bold">{account.holderName}</h1>
             <p className="text-muted-foreground">{user?.email}</p>
